@@ -1,21 +1,29 @@
 ---
-title: MYSQL死锁配置
+title: MYSQL死锁检测配置
 date: 2021-06-28 18:55:49
 tags: [mysql]
 ---
 
 
 
+MYSQL死锁检测相关配置
+
+<!-- more -->
+
 使用mysql时总免不了遇到死锁问题，MYSQL的锁全局锁、有表锁、行锁、间歇所锁、next key lock等。MYSQL的锁都是存储引擎自己实现的。比如现在常用的 InnoDB 。支持行锁。下面以行锁为例说明，死锁时该怎么配置。
 
+<br>
 
+<br>
+
+<br>
 
 | 事务T1                                                       | 事务T2                                                       |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | begin; <br>update user set name='王麻子' where id=1;         | begin;                                                       |
 |                                                              | update user set name='王爷' where id=2;                      |
-| <font color="#F08080">update user set name='王麻子' where id=2;</font> |                                                              |
-|                                                              | <font color="#F08080">update user set name='王爷' where id=1;</font> |
+| <font color="#FF005C">update user set name='王麻子' where id=2;</font> |                                                              |
+|                                                              | <font color="#FF005C">update user set name='王爷' where id=1;</font> |
 
 
 
