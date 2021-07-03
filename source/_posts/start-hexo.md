@@ -33,6 +33,8 @@ hexo博客搭建
 
   ​	hexo g，然后在安装next主题。基本可以跑起来了。感觉这个流程还可以优化下。
 
+  > next的主题配置_config.yml是可以放到，仓库根目录下，命名为_config.next.yml
+
  
 
 Tips:
@@ -163,5 +165,58 @@ scheme: Muse
 #scheme: Mist
 #scheme: Pisces
 #scheme: Gemini
+```
+
+### **设置站点icon**
+
+​	需要icon放在 source/img/目录下
+
+```text
+favicon:
+ small: /img/avatar.jfif
+ medium: /img/avatar.jfif
+ apple_touch_icon: /img/avatar.jfif
+ safari_pinned_tab: /images/logo.svg
+```
+
+### **设置菜单栏**
+
+在menu下，可以设置菜单显示内容，此版本next支持font awesome图标，可以去**[官网](https://link.zhihu.com/?target=https%3A//fontawesome.com/)**寻找你喜欢的图标进行替换。注：相应的菜单栏需要有对应的页面才能打开，不然会404哦！
+
+```text
+menu:
+ home: / || fa fa-home
+ #about: /about/ || fa fa-user
+ tags: /tags/ || fa fa-tags
+ categories: /categories/ || fa fa-th
+ archives: /archives/ || fa fa-archive
+ guestbook: /guestbook/ || fa fa-book
+ #schedule: /schedule/ || fa fa-calendar
+ #sitemap: /sitemap.xml || fa fa-sitemap
+ #commonweal: /404/ || fa fa-heartbeat
+```
+
+Tips:
+
+>  创建分类 hexo new page categories	
+>
+> 创建 tags hexo new page tags
+
+​		
+
+### **设置已读进度条**
+
+
+
+reading_progress的enable设置为true即可，color为颜色。
+
+```text
+# Reading progress bar
+reading_progress:
+ enable: true
+ # Available values: top | bottom
+ position: bottom
+ color: "#37c6c0"
+ height: 3px
 ```
 

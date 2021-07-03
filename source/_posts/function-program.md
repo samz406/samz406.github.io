@@ -1,5 +1,10 @@
 ---
-title: function_program
+title: 函数式编程浅析
 date: 2021-07-03 19:41:55
-tags:
+tags: [技术]
 ---
+
+JDK8函数式编程学习笔记
+
+<!-- more -->
+
