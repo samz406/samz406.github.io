@@ -2,6 +2,7 @@
 title: hexo博客搭建
 date: 2021-06-16 18:32:46
 tags: 技术
+categories: 技术
 ---
 
 hexo博客搭建
@@ -171,7 +172,7 @@ scheme: Muse
 
 ​	需要icon放在 source/img/目录下
 
-```text
+```yaml
 favicon:
  small: /img/avatar.jfif
  medium: /img/avatar.jfif
@@ -183,7 +184,7 @@ favicon:
 
 在menu下，可以设置菜单显示内容，此版本next支持font awesome图标，可以去**[官网](https://link.zhihu.com/?target=https%3A//fontawesome.com/)**寻找你喜欢的图标进行替换。注：相应的菜单栏需要有对应的页面才能打开，不然会404哦！
 
-```text
+```yaml
 menu:
  home: / || fa fa-home
  #about: /about/ || fa fa-user
@@ -210,7 +211,7 @@ Tips:
 
 reading_progress的enable设置为true即可，color为颜色。
 
-```text
+```yaml
 # Reading progress bar
 reading_progress:
  enable: true
@@ -219,4 +220,45 @@ reading_progress:
  color: "#37c6c0"
  height: 3px
 ```
+
+### 常用配置
+
+ 怎么配置文章分类
+
+​	1 在next主题_config_next.yml中配置中加入分类菜单
+
+```yaml
+menu:
+  home: / || fa fa-home
+  about: /about/ || fa fa-user
+  #tags: /tags/ || fa fa-tags
+  categories: /categories/ || fa fa-th
+  archives: /archives/ || fa fa-archive
+  #schedule: /schedule/ || fa fa-calendar
+  #sitemap: /sitemap.xml || fa fa-sitemap
+  #commonweal: /404/ || fa fa-heartbeat
+
+# Enable / Disable menu icons / item badges.
+```
+
+​		
+
+​	2 创建分类 hexo new page categories	
+
+​    3  进入source/categories目录，修改index.md基本信息
+
+```markdown
+---
+title: 分类
+date: 2021-07-03 21:55:20
+type: categories
+comments: true
+sitemap: false
+---
+
+```
+
+​		
+
+
 

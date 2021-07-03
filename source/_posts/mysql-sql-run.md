@@ -2,6 +2,7 @@
 title: Mysql基础架构
 date: 2021-06-17 09:54:45
 tags: [mysql,技术]
+categories: MYSQL
 ---
 
 

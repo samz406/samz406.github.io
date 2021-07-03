@@ -2,6 +2,7 @@
 title: MYSQL死锁检测配置
 date: 2021-06-28 18:55:49
 tags: [mysql]
+categories: MYSQL
 ---
 
 
