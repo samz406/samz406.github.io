@@ -262,3 +262,6 @@ sitemap: false
 
 
 
+添加图片可以用这个插件
+
+https://www.jianshu.com/p/f72aaad7b852

@@ -71,12 +71,12 @@ footer:
 
   # Beian ICP and gongan information for Chinese users. See: https://beian.miit.gov.cn, http://www.beian.gov.cn
   beian:
-    enable: false
+    enable: true
     icp:
     # The digit in the num of gongan beian.
-    gongan_id:
+    gongan_id: 蜀ICP备2021016919号
     # The full num of gongan beian.
-    gongan_num:
+    gongan_num: 蜀ICP备2021016919号
     # The icon for gongan beian. See: http://www.beian.gov.cn/portal/download
     gongan_icon_url:
 
