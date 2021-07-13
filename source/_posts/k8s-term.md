@@ -64,6 +64,8 @@ spec:
 
 
 
+![module_03_nodes](module_03_pods.svg)
+
 ### Node
 
 Node可以是一台物理主机，也可以是一台虚拟机。Node是Kubernetes集群中的工作负载节点。Node可以在运行期间动态增加到Kubernetes集群中，前提是在这个节点上已经正确安装、配置和启动了上述关键进程，在默认情况下kubelet会向Master注册自己，这也是Kubernetes推荐的Node管理方式。一旦Node被纳入集群管理范围，kubelet进程就会定时向Master汇报自身的情报，例如操作系统、Docker版本、机器的CPU和内存情况，以及当前有哪些Pod在运行等，这样Master就可以获知每个Node的资源使用情况，并实现高效均衡的资源调度策略。而某个Node在超过指定时间不上报信息时，会被Master判定为“失联”，Node的状态被标记为不可用（Not Ready）。
@@ -73,6 +75,10 @@ Node可以是一台物理主机，也可以是一台虚拟机。Node是Kubernete
 -  **kubelet**：负责Pod对应的容器的创建、启停等任务，同时与Master密切协作，实现集群管理的基本功能。
 -  **kube-proxy**：实现Kubernetes Service的通信与负载均衡机制的重要组件。
 - Docker Engine（docker）：Docker引擎，负责本机的容器创建和管理工作。
+
+
+
+![module_03_nodes](module_03_nodes.svg)
 
 
 
