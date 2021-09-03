@@ -118,6 +118,10 @@ Label Selector在Kubernetes中的重要使用场景如下
 
 Service 是应用服务的抽象，通过 labels 为应用提供负载均衡和服务发现。匹配 labels 的 Pod IP 和端口列表组成 endpoints，由 kube-proxy 负责将服务 IP 负载均衡到这些 endpoints 上。每个 Service 都会自动分配一个 cluster IP（仅在集群内部可访问的虚拟地址）和 DNS 名，其他容器可以通过该地址或 DNS 来访问服务，而不需要了解后端容器的运行。
 
+![module_04_labels](module_04_labels.svg)
+
+
+
 
 
 ### Deployment

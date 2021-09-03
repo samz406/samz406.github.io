@@ -6,3 +6,5 @@ categories: MYSQL
 ---
 
 <!-- more -->
+
+**待写**
