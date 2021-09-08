@@ -1,7 +1,7 @@
 ---
-  title: 正则表达式入门
+title: 正则表达式入门
 date: 2021-09-04 23:09:38
-tags:[技术技术]
+tags: [技术]
 categories: 技术
 ---
 
