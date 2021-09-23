@@ -2,7 +2,7 @@
 title: Redis事务管理
 date: 2021-09-22 09:47:53
 tags: [技术]
-categories: Redis
+categories: REDIS
 ---
 
 redis事务浅析
