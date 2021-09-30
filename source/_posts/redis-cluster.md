@@ -1,5 +1,5 @@
 ---
-title: redis切片集群
+title: Redis切片集群
 date: 2021-09-30 14:57:53
 tags: [技术]
 categories: REDIS
