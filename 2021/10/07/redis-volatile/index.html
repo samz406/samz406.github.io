@@ -20,20 +20,20 @@
     var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="正则表达式作用 校验数据的有效性  文本查找  文本进行切割和替换   元素元字符元字符是指在正则表达式中具有特殊意义专用字符。是正则表达式额基本元件。 1 特殊单字符 . 任意字符 \d 任意数字 \D任意非数字 \w 任意字母数字下划线 \W任意非字母下划线 \s 任意空白符 \S  任意非空白符 2 空白符\r 回车符  \n 换行符  \f 换页符 \t 制表符 \v 垂直制表符 \s 任">
+  <meta name="description" content="Redis缓存淘汰策略介绍">
 <meta property="og:type" content="article">
-<meta property="og:title" content="正则表达式入门">
-<meta property="og:url" content="http://www.sanmuzi.com/2021/09/04/regex-study/index.html">
+<meta property="og:title" content="Redis缓存淘汰策略">
+<meta property="og:url" content="http://www.sanmuzi.com/2021/10/07/redis-volatile/index.html">
 <meta property="og:site_name" content="一子三木">
-<meta property="og:description" content="正则表达式作用 校验数据的有效性  文本查找  文本进行切割和替换   元素元字符元字符是指在正则表达式中具有特殊意义专用字符。是正则表达式额基本元件。 1 特殊单字符 . 任意字符 \d 任意数字 \D任意非数字 \w 任意字母数字下划线 \W任意非字母下划线 \s 任意空白符 \S  任意非空白符 2 空白符\r 回车符  \n 换行符  \f 换页符 \t 制表符 \v 垂直制表符 \s 任">
+<meta property="og:description" content="Redis缓存淘汰策略介绍">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-09-04T15:09:38.000Z">
-<meta property="article:modified_time" content="2021-09-08T14:46:44.317Z">
+<meta property="article:published_time" content="2021-10-07T13:45:58.000Z">
+<meta property="article:modified_time" content="2021-10-07T14:28:26.453Z">
 <meta property="article:author" content="爱妙妙爱生活">
 <meta property="article:tag" content="技术">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://www.sanmuzi.com/2021/09/04/regex-study/">
+<link rel="canonical" href="http://www.sanmuzi.com/2021/10/07/redis-volatile/">
 
 
 <script id="page-configurations">
@@ -46,7 +46,7 @@
   };
 </script>
 
-  <title>正则表达式入门 | 一子三木</title>
+  <title>Redis缓存淘汰策略 | 一子三木</title>
   
 
 
@@ -162,7 +162,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2021/09/04/regex-study/">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2021/10/07/redis-volatile/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -175,7 +175,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          正则表达式入门
+          Redis缓存淘汰策略
         </h1>
 
         <div class="post-meta">
@@ -184,23 +184,17 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2021-09-04 23:09:38" itemprop="dateCreated datePublished" datetime="2021-09-04T23:09:38+08:00">2021-09-04</time>
+              <time title="创建时间：2021-10-07 21:45:58 / 修改时间：22:28:26" itemprop="dateCreated datePublished" datetime="2021-10-07T21:45:58+08:00">2021-10-07</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-09-08 22:46:44" itemprop="dateModified" datetime="2021-09-08T22:46:44+08:00">2021-09-08</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                  <a href="/categories/REDIS/" itemprop="url" rel="index"><span itemprop="name">REDIS</span></a>
                 </span>
             </span>
 
@@ -215,42 +209,48 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h3 id="正则表达式作用"><a href="#正则表达式作用" class="headerlink" title="正则表达式作用"></a>正则表达式作用</h3><ul>
-<li><p>校验数据的有效性</p>
-</li>
-<li><p>文本查找</p>
-</li>
-<li><p>文本进行切割和替换</p>
-</li>
-</ul>
-<h3 id="元素"><a href="#元素" class="headerlink" title="元素"></a>元素</h3><h4 id="元字符"><a href="#元字符" class="headerlink" title="元字符"></a>元字符</h4><p>元字符是指在正则表达式中具有特殊意义专用字符。是正则表达式额基本元件。</p>
-<h5 id="1-特殊单字符"><a href="#1-特殊单字符" class="headerlink" title="1 特殊单字符"></a>1 特殊单字符</h5><p> . 任意字符</p>
-<p>\d 任意数字 \D任意非数字</p>
-<p>\w 任意字母数字下划线 \W任意非字母下划线</p>
-<p>\s 任意空白符 \S  任意非空白符</p>
-<h5 id="2-空白符"><a href="#2-空白符" class="headerlink" title="2 空白符"></a>2 空白符</h5><p>\r 回车符</p>
-<p> \n 换行符</p>
-<p> \f 换页符</p>
-<p>\t 制表符</p>
-<p>\v 垂直制表符</p>
-<p>\s 任意空白符</p>
-<h5 id="3-量词"><a href="#3-量词" class="headerlink" title="3 量词"></a>3 量词</h5><ul>
-<li>0到多次</li>
-</ul>
+        <p>Redis缓存淘汰策略介绍</p>
+<span id="more"></span>
+
+<p>​    由于内存相比于硬盘容量capacity小很多，Redis数据是放在内存中，如果缓存满了，就需要把淘汰清除一些数据。清理这些数据是是需要按照一定的规则的。比如按照过期时间、按照最久未被使用的数据进行淘汰。下面介绍几种Redis淘汰策略。</p>
+<h4 id="不进行数据淘汰的策略"><a href="#不进行数据淘汰的策略" class="headerlink" title="不进行数据淘汰的策略"></a>不进行数据淘汰的策略</h4><h5 id="noeviction"><a href="#noeviction" class="headerlink" title="noeviction"></a>noeviction</h5><p>​    <strong>默认情况下</strong>Redis内存空间超过 <u>maxmemory</u>时，是不会淘汰数据，也就是noeviction策略。也就是一旦缓存被写满后，再有写请求来时，Redis不再提供服务，而是<strong>直接返回错误</strong>。</p>
+<blockquote>
+<p>redis3.0之前默认是volatile-lru</p>
+<p>redis3.0之后默认淘汰策略是noeviction</p>
+</blockquote>
+<h4 id="在设置了过期时间的数据中进行淘汰，"><a href="#在设置了过期时间的数据中进行淘汰，" class="headerlink" title="在设置了过期时间的数据中进行淘汰，"></a>在设置了过期时间的数据中进行淘汰，</h4><p>使用EXPIRE命令给键值对设置了过期时间后，无论是这些键值对快到过期时间，还是Redis的内存使用量达到了 maxmemory 阈值，Redis会按照下面的几种方式淘汰数据</p>
+<h5 id="volatile-random"><a href="#volatile-random" class="headerlink" title="volatile-random"></a>volatile-random</h5><p>​    在设置了过期时间的键值对中进行随机删除。    </p>
+<h5 id="volatile-ttl"><a href="#volatile-ttl" class="headerlink" title="volatile-ttl"></a>volatile-ttl</h5><p>​    根据过期时间的先后进行删除，越早过期的越先被删除</p>
+<h5 id="volatile-lru"><a href="#volatile-lru" class="headerlink" title="volatile-lru"></a>volatile-lru</h5><p>​    根据LRU算法筛选设置了过期时间的键值对</p>
+<h5 id="volatile-lfu"><a href="#volatile-lfu" class="headerlink" title="volatile-lfu"></a>volatile-lfu</h5><p>根据LFU 算法选择设置了过期时间的键值对</p>
+<h4 id="按照数据范围内进行淘汰"><a href="#按照数据范围内进行淘汰" class="headerlink" title="按照数据范围内进行淘汰"></a>按照数据范围内进行淘汰</h4><h5 id="allkeys-random"><a href="#allkeys-random" class="headerlink" title="allkeys-random"></a>allkeys-random</h5><p>从所有键值对中随机选择并删除数据；</p>
+<h5 id="allkeys-lru"><a href="#allkeys-lru" class="headerlink" title="allkeys-lru"></a>allkeys-lru</h5><p>使用 LRU 算法对所有数据中进行筛选</p>
+<h5 id="allkeys-lfu"><a href="#allkeys-lfu" class="headerlink" title="allkeys-lfu"></a>allkeys-lfu</h5><p>使用 LFU 算法对所有数据中进行筛选</p>
+<blockquote>
+<p>LRU 算法的全称 Least Recently Used，按照最近最少使用的原则来筛选数据，最不常用的数据会被筛选出来，而最近频繁使用的数据会留在缓存中。</p>
+</blockquote>
+<blockquote>
+<p>LRU 算法在实际实现时，需要用链表管理所有的缓存数据，这会带来额外的空间开销。而且，当有数据被访问时，需要在链表上把该数据移动到 MRU 端，如果有大量数据被访问，就会带来很多链表移动操作，会很耗时，进而会降低 Redis 缓存性能</p>
+</blockquote>
+<blockquote>
+<p>Redis对LRU 算法被做了简化，目的是减少数据淘汰对缓存性能的影响。Redis默认会记录每个数据的最近一次访问的时间戳（由键值对数据结构 RedisObject 中的 lru 字段记录）。然后，Redis 在决定淘汰的数据时，第一次会随机选出 N 个数据，把它们作为一个候选集合。接下来，Redis 会比较这 N 个数据的 lru 字段，把 lru 字段值最小的数据从缓存中淘汰出去。</p>
+</blockquote>
+<p><strong>选择建议</strong></p>
 <ul>
-<li>1 到多次</li>
+<li><p>优先使用 allkeys-lru 策略。把最近最常访问的数据留在缓存中，提升应用的访问性能。如果你的业务数据中有明显的冷热数据区分，我建议你使用 allkeys-lru 策略。</p>
+</li>
+<li><p>如果业务应用中的数据访问频率相差不大，没有明显的冷热数据区分，建议使用 allkeys-random 策略，随机选择淘汰的数据就行。</p>
+</li>
+<li><p>如果业务中有置顶的需求，比如置顶新闻、置顶视频，那么，可以使用 volatile-lru 策略，同时不给这些置顶数据设置过期时间。这些需要置顶的数据一直不会被删除，而其他数据会在过期时根据 LRU 规则进行筛选。</p>
+</li>
 </ul>
-<p> ？0到1次，</p>
-<p>{m} 出现m次</p>
-<p>{m,} 出现至少m次</p>
-<p>{m,n} 出现m到n次</p>
-<h5 id="4-范围"><a href="#4-范围" class="headerlink" title="4 范围"></a>4 范围</h5><p> | 或。a|b ，表示a或者b</p>
-<p>[….] 多选一。括号中任意单个元素</p>
-<p>[a-z]  匹配a到z之间的任意单个元素</p>
-<p>[^…] 取反。不能在括号中的任意单个元素</p>
-<p>注：^叫脱字符。</p>
-<p>​    </p>
-<p>​    </p>
+<h4 id="如何处理被淘汰的数据"><a href="#如何处理被淘汰的数据" class="headerlink" title="如何处理被淘汰的数据"></a>如何处理被淘汰的数据</h4><p>​    数据被认定为是淘汰的数据后，如果这个数据是干净数据，就直接删除；如果这个数据是脏数据，就需要把它写回数据库。</p>
+<p>​    干净数据和脏数据的区别是和最初从后端数据库里读取时的值相比，有没有被修改过。干净数据一直没有被修改，所以后端数据库里的数据也是最新值。在替换时，它可以被直接删除，而脏数据就是曾经被修改过的，已经和后端数据库中保存的数据不一致。就需要把脏数据写回到数据库中。</p>
+<blockquote>
+<p>思考：有什么方法可以将过期的脏数据写回到数据库</p>
+</blockquote>
+<p>注：</p>
+<p>以上内容为《Redis核心技术与实战》学习笔记记录</p>
 
     </div>
 
@@ -269,13 +269,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2021/09/04/architect-requirements/" rel="prev" title="架构师需要的软技能">
-      <i class="fa fa-chevron-left"></i> 架构师需要的软技能
+    <a href="/2021/10/04/redis-cache-init/" rel="prev" title="Redis旁路缓存介绍">
+      <i class="fa fa-chevron-left"></i> Redis旁路缓存介绍
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2021/09/12/redis-data-init/" rel="next" title="redis 基本数据类型">
-      redis 基本数据类型 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -334,7 +331,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E4%BD%9C%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">正则表达式作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%83%E7%B4%A0"><span class="nav-number">2.</span> <span class="nav-text">元素</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%83%E5%AD%97%E7%AC%A6"><span class="nav-number">2.1.</span> <span class="nav-text">元字符</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-%E7%89%B9%E6%AE%8A%E5%8D%95%E5%AD%97%E7%AC%A6"><span class="nav-number">2.1.1.</span> <span class="nav-text">1 特殊单字符</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-%E7%A9%BA%E7%99%BD%E7%AC%A6"><span class="nav-number">2.1.2.</span> <span class="nav-text">2 空白符</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-%E9%87%8F%E8%AF%8D"><span class="nav-number">2.1.3.</span> <span class="nav-text">3 量词</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-%E8%8C%83%E5%9B%B4"><span class="nav-number">2.1.4.</span> <span class="nav-text">4 范围</span></a></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8D%E8%BF%9B%E8%A1%8C%E6%95%B0%E6%8D%AE%E6%B7%98%E6%B1%B0%E7%9A%84%E7%AD%96%E7%95%A5"><span class="nav-number">1.</span> <span class="nav-text">不进行数据淘汰的策略</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#noeviction"><span class="nav-number">1.1.</span> <span class="nav-text">noeviction</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%A8%E8%AE%BE%E7%BD%AE%E4%BA%86%E8%BF%87%E6%9C%9F%E6%97%B6%E9%97%B4%E7%9A%84%E6%95%B0%E6%8D%AE%E4%B8%AD%E8%BF%9B%E8%A1%8C%E6%B7%98%E6%B1%B0%EF%BC%8C"><span class="nav-number">2.</span> <span class="nav-text">在设置了过期时间的数据中进行淘汰，</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#volatile-random"><span class="nav-number">2.1.</span> <span class="nav-text">volatile-random</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#volatile-ttl"><span class="nav-number">2.2.</span> <span class="nav-text">volatile-ttl</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#volatile-lru"><span class="nav-number">2.3.</span> <span class="nav-text">volatile-lru</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#volatile-lfu"><span class="nav-number">2.4.</span> <span class="nav-text">volatile-lfu</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8C%89%E7%85%A7%E6%95%B0%E6%8D%AE%E8%8C%83%E5%9B%B4%E5%86%85%E8%BF%9B%E8%A1%8C%E6%B7%98%E6%B1%B0"><span class="nav-number">3.</span> <span class="nav-text">按照数据范围内进行淘汰</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#allkeys-random"><span class="nav-number">3.1.</span> <span class="nav-text">allkeys-random</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#allkeys-lru"><span class="nav-number">3.2.</span> <span class="nav-text">allkeys-lru</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#allkeys-lfu"><span class="nav-number">3.3.</span> <span class="nav-text">allkeys-lfu</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%86%E8%A2%AB%E6%B7%98%E6%B1%B0%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="nav-number">4.</span> <span class="nav-text">如何处理被淘汰的数据</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
