@@ -99,6 +99,22 @@ Redis缓存淘汰策略介绍
 
 
 
+#### 相关配置
+
+- 缓存最大容量
+
+```
+ maxmemory <bytes>
+```
+
+- 缓存满了过期策略
+
+```
+ maxmemory-policy noeviction
+```
+
+
+
 注：
 
 以上内容为《Redis核心技术与实战》学习笔记记录
