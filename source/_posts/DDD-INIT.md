@@ -2,7 +2,7 @@
 title: DDD学习笔记
 date: 2021-09-22 22:51:51
 tags: [技术]
-categories: DDD 架构
+categories: DDD
 ---
 
 DDD 学习入门
