@@ -1,12 +1,15 @@
 ---
-title: linux查看性能工具
+title: linux查看性能命令
 date: 2021-11-01 13:56:47
-tags:
+tags: [技术]
+categories: 技
 ---
 
 
 
+ linux 常用命令介绍
 
+<!-- more -->
 
 #### pidstat
 
@@ -75,6 +78,11 @@ tags:
 | IO     | bo     | 发送给块设备                 |
 | System | in     | 每秒中断次数                 |
 | System | cs     | 没秒上下文切换次数           |
+| CPU    | us     | 用户态使用时间               |
+| CPU    | sy     | 内核态时间                   |
+| CPU    | id     | 空闲时间                     |
+| CPU    | wa     | 等待IO花费的时间             |
+| CPU    | st     | 虚拟机使用时间               |
 
 
 
