@@ -1,8 +1,8 @@
 ---
-title: linux查看性能命令
+title: linux性能查看命令
 date: 2021-11-01 13:56:47
 tags: [技术]
-categories: 技
+categories: 技术
 ---
 
 
