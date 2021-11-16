@@ -5,3 +5,9 @@ tags: [非技术]
 categories: 成长
 ---
 
+
+
+
+
+![封面](anger-control.jpg)
+
