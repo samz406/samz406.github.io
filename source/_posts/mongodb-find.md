@@ -41,6 +41,16 @@ db.user.find({"userName":"samz"});
 db.user.find({"userName":"samz","sex":1}); 
 ```
 
+4、查询一个组数包含的其中一个元素。。
+
+```
+db.test.find({ 
+    userIds: NumberLong("1230141040041246722")
+})
+```
+
+> userIds是一个数组，值是用户id
+
 
 
 ##### 分页排序
@@ -215,9 +225,22 @@ db.user.deleteMany({"userName":"samz"})
 
 
 
+其他说明
 
+- 查询一个long类型的字段值
 
+  ​	
 
+  ```json
+  db.test.find({
+      
+      userIds: NumberLong("1460141040041246722")
+  })
+  ```
+
+  
+
+参数值必须要NumberLong类型，并且值是字符串。
 
 
 
