@@ -52,3 +52,23 @@ jmap -dump:format=b,file=heap.bin 122222
   查看gc分配情况
 
 jstat -gcutil xxx
+
+
+
+
+
+
+
+### 收集器设置
+
+
+
+| 参数                    | 说明                     |
+| ----------------------- | ------------------------ |
+| -XX:+UseSerialGC        | 设置串行收集器           |
+| -XX:+UseParallelGC      | 设置并行收集器           |
+| -XX:+UseParallelOldGC   | 老年代使用并行回收收集器 |
+| -XX:+UseParNewGC        | 新生代使用并行收集器     |
+| -XX:+UseConcMarkSweepGC | CMS并发收集器            |
+| -XX:+UseG1GC            | G1收集器                 |
+
