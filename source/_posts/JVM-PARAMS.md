@@ -53,6 +53,28 @@ jmap -dump:format=b,file=heap.bin 122222
 
 jstat -gcutil xxx
 
+ 
+
+
+
+| 参数 | 说明                                     |      |
+| ---- | ---------------------------------------- | ---- |
+| S0   | S0空间利用率占当前空间容量的百分比       |      |
+| S1   | S1空间利用率占当前空间容量的百分比       |      |
+| E    | eden区空间利用率占当前空间容量的百分比   |      |
+| O    | 老年代空间利用率占当前空间容量的百分比   |      |
+| M    | 元空间空间利用率占当前空间容量的百分比。 |      |
+| CSS  | 压缩类空间利用率百分比                   |      |
+| YGC  | Yong gc 次数                             |      |
+| YGCT | Young gc 时间                            |      |
+| FGC  | full gc 次数                             |      |
+| FGCT | full gc垃圾收集时间                      |      |
+| GCT  | 垃圾收集总时间                           |      |
+
+
+
+
+
 
 
 
@@ -71,4 +93,6 @@ jstat -gcutil xxx
 | -XX:+UseParNewGC        | 新生代使用并行收集器     |
 | -XX:+UseConcMarkSweepGC | CMS并发收集器            |
 | -XX:+UseG1GC            | G1收集器                 |
+
+
 
