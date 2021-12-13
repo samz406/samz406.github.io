@@ -33,3 +33,193 @@ categories: JAVA
 
 
 
+
+
+
+
+### ConcurrentReferenceHashMap使用
+
+
+
+ConcurrentReferenceHashMap是一个ConcurrentHashMap。但是它的key和value是soft或weak引用。这里面定义了两种类型，默认的都是SOFT,
+
+```java
+public enum ReferenceType {
+
+		/** Use {@link SoftReference SoftReferences}. */
+		SOFT,
+
+		/** Use {@link WeakReference WeakReferences}. */
+		WEAK
+	}
+
+```
+
+下面是一个框架中使用的地方
+
+
+
+- **SpringFactoriesLoader**
+
+from spring-core
+
+参数定义：
+
+```java
+private static final Map<ClassLoader, MultiValueMap<String, String>> cache = new ConcurrentReferenceHashMap<>();
+```
+
+使用的地方
+
+```java
+private static Map<String, List<String>> loadSpringFactories(@Nullable ClassLoader classLoader) {
+   MultiValueMap<String, String> result = cache.get(classLoader);
+    //先判断是否存在。
+   if (result != null) {
+      return result;
+   }
+
+   try {
+      Enumeration<URL> urls = (classLoader != null ?
+            classLoader.getResources(FACTORIES_RESOURCE_LOCATION) :
+            ClassLoader.getSystemResources(FACTORIES_RESOURCE_LOCATION));
+      result = new LinkedMultiValueMap<>();
+      while (urls.hasMoreElements()) {
+         URL url = urls.nextElement();
+         UrlResource resource = new UrlResource(url);
+         Properties properties = PropertiesLoaderUtils.loadProperties(resource);
+         for (Map.Entry<?, ?> entry : properties.entrySet()) {
+            String factoryClassName = ((String) entry.getKey()).trim();
+            for (String factoryName : StringUtils.commaDelimitedListToStringArray((String) entry.getValue())) {
+               result.add(factoryClassName, factoryName.trim());
+            }
+         }
+      }
+       //设置参数
+      cache.put(classLoader, result);
+      return result;
+   }
+   catch (IOException ex) {
+      throw new IllegalArgumentException("Unable to load factories from location [" +
+            FACTORIES_RESOURCE_LOCATION + "]", ex);
+   }
+}
+```
+
+
+
+
+
+- **CachingSpringLoadBalancerFactory**
+
+from openfeign-core
+
+定义
+
+```java
+private volatile Map<String, FeignLoadBalancer> cache = new ConcurrentReferenceHashMap<>();
+```
+
+使用
+
+```java
+public FeignLoadBalancer create(String clientName) {
+   FeignLoadBalancer client = this.cache.get(clientName);
+   if (client != null) {
+      return client;
+   }
+   IClientConfig config = this.factory.getClientConfig(clientName);
+   ILoadBalancer lb = this.factory.getLoadBalancer(clientName);
+   ServerIntrospector serverIntrospector = this.factory.getInstance(clientName,
+         ServerIntrospector.class);
+   client = this.loadBalancedRetryFactory != null
+         ? new RetryableFeignLoadBalancer(lb, config, serverIntrospector,
+               this.loadBalancedRetryFactory)
+         : new FeignLoadBalancer(lb, config, serverIntrospector);
+   this.cache.put(clientName, client);
+   return client;
+}
+```
+
+
+
+- **OrderUtils**
+
+from spring-core
+
+```java
+/** Cache for @Priority value (or NOT_ANNOTATED marker) per Class. */
+private static final Map<Class<?>, Object> priorityCache = new ConcurrentReferenceHashMap<>();
+```
+
+
+
+```java
+public static Integer getOrder(Class<?> type) {
+   Object cached = orderCache.get(type);
+   if (cached != null) {
+      return (cached instanceof Integer ? (Integer) cached : null);
+   }
+   Order order = AnnotationUtils.findAnnotation(type, Order.class);
+   Integer result;
+   if (order != null) {
+      result = order.value();
+   }
+   else {
+      result = getPriority(type);
+   }
+   orderCache.put(type, (result != null ? result : NOT_ANNOTATED));
+   return result;
+}
+```
+
+
+
+- **ReflectionUtils**
+
+from spring-core
+
+定义：
+
+```java
+/**
+ * Cache for {@link Class#getDeclaredMethods()} plus equivalent default methods
+ * from Java 8 based interfaces, allowing for fast iteration.
+ */
+private static final Map<Class<?>, Method[]> declaredMethodsCache = new ConcurrentReferenceHashMap<>(256);
+```
+
+使用：
+
+```java
+private static Method[] getDeclaredMethods(Class<?> clazz) {
+   Assert.notNull(clazz, "Class must not be null");
+   Method[] result = declaredMethodsCache.get(clazz);
+   if (result == null) {
+      try {
+         Method[] declaredMethods = clazz.getDeclaredMethods();
+         List<Method> defaultMethods = findConcreteMethodsOnInterfaces(clazz);
+         if (defaultMethods != null) {
+            result = new Method[declaredMethods.length + defaultMethods.size()];
+            System.arraycopy(declaredMethods, 0, result, 0, declaredMethods.length);
+            int index = declaredMethods.length;
+            for (Method defaultMethod : defaultMethods) {
+               result[index] = defaultMethod;
+               index++;
+            }
+         }
+         else {
+            result = declaredMethods;
+         }
+          //保存
+         declaredMethodsCache.put(clazz, (result.length == 0 ? EMPTY_METHOD_ARRAY : result));
+      }
+      catch (Throwable ex) {
+         throw new IllegalStateException("Failed to introspect Class [" + clazz.getName() +
+               "] from ClassLoader [" + clazz.getClassLoader() + "]", ex);
+      }
+   }
+   return result;
+}
+```
+
