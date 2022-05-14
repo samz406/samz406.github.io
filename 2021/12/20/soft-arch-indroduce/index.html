@@ -28,7 +28,7 @@
 <meta property="og:description" content="《 软件架构：架构模式 特征及实践指南》读书笔记">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-12-20T11:06:23.000Z">
-<meta property="article:modified_time" content="2021-12-25T03:13:22.789Z">
+<meta property="article:modified_time" content="2022-05-14T11:27:03.606Z">
 <meta property="article:author" content="爱妙妙爱生活">
 <meta property="article:tag" content="技术">
 <meta name="twitter:card" content="summary">
@@ -192,7 +192,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-12-25 11:13:22" itemprop="dateModified" datetime="2021-12-25T11:13:22+08:00">2021-12-25</time>
+                <time title="修改时间：2022-05-14 19:27:03" itemprop="dateModified" datetime="2022-05-14T19:27:03+08:00">2022-05-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -282,8 +282,155 @@
 </blockquote>
 <h4 id="理解业务驱动因素"><a href="#理解业务驱动因素" class="headerlink" title="理解业务驱动因素"></a>理解业务驱动因素</h4><p>​        架构师还要理解系统成功所需的业务驱动因素，并将这些需求转换为架构特征（如可伸缩、性能、可用性等）。需要架构师具有一定程度业务领域知识。并需要与关键业务的利益相关者（甲方粑粑）建立好关系。</p>
 <h4 id="平衡架构和动手编码"><a href="#平衡架构和动手编码" class="headerlink" title="平衡架构和动手编码"></a>平衡架构和动手编码</h4><p>​    架构师会面临如何平衡动手编码与设计软件架构。每个架构师应该动手编写代码，并保持一定水平的技术深度。架构师是一般都是设计项目框架代码，由于架构师不是全职开发人员，因此必须在开发人员（编写和测试代码）和架构师（绘制图表、开会）这两个角色之间平衡。拜托这种现象就是将关键路径和框架代码委派给开发团队的其他人员。找一个业务点来做。这样的好处是 架构师获得了动手编码机会。第二是关键路径和框架代码已分发给开发团队，第三是架构师与开发团队一样，编写业务代码代码，可以更好识别开发团队在开发过程中遇到与流程、步骤和开发环境相关的痛点。</p>
+<h3 id="架构特征"><a href="#架构特征" class="headerlink" title="架构特征"></a>架构特征</h3><p>​    架构特征包含了定义需求、发现和分析软件必须包含的全部功能。</p>
+<p>架构特征满足三个标准：</p>
+<ul>
+<li><p>明确非领域涉及的某个注意事项、</p>
+<p>​    设计应用时，需求制定了应用该做什么，架构特征指定了成功的操作和设计标准。涉及如何实现需求以及为何做出某些决策。如一个常见的架构特征为应用指定了一定的性能水平，而这个通常不会出现在需求文档中。</p>
+</li>
+<li><p>影响设计的某些结构项</p>
+<p>​    如架构设计需要考虑安全因素，这会上升到架构特征的层级</p>
+</li>
+<li><p>是否对应用的成功至关重要</p>
+</li>
+</ul>
+<p>架构特征可以分为显示和隐式架构特征。隐式架构特征很少出现在需求中，但它们对项目成功又是必不可少的。如可用性、可靠性、安全性等。显示架构特征初选在需求文档或其他特定说明中。</p>
+<h4 id="运营性架构特征"><a href="#运营性架构特征" class="headerlink" title="运营性架构特征"></a>运营性架构特征</h4><p>运营性架构特征涵盖了性能、可伸缩性、弹性、可用性和可靠性等功能。</p>
+<table>
+<thead>
+<tr>
+<th>术语</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>可用性</td>
+<td>系统需要多长时间可用</td>
+</tr>
+<tr>
+<td>连续性</td>
+<td>灾难恢复能力</td>
+</tr>
+<tr>
+<td>性能</td>
+<td>压力测试、峰值分析、所用功能的频率、所需容量和响应时间分析</td>
+</tr>
+<tr>
+<td>可恢复性</td>
+<td>业务的连续性要求</td>
+</tr>
+<tr>
+<td>可靠性、安全性</td>
+<td>评估系统是否需要故障安全</td>
+</tr>
+<tr>
+<td>健壮性</td>
+<td>互联网中断、断电、硬件故障 。能在运行时处理错误和边界条件</td>
+</tr>
+<tr>
+<td>可伸缩性</td>
+<td>随着用户或请求数量增加，系统执行和操作的能力</td>
+</tr>
+</tbody></table>
+<h4 id="结构性架构特征"><a href="#结构性架构特征" class="headerlink" title="结构性架构特征"></a>结构性架构特征</h4><p>架构师需要代码质量问题负责</p>
+<table>
+<thead>
+<tr>
+<th>术语</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>可配置性</td>
+<td>能够方便更改软件配置</td>
+</tr>
+<tr>
+<td>可扩展性</td>
+<td>能够插入新功能非常重要</td>
+</tr>
+<tr>
+<td>可安装性</td>
+<td>易于在所有必要的平台上安装系统</td>
+</tr>
+<tr>
+<td>可利用性</td>
+<td>能够跨多个产品利用通用组件能力</td>
+</tr>
+<tr>
+<td>可维护性</td>
+<td>应用更改和增强系统非常容易</td>
+</tr>
+<tr>
+<td>可移植性</td>
+<td>系统是否需要再多个系统上运行</td>
+</tr>
+<tr>
+<td>可支持性</td>
+<td>应用需要什么级别的技术支持</td>
+</tr>
+<tr>
+<td>可升级性</td>
+<td>能够轻松快速地将服务器和客户端上的应用或解决方案从先前版本升级到新版本</td>
+</tr>
+</tbody></table>
 <p>​    </p>
-<p>​    </p>
+<h4 id="跨领域架构特征"><a href="#跨领域架构特征" class="headerlink" title="跨领域架构特征"></a>跨领域架构特征</h4><p>​    </p>
+<table>
+<thead>
+<tr>
+<th>术语</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>可访问性</td>
+<td>触达所有用户</td>
+</tr>
+<tr>
+<td>可归档性</td>
+<td>一段时间后是否需要归档或删除数据？</td>
+</tr>
+<tr>
+<td>认证</td>
+<td>安全性要求以验证用户身份</td>
+</tr>
+<tr>
+<td>授权</td>
+<td>安全性要求，以确保用户只能访问应用内的某些功能</td>
+</tr>
+<tr>
+<td>法律</td>
+<td>系统在哪些立法约束下运行</td>
+</tr>
+<tr>
+<td>隐式性</td>
+<td>能够向公司内部员工隐藏事务</td>
+</tr>
+<tr>
+<td>安全性</td>
+<td>是否需要再数据库中对数据进行加密</td>
+</tr>
+<tr>
+<td>可支持性</td>
+<td>应用需要什么级别的技术支持</td>
+</tr>
+<tr>
+<td>易用性/可读性</td>
+<td>用户使用应用或解决方案实现其目标所需的培训水平</td>
+</tr>
+</tbody></table>
+<p><strong>永远不要为最好的架构而努力，而要为最差可用的架构而努力。</strong></p>
+<h3 id="识别架构特征"><a href="#识别架构特征" class="headerlink" title="识别架构特征"></a>识别架构特征</h3><h4 id="从领域问题中提取架构特征"><a href="#从领域问题中提取架构特征" class="headerlink" title="从领域问题中提取架构特征"></a>从领域问题中提取架构特征</h4><h4 id=""><a href="#" class="headerlink" title=""></a></h4><p>架构师需要“翻译”领域问题，以识别架构特征。比如可伸缩性重要还是容错性重要？要理解关键领域目标和领域知识，架构师可以将这些领域问题转换为具体特征。很多架构师希望和利益相关者确定系统必须支持的最终架构特征的优先级。这是合乎需要的。但是大多数情况下是达不到目标的。更好的做法是让利益相关者从最终列表中任意顺序选择三个最重要的特征。</p>
+<h4 id="从需求中提取架构特征"><a href="#从需求中提取架构特征" class="headerlink" title="从需求中提取架构特征"></a>从需求中提取架构特征</h4><p>一些架构特征来之需求文档的显示声明。如预期用户数。</p>
+<blockquote>
+<p>在架构中没有错误的答案，只有昂贵的答案</p>
+</blockquote>
+<h3 id="度量和治理架构特征"><a href="#度量和治理架构特征" class="headerlink" title="度量和治理架构特征"></a>度量和治理架构特征</h3><h4 id="度量架构特征"><a href="#度量架构特征" class="headerlink" title="度量架构特征"></a>度量架构特征</h4><h5 id="运营性度量"><a href="#运营性度量" class="headerlink" title="运营性度量"></a>运营性度量</h5><p>​        一些架构特征具有明显的直接度量，比如性能和可升缩性，Web应用的请求和响应周期需要多长时间，通过指标分析查看系统运行是否健康</p>
+<h5 id="架构性度量"><a href="#架构性度量" class="headerlink" title="架构性度量"></a>架构性度量</h5><p>代码的可测量是复杂度，代码覆盖率测量</p>
+<h4 id="治理和适应度函数"><a href="#治理和适应度函数" class="headerlink" title="治理和适应度函数"></a>治理和适应度函数</h4><h5 id="治理架构特征"><a href="#治理架构特征" class="headerlink" title="治理架构特征"></a>治理架构特征</h5><p>架构治理范围涵盖了 架构师想要在软件开发过程中施加影响的任何方面，如确保组织内的软件质量属于架构治理的范畴。</p>
+<h5 id="适应度函数"><a href="#适应度函数" class="headerlink" title="适应度函数"></a>适应度函数</h5><p>​    适应度函数是任何对某些架构特征或架构特征组合进行客观的完整性评估机制。有度量、监视器、单元测试、混沌工程方式。</p>
+<h3 id="架构特征范围"><a href="#架构特征范围" class="headerlink" title="架构特征范围"></a>架构特征范围</h3><p>共生性</p>
+<p>​     如果一个组件的变更需要修改另一个组件才能保证系统的整体准确性，则两个组件是共生的。共生包括静态性共生（可通过静态代码分析发现）和动态共生性（涉及运行时行为）。如微服务架构中两个服务共享某个相同的类定义，则它们有静态共生性-更改共享类需要同时更改这两个服务。动态共生性分为同步和异步。两个分布式服务之间的同步调用使调用者等待被调用者的响应。异步调用在事件驱动的架构中允许发出事件后就结束，从而允许两种不同的服务在运营性架构中有所不同。</p>
 <p>​    </p>
 
     </div>
@@ -368,7 +515,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E5%B8%88%E7%9A%84%E8%A7%92%E8%89%B2%E6%9C%9F%E6%9C%9B"><span class="nav-number">1.</span> <span class="nav-text">架构师的角色期望</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E6%9E%B6%E6%9E%84%E5%AE%9A%E5%BE%8B"><span class="nav-number">2.</span> <span class="nav-text">软件架构定律</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E6%80%9D%E7%BB%B4"><span class="nav-number">3.</span> <span class="nav-text">架构思维</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E4%B8%8E%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.1.</span> <span class="nav-text">架构与设计</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E5%B9%BF%E5%BA%A6"><span class="nav-number">3.2.</span> <span class="nav-text">技术广度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E6%9D%83%E8%A1%A1"><span class="nav-number">3.3.</span> <span class="nav-text">分析权衡</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%90%86%E8%A7%A3%E4%B8%9A%E5%8A%A1%E9%A9%B1%E5%8A%A8%E5%9B%A0%E7%B4%A0"><span class="nav-number">3.4.</span> <span class="nav-text">理解业务驱动因素</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%B3%E8%A1%A1%E6%9E%B6%E6%9E%84%E5%92%8C%E5%8A%A8%E6%89%8B%E7%BC%96%E7%A0%81"><span class="nav-number">3.5.</span> <span class="nav-text">平衡架构和动手编码</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E5%B8%88%E7%9A%84%E8%A7%92%E8%89%B2%E6%9C%9F%E6%9C%9B"><span class="nav-number">1.</span> <span class="nav-text">架构师的角色期望</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E6%9E%B6%E6%9E%84%E5%AE%9A%E5%BE%8B"><span class="nav-number">2.</span> <span class="nav-text">软件架构定律</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E6%80%9D%E7%BB%B4"><span class="nav-number">3.</span> <span class="nav-text">架构思维</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E4%B8%8E%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.1.</span> <span class="nav-text">架构与设计</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E5%B9%BF%E5%BA%A6"><span class="nav-number">3.2.</span> <span class="nav-text">技术广度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E6%9D%83%E8%A1%A1"><span class="nav-number">3.3.</span> <span class="nav-text">分析权衡</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%90%86%E8%A7%A3%E4%B8%9A%E5%8A%A1%E9%A9%B1%E5%8A%A8%E5%9B%A0%E7%B4%A0"><span class="nav-number">3.4.</span> <span class="nav-text">理解业务驱动因素</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%B3%E8%A1%A1%E6%9E%B6%E6%9E%84%E5%92%8C%E5%8A%A8%E6%89%8B%E7%BC%96%E7%A0%81"><span class="nav-number">3.5.</span> <span class="nav-text">平衡架构和动手编码</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">4.</span> <span class="nav-text">架构特征</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%90%E8%90%A5%E6%80%A7%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">4.1.</span> <span class="nav-text">运营性架构特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E6%80%A7%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">4.2.</span> <span class="nav-text">结构性架构特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B7%A8%E9%A2%86%E5%9F%9F%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">4.3.</span> <span class="nav-text">跨领域架构特征</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%86%E5%88%AB%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">5.</span> <span class="nav-text">识别架构特征</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%8E%E9%A2%86%E5%9F%9F%E9%97%AE%E9%A2%98%E4%B8%AD%E6%8F%90%E5%8F%96%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">5.1.</span> <span class="nav-text">从领域问题中提取架构特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">5.2.</span> <span class="nav-text"></span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%8E%E9%9C%80%E6%B1%82%E4%B8%AD%E6%8F%90%E5%8F%96%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">5.3.</span> <span class="nav-text">从需求中提取架构特征</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%A6%E9%87%8F%E5%92%8C%E6%B2%BB%E7%90%86%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">6.</span> <span class="nav-text">度量和治理架构特征</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BA%A6%E9%87%8F%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">6.1.</span> <span class="nav-text">度量架构特征</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BF%90%E8%90%A5%E6%80%A7%E5%BA%A6%E9%87%8F"><span class="nav-number">6.1.1.</span> <span class="nav-text">运营性度量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E6%80%A7%E5%BA%A6%E9%87%8F"><span class="nav-number">6.1.2.</span> <span class="nav-text">架构性度量</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B2%BB%E7%90%86%E5%92%8C%E9%80%82%E5%BA%94%E5%BA%A6%E5%87%BD%E6%95%B0"><span class="nav-number">6.2.</span> <span class="nav-text">治理和适应度函数</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B2%BB%E7%90%86%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">6.2.1.</span> <span class="nav-text">治理架构特征</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%80%82%E5%BA%94%E5%BA%A6%E5%87%BD%E6%95%B0"><span class="nav-number">6.2.2.</span> <span class="nav-text">适应度函数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81%E8%8C%83%E5%9B%B4"><span class="nav-number">7.</span> <span class="nav-text">架构特征范围</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -382,14 +529,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-count">58</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-count">17</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
