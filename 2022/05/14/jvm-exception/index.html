@@ -22,18 +22,18 @@
 
   <meta name="description" content="从字节码角度看异常处理">
 <meta property="og:type" content="article">
-<meta property="og:title" content="JVM异常处理">
+<meta property="og:title" content="JVM 异常处理">
 <meta property="og:url" content="http://www.sanmuzi.com/2022/05/14/jvm-exception/index.html">
 <meta property="og:site_name" content="一子三木">
 <meta property="og:description" content="从字节码角度看异常处理">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://www.sanmuzi.com/2022/05/14/jvm-exception/jvm-exception/ex1.png">
+<meta property="og:image" content="http://www.sanmuzi.com/2022/05/14/jvm-exception/ex1.png">
 <meta property="article:published_time" content="2022-05-14T11:27:47.000Z">
-<meta property="article:modified_time" content="2022-05-14T12:51:44.917Z">
+<meta property="article:modified_time" content="2022-05-14T12:56:25.631Z">
 <meta property="article:author" content="爱妙妙爱生活">
 <meta property="article:tag" content="技术">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://www.sanmuzi.com/2022/05/14/jvm-exception/jvm-exception/ex1.png">
+<meta name="twitter:image" content="http://www.sanmuzi.com/2022/05/14/jvm-exception/ex1.png">
 
 <link rel="canonical" href="http://www.sanmuzi.com/2022/05/14/jvm-exception/">
 
@@ -48,7 +48,7 @@
   };
 </script>
 
-  <title>JVM异常处理 | 一子三木</title>
+  <title>JVM 异常处理 | 一子三木</title>
   
 
 
@@ -177,7 +177,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          JVM异常处理
+          JVM 异常处理
         </h1>
 
         <div class="post-meta">
@@ -188,7 +188,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2022-05-14 19:27:47 / 修改时间：20:51:44" itemprop="dateCreated datePublished" datetime="2022-05-14T19:27:47+08:00">2022-05-14</time>
+              <time title="创建时间：2022-05-14 19:27:47 / 修改时间：20:56:25" itemprop="dateCreated datePublished" datetime="2022-05-14T19:27:47+08:00">2022-05-14</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -219,10 +219,7 @@
 <blockquote>
 <p>检查异常都需要程序显式地捕获，或在方法声明中用 throws 关键字</p>
 </blockquote>
-<img src="./jvm-exception/ex1.png" alt="image-20220514200229317" style="zoom: 50%;" />
-
-
-
+<p><img src="ex1.png" alt="封面"></p>
 <p>每个方法都附带一个异常表。异常表中的每一个条目代表一个异常处理器，并且由from指针、to指针、target 指针以及所捕获的异常类型构成，from 指针和 to 指针标示了该异常处理器所监控的范围。</p>
 <p>from 指针和 to 指针标示了该异常处理器所监控的范围，程序抛异常时，JVM会从上至下遍历异常表中的所有异常条目。当触发异常的字节码的索引值在某个异常表条目范围内，拟机会判断所抛出的异常和该条目想要捕获的异常是否匹配。</p>
 <p>如果匹配，虚拟机会将控制流转移至该条目 target 指针指向的字节码。如果遍历完所有异常表条目，JVM仍未匹配到异常处理器，那么它会弹出当前方法对应的 Java 栈帧，并且在调用者中重复上述操作。在最坏情况下，Java 虚拟机需要遍历当前线程 Java 栈上所有方法的异常表。</p>
@@ -260,8 +257,10 @@
 <p>再看下面的方法</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">printStackTrace2</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        RuntimeException tempEx = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">int</span> t = <span class="number">2</span> / <span class="number">0</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RuntimeException ex) &#123;</span><br><span class="line"></span><br><span class="line">            ex.printStackTrace();</span><br><span class="line">            tempEx = <span class="keyword">new</span> RuntimeException(<span class="string">&quot;catch RuntimeException&quot;</span>);</span><br><span class="line">            <span class="keyword">throw</span> tempEx;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line"></span><br><span class="line">            RuntimeException finallyEx = <span class="keyword">new</span> RuntimeException(<span class="string">&quot;finally RuntimeException&quot;</span>);</span><br><span class="line">            finallyEx.addSuppressed(tempEx);</span><br><span class="line">            <span class="keyword">throw</span> finallyEx;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 
+<p>对应的异常</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">java.lang.ArithmeticException: / by zero</span><br><span class="line">	at org.samz.study.basic.PrintException.printStackTrace2(PrintException.java:<span class="number">130</span>)</span><br><span class="line">	at org.samz.study.basic.PrintException.main(PrintException.java:<span class="number">6</span>)</span><br><span class="line">Exception in thread <span class="string">&quot;main&quot;</span> java.lang.RuntimeException: <span class="keyword">finally</span> RuntimeException</span><br><span class="line">	at org.samz.study.basic.PrintException.printStackTrace2(PrintException.java:<span class="number">138</span>)</span><br><span class="line">	at org.samz.study.basic.PrintException.main(PrintException.java:<span class="number">6</span>)</span><br><span class="line">	Suppressed: java.lang.RuntimeException: <span class="keyword">catch</span> RuntimeException</span><br><span class="line">		at org.samz.study.basic.PrintException.printStackTrace2(PrintException.java:<span class="number">134</span>)</span><br><span class="line">		... <span class="number">1</span> more</span><br></pre></td></tr></table></figure>
 
-
+<p>打印出了catch模块和finally模块的异常。</p>
 <p>对应的字节码</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">printStackTrace2</span><span class="params">()</span></span>;</span><br><span class="line">    Code:</span><br><span class="line">       <span class="number">0</span>: aconst_null</span><br><span class="line">       <span class="number">1</span>: astore_0</span><br><span class="line">       <span class="number">2</span>: iconst_2</span><br><span class="line">       <span class="number">3</span>: iconst_0</span><br><span class="line">       <span class="number">4</span>: idiv</span><br><span class="line">       <span class="number">5</span>: istore_1</span><br><span class="line">       <span class="number">6</span>: <span class="keyword">new</span>           #<span class="number">5</span>                  <span class="comment">// class java/lang/RuntimeException</span></span><br><span class="line">       <span class="number">9</span>: dup</span><br><span class="line">      <span class="number">10</span>: ldc           #<span class="number">14</span>                 <span class="comment">// String finally RuntimeException</span></span><br><span class="line">      <span class="number">12</span>: invokespecial #<span class="number">15</span>                 <span class="comment">// Method java/lang/RuntimeException.&quot;&lt;init&gt;&quot;:(Ljava/lang/String;)V</span></span><br><span class="line">      <span class="number">15</span>: astore_1</span><br><span class="line">      <span class="number">16</span>: aload_1</span><br><span class="line">      <span class="number">17</span>: aload_0</span><br><span class="line">      <span class="number">18</span>: invokevirtual #<span class="number">17</span>                 <span class="comment">// Method java/lang/RuntimeException.addSuppressed:(Ljava/lang/Throwable;)V</span></span><br><span class="line">      <span class="number">21</span>: aload_1</span><br><span class="line">      <span class="number">22</span>: athrow</span><br><span class="line">      <span class="number">23</span>: astore_1</span><br><span class="line">      <span class="number">24</span>: aload_1</span><br><span class="line">      <span class="number">25</span>: invokevirtual #<span class="number">6</span>                  <span class="comment">// Method java/lang/RuntimeException.printStackTrace:()V</span></span><br><span class="line">      <span class="number">28</span>: <span class="keyword">new</span>           #<span class="number">5</span>                  <span class="comment">// class java/lang/RuntimeException</span></span><br><span class="line">      <span class="number">31</span>: dup</span><br><span class="line">      <span class="number">32</span>: ldc           #<span class="number">16</span>                 <span class="comment">// String catch RuntimeException</span></span><br><span class="line">      <span class="number">34</span>: invokespecial #<span class="number">15</span>                 <span class="comment">// Method java/lang/RuntimeException.&quot;&lt;init&gt;&quot;:(Ljava/lang/String;)V</span></span><br><span class="line">      <span class="number">37</span>: astore_0</span><br><span class="line">      <span class="number">38</span>: aload_0</span><br><span class="line">      <span class="number">39</span>: athrow</span><br><span class="line">      <span class="number">40</span>: astore_2</span><br><span class="line">      <span class="number">41</span>: <span class="keyword">new</span>           #<span class="number">5</span>                  <span class="comment">// class java/lang/RuntimeException</span></span><br><span class="line">      <span class="number">44</span>: dup</span><br><span class="line">      <span class="number">45</span>: ldc           #<span class="number">14</span>                 <span class="comment">// String finally RuntimeException</span></span><br><span class="line">      <span class="number">47</span>: invokespecial #<span class="number">15</span>                 <span class="comment">// Method java/lang/RuntimeException.&quot;&lt;init&gt;&quot;:(Ljava/lang/String;)V</span></span><br><span class="line">      <span class="number">50</span>: astore_3</span><br><span class="line">      <span class="number">51</span>: aload_3</span><br><span class="line">      <span class="number">52</span>: aload_0</span><br><span class="line">      <span class="number">53</span>: invokevirtual #<span class="number">17</span>                 <span class="comment">// Method java/lang/RuntimeException.addSuppressed:(Ljava/lang/Throwable;)V</span></span><br><span class="line">      <span class="number">56</span>: aload_3</span><br><span class="line">      <span class="number">57</span>: athrow</span><br><span class="line">    Exception table:</span><br><span class="line">       from    to  target type</span><br><span class="line">           <span class="number">2</span>     <span class="number">6</span>    <span class="number">23</span>   Class java/lang/RuntimeException</span><br><span class="line">           <span class="number">2</span>     <span class="number">6</span>    <span class="number">40</span>   any</span><br><span class="line">          <span class="number">23</span>    <span class="number">41</span>    <span class="number">40</span>   any</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
