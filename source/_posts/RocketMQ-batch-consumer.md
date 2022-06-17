@@ -111,7 +111,7 @@ public class Consumer {
 
 **流程**
 
-​	重新启动之前Producer，然后再启动修改后的Consumer，打个断点观看。
+​	重新启动之前Producer，然后再启动修改后的Consumer，打个断点观看。consumeMessage的msgs，有10条数据
 
 
 
@@ -123,11 +123,11 @@ public class Consumer {
 
 
 
-#### DefaultMQPushConsumer
+### DefaultMQPushConsumer
 
 
 
-查看DefaultMQPushConsumer代码，发现有个属性consumeMessageBatchMaxSize，设置每次能消费的消息数，默认值为1，这样就是默认消费的
+查看DefaultMQPushConsumer代码，发现有个属性consumeMessageBatchMaxSize，设置每次能消费的消息数，默认值为1，所以默认每次都消费一条数据；
 
 ```
 public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsumer {
@@ -142,7 +142,7 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
 
 
 
-#### 注意：
+### 注意：
 
 如果多个消息消费，应该要保证本次的消费的消息数应该是具有原子性，要么都成功，要么都失败。
 
