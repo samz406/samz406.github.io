@@ -20,19 +20,20 @@
     var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="查询方法Query Methods   关键字 请求样例 语法    Distinct findDistinctByLastnameAndFirstname select distinct … where x.lastname &#x3D; ?1 and x.firstname &#x3D; ?2   And findByLastnameAndFirstname … where x.lastname &#x3D; ?1 and">
+  <meta name="description" content="在并发数据库系统中，Write Skew（写偏差） 是一种常见但容易被忽略的数据一致性问题。它通常发生在 快照隔离级别下，导致多个事务在并发执行时，基于同一时间点的数据库快照做出决策，但最终的更新却破坏了业务规则">
 <meta property="og:type" content="article">
-<meta property="og:title" content="jpa_start">
-<meta property="og:url" content="http://www.sanmuzi.com/2022/03/04/jpa-start/index.html">
+<meta property="og:title" content="什么是Write Skew（写偏差）">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/02/13/Write-Skew/index.html">
 <meta property="og:site_name" content="一子三木">
-<meta property="og:description" content="查询方法Query Methods   关键字 请求样例 语法    Distinct findDistinctByLastnameAndFirstname select distinct … where x.lastname &#x3D; ?1 and x.firstname &#x3D; ?2   And findByLastnameAndFirstname … where x.lastname &#x3D; ?1 and">
+<meta property="og:description" content="在并发数据库系统中，Write Skew（写偏差） 是一种常见但容易被忽略的数据一致性问题。它通常发生在 快照隔离级别下，导致多个事务在并发执行时，基于同一时间点的数据库快照做出决策，但最终的更新却破坏了业务规则">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-03-04T08:45:28.000Z">
-<meta property="article:modified_time" content="2025-01-18T13:38:13.486Z">
+<meta property="article:published_time" content="2025-02-13T10:42:56.000Z">
+<meta property="article:modified_time" content="2025-02-15T13:29:08.212Z">
 <meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="MYSQL">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://www.sanmuzi.com/2022/03/04/jpa-start/">
+<link rel="canonical" href="http://www.sanmuzi.com/2025/02/13/Write-Skew/">
 
 
 <script id="page-configurations">
@@ -45,7 +46,7 @@
   };
 </script>
 
-  <title>jpa_start | 一子三木</title>
+  <title>什么是Write Skew（写偏差） | 一子三木</title>
   
 
 
@@ -161,7 +162,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2022/03/04/jpa-start/">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/02/13/Write-Skew/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -174,7 +175,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          jpa_start
+          什么是Write Skew（写偏差）
         </h1>
 
         <div class="post-meta">
@@ -184,15 +185,24 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2022-03-04 16:45:28" itemprop="dateCreated datePublished" datetime="2022-03-04T16:45:28+08:00">2022-03-04</time>
+              <time title="创建时间：2025-02-13 18:42:56" itemprop="dateCreated datePublished" datetime="2025-02-13T18:42:56+08:00">2025-02-13</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-01-18 21:38:13" itemprop="dateModified" datetime="2025-01-18T21:38:13+08:00">2025-01-18</time>
+                <time title="修改时间：2025-02-15 21:29:08" itemprop="dateModified" datetime="2025-02-15T21:29:08+08:00">2025-02-15</time>
               </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+            </span>
 
           
 
@@ -205,140 +215,134 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h4 id="查询方法Query-Methods"><a href="#查询方法Query-Methods" class="headerlink" title="查询方法Query Methods"></a>查询方法Query Methods</h4><table>
+        <p>在并发数据库系统中，Write Skew（写偏差） 是一种常见但容易被忽略的数据一致性问题。它通常发生在 快照隔离级别下，导致多个事务在并发执行时，基于同一时间点的数据库快照做出决策，但最终的更新却破坏了业务规则</p>
+<span id="more"></span>
+
+
+
+<p>最近重新看了下DDIA，其中介绍了Write Skew，本文就简单介绍下</p>
+<h3 id="什么是-Write-Skew？"><a href="#什么是-Write-Skew？" class="headerlink" title="什么是 Write Skew？"></a>什么是 Write Skew？</h3><p>Write Skew 发生的典型场景是：</p>
+<ul>
+<li>多个事务读取数据，发现业务条件满足后进行更新；</li>
+<li>由于 快照隔离，事务彼此看不到对方的更新；</li>
+<li>事务独立提交后，最终的数据库状态违反了业务约束。</li>
+</ul>
+<p><strong>Write Skew 的本质</strong>：<br>它不是简单的丢失更新，因为事务并没有修改相同的行，而是各自独立修改不同的行，最终导致错误的数据状态。</p>
+<h3 id="书中例子：医院值班医生问题"><a href="#书中例子：医院值班医生问题" class="headerlink" title="书中例子：医院值班医生问题"></a>书中例子：医院值班医生问题</h3><p>医院的值班医生表如下，其中规定：每个医生可以退出值班，但前提是至少有 1 位医生继续值班。</p>
+<p> ** 数据库表**</p>
+<table>
 <thead>
 <tr>
-<th align="left">关键字</th>
-<th align="left">请求样例</th>
-<th align="left">语法</th>
+<th>id</th>
+<th>name</th>
+<th>on_call</th>
+<th>shift_id</th>
 </tr>
 </thead>
 <tbody><tr>
-<td align="left"><code>Distinct</code></td>
-<td align="left"><code>findDistinctByLastnameAndFirstname</code></td>
-<td align="left"><code>select distinct … where x.lastname = ?1 and x.firstname = ?2</code></td>
+<td>1</td>
+<td>Alice</td>
+<td>true</td>
+<td>1234</td>
 </tr>
 <tr>
-<td align="left"><code>And</code></td>
-<td align="left"><code>findByLastnameAndFirstname</code></td>
-<td align="left"><code>… where x.lastname = ?1 and x.firstname = ?2</code></td>
+<td>2</td>
+<td>Bob</td>
+<td>true</td>
+<td>1234</td>
 </tr>
 <tr>
-<td align="left"><code>Or</code></td>
-<td align="left"><code>findByLastnameOrFirstname</code></td>
-<td align="left"><code>… where x.lastname = ?1 or x.firstname = ?2</code></td>
-</tr>
-<tr>
-<td align="left"><code>Is</code>, <code>Equals</code></td>
-<td align="left"><code>findByFirstname</code>,<code>findByFirstnameIs</code>,<code>findByFirstnameEquals</code></td>
-<td align="left"><code>… where x.firstname = ?1</code></td>
-</tr>
-<tr>
-<td align="left"><code>Between</code></td>
-<td align="left"><code>findByStartDateBetween</code></td>
-<td align="left"><code>… where x.startDate between ?1 and ?2</code></td>
-</tr>
-<tr>
-<td align="left"><code>LessThan</code></td>
-<td align="left"><code>findByAgeLessThan</code></td>
-<td align="left"><code>… where x.age &lt; ?1</code></td>
-</tr>
-<tr>
-<td align="left"><code>LessThanEqual</code></td>
-<td align="left"><code>findByAgeLessThanEqual</code></td>
-<td align="left"><code>… where x.age &lt;= ?1</code></td>
-</tr>
-<tr>
-<td align="left"><code>GreaterThan</code></td>
-<td align="left"><code>findByAgeGreaterThan</code></td>
-<td align="left"><code>… where x.age &gt; ?1</code></td>
-</tr>
-<tr>
-<td align="left"><code>GreaterThanEqual</code></td>
-<td align="left"><code>findByAgeGreaterThanEqual</code></td>
-<td align="left"><code>… where x.age &gt;= ?1</code></td>
-</tr>
-<tr>
-<td align="left"><code>After</code></td>
-<td align="left"><code>findByStartDateAfter</code></td>
-<td align="left"><code>… where x.startDate &gt; ?1</code></td>
-</tr>
-<tr>
-<td align="left"><code>Before</code></td>
-<td align="left"><code>findByStartDateBefore</code></td>
-<td align="left"><code>… where x.startDate &lt; ?1</code></td>
-</tr>
-<tr>
-<td align="left"><code>IsNull</code>, <code>Null</code></td>
-<td align="left"><code>findByAge(Is)Null</code></td>
-<td align="left"><code>… where x.age is null</code></td>
-</tr>
-<tr>
-<td align="left"><code>IsNotNull</code>, <code>NotNull</code></td>
-<td align="left"><code>findByAge(Is)NotNull</code></td>
-<td align="left"><code>… where x.age not null</code></td>
-</tr>
-<tr>
-<td align="left"><code>Like</code></td>
-<td align="left"><code>findByFirstnameLike</code></td>
-<td align="left"><code>… where x.firstname like ?1</code></td>
-</tr>
-<tr>
-<td align="left"><code>NotLike</code></td>
-<td align="left"><code>findByFirstnameNotLike</code></td>
-<td align="left"><code>… where x.firstname not like ?1</code></td>
-</tr>
-<tr>
-<td align="left"><code>StartingWith</code></td>
-<td align="left"><code>findByFirstnameStartingWith</code></td>
-<td align="left"><code>… where x.firstname like ?1</code> (parameter bound with appended <code>%</code>)</td>
-</tr>
-<tr>
-<td align="left"><code>EndingWith</code></td>
-<td align="left"><code>findByFirstnameEndingWith</code></td>
-<td align="left"><code>… where x.firstname like ?1</code> (parameter bound with prepended <code>%</code>)</td>
-</tr>
-<tr>
-<td align="left"><code>Containing</code></td>
-<td align="left"><code>findByFirstnameContaining</code></td>
-<td align="left"><code>… where x.firstname like ?1</code> (parameter bound wrapped in <code>%</code>)</td>
-</tr>
-<tr>
-<td align="left"><code>OrderBy</code></td>
-<td align="left"><code>findByAgeOrderByLastnameDesc</code></td>
-<td align="left"><code>… where x.age = ?1 order by x.lastname desc</code></td>
-</tr>
-<tr>
-<td align="left"><code>Not</code></td>
-<td align="left"><code>findByLastnameNot</code></td>
-<td align="left"><code>… where x.lastname &lt;&gt; ?1</code></td>
-</tr>
-<tr>
-<td align="left"><code>In</code></td>
-<td align="left"><code>findByAgeIn(Collection&lt;Age&gt; ages)</code></td>
-<td align="left"><code>… where x.age in ?1</code></td>
-</tr>
-<tr>
-<td align="left"><code>NotIn</code></td>
-<td align="left"><code>findByAgeNotIn(Collection&lt;Age&gt; ages)</code></td>
-<td align="left"><code>… where x.age not in ?1</code></td>
-</tr>
-<tr>
-<td align="left"><code>True</code></td>
-<td align="left"><code>findByActiveTrue()</code></td>
-<td align="left"><code>… where x.active = true</code></td>
-</tr>
-<tr>
-<td align="left"><code>False</code></td>
-<td align="left"><code>findByActiveFalse()</code></td>
-<td align="left"><code>… where x.active = false</code></td>
-</tr>
-<tr>
-<td align="left"><code>IgnoreCase</code></td>
-<td align="left"><code>findByFirstnameIgnoreCase</code></td>
-<td align="left"><code>… where UPPER(x.firstname) = UPPER(?1)</code></td>
+<td>3</td>
+<td>Carol</td>
+<td>false</td>
+<td>1234</td>
 </tr>
 </tbody></table>
+<p>假设 Alice 和 Bob 都不舒服，同时点击按钮 请求退出值班，系统执行了以下事务：</p>
+<p> <strong>事务 1（Alice 退出值班）</strong></p>
+<ol>
+<li><p>读取当前值班医生数量：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT COUNT(*) FROM doctors</span><br><span class="line">WHERE on_call = true AND shift_id = 1234;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>事务开始时，Alice 读取到 2 位值班医生（Alice &amp; Bob）。</li>
+</ul>
+</li>
+<li><p>Alice 认为可以退出值班：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">IF (currently_on_call &gt;= 2) THEN</span><br><span class="line">    UPDATE doctors</span><br><span class="line">    SET on_call = false</span><br><span class="line">    WHERE name = &#x27;Alice&#x27; AND shift_id = 1234;</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>提交事务</strong></p>
+<p>COMMIT;</p>
+</li>
+</ol>
+<p> <strong>事务 2（Bob 退出值班）</strong></p>
+<p>Bob 也执行了完全相同的步骤：</p>
+<ul>
+<li><p>读取数据时，仍然看到 2 位医生值班（因为他的事务与 Alice 的事务是并行执行，彼此看不到对方的更新）。</p>
+</li>
+<li><p>Bob 认为可以退出值班，于是执行 语句：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">UPDATE doctors</span><br><span class="line">SET on_call = false</span><br><span class="line">WHERE name = &#x27;Bob&#x27; AND shift_id = 1234;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p> <strong>最终结果</strong></p>
+<table>
+<thead>
+<tr>
+<th>name</th>
+<th>on_call</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Alice</td>
+<td>false</td>
+</tr>
+<tr>
+<td>Bob</td>
+<td>false</td>
+</tr>
+<tr>
+<td>Carol</td>
+<td>false</td>
+</tr>
+</tbody></table>
+<ul>
+<li>错误：所有医生都退出了值班，违反了业务逻辑！</li>
+<li>由于事务使用的是 快照隔离（Snapshot Isolation），Alice 和 Bob 在执行时看到的是同一个快照，但它们并没有互相感知对方的修改，最终都提交了错误的更新。</li>
+</ul>
+<hr>
+<h5 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a><strong>解决方案</strong></h5><p> <strong>方法 1：使用 SERIALIZABLE 事务</strong></p>
+<ul>
+<li><p>直接提升事务隔离级别：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;</span><br></pre></td></tr></table></figure></li>
+<li><p>效果</p>
+<ul>
+<li>数据库会自动检测到冲突，并强制让其中一个事务回滚。</li>
+<li>例如，Bob 的事务会在 Alice 提交后重新执行，发现数据状态已变更，避免错误提交。</li>
+</ul>
+</li>
+<li><p>缺点</p>
+<ul>
+<li>性能开销较大，尤其在高并发场景下可能引发大量事务回滚。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>方法 2：使用 SELECT … FOR UPDATE</strong></p>
+<ul>
+<li><p>在读取数据时，使用 行级锁避免事务间竞争：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT COUNT(*) FROM doctors</span><br><span class="line">WHERE on_call = true AND shift_id = 1234</span><br><span class="line">FOR UPDATE;</span><br></pre></td></tr></table></figure></li>
+<li><p>效果</p>
+<ul>
+<li>强制事务串行化，防止并发读取导致的错误判断。</li>
+<li>Bob 的事务会<strong>等待</strong> Alice 的事务完成，并读取最新数据，从而避免错误退出。</li>
+</ul>
+</li>
+<li><p>缺点</p>
+<ul>
+<li>可能影响并发性能，因为事务需要等待锁释放。</li>
+</ul>
+</li>
+</ul>
+<p><strong>方法 3：分布式锁</strong></p>
+<p>当然也可以使用一些分布式锁比如zookeeper，redis 等中间件。这样可以保证串行和不锁表，影响范围控制在最小。</p>
 
     </div>
 
@@ -347,6 +351,9 @@
     
 
       <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MYSQL/" rel="tag"># MYSQL</a>
+          </div>
 
         
 
@@ -354,13 +361,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2022/01/12/monojust-and-monodefer/" rel="prev" title="MonoJust与MonoDefer区别">
-      <i class="fa fa-chevron-left"></i> MonoJust与MonoDefer区别
+    <a href="/2025/02/12/the-world-i-see/" rel="prev" title="我看见的世界">
+      <i class="fa fa-chevron-left"></i> 我看见的世界
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2022/03/15/string-count/" rel="next" title="通过字节码来看string对象个数">
-      通过字节码来看string对象个数 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -419,7 +423,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2%E6%96%B9%E6%B3%95Query-Methods"><span class="nav-number">1.</span> <span class="nav-text">查询方法Query Methods</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-Write-Skew%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">什么是 Write Skew？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B9%A6%E4%B8%AD%E4%BE%8B%E5%AD%90%EF%BC%9A%E5%8C%BB%E9%99%A2%E5%80%BC%E7%8F%AD%E5%8C%BB%E7%94%9F%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">书中例子：医院值班医生问题</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">2.0.1.</span> <span class="nav-text">解决方案</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
