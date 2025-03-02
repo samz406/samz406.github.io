@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="消息队列提供了一个临时存储消息的轻量级缓冲区，以及允许软件组件连接到队列以发送和接收消息的端点。消息队列对于现代系统至关重要，它使独立组件能够高效通信。它们通过异步存储和转发消息来提高可靠性、可扩展性和性能。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="消息队列设计科普">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/01/22/mq-design/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="消息队列提供了一个临时存储消息的轻量级缓冲区，以及允许软件组件连接到队列以发送和接收消息的端点。消息队列对于现代系统至关重要，它使独立组件能够高效通信。它们通过异步存储和转发消息来提高可靠性、可扩展性和性能。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-01-22T10:03:24.000Z">
+<meta property="article:modified_time" content="2025-03-02T15:01:19.110Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/01/22/mq-design/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>消息队列设计科普 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/01/22/mq-design/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          消息队列设计科普
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-01-22 18:03:24" itemprop="dateCreated datePublished" datetime="2025-01-22T18:03:24+08:00">2025-01-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>消息队列提供了一个临时存储消息的轻量级缓冲区，以及允许软件组件连接到队列以发送和接收消息的端点。消息队列对于现代系统至关重要，它使独立组件能够高效通信。它们通过异步存储和转发消息来提高可靠性、可扩展性和性能。</p>
+<span id="more"></span>
+
+
+
+<h3 id="消息队列的主要优点："><a href="#消息队列的主要优点：" class="headerlink" title="消息队列的主要优点："></a>消息队列的主要优点：</h3><ul>
+<li><strong>解耦</strong>：服务独立运行。</li>
+<li><strong>可靠性</strong>：即使出现故障，消息仍然是安全的。</li>
+<li><strong>可扩展性</strong>：无缝处理高工作负载。</li>
+<li><strong>容错</strong>：尽管出现问题，仍维持运行。</li>
+</ul>
+<h3 id="常见用例："><a href="#常见用例：" class="headerlink" title="常见用例："></a>常见用例：</h3><ul>
+<li><strong>事件驱动系统</strong>：实时通知或交易。</li>
+<li><strong>微服务通信</strong>：服务之间的数据交换。</li>
+<li><strong>后台处理</strong>：诸如发送电子邮件或生成报告之类的任务。</li>
+</ul>
+<h3 id="核心组件："><a href="#核心组件：" class="headerlink" title="核心组件："></a>核心组件：</h3><ul>
+<li><strong>生产者</strong>：发送消息。</li>
+<li><strong>消费者</strong>：处理消息。</li>
+<li><strong>经纪人</strong>：管理路线和交付。</li>
+</ul>
+<h3 id="模式："><a href="#模式：" class="headerlink" title="模式："></a>模式：</h3><ul>
+<li><strong>点对点（P2P）</strong>：每条消息单个消费者。</li>
+<li><strong>发布-订阅（Pub/Sub）</strong>：向多个消费者广播。</li>
+<li><strong>死信队列（DLQ）</strong>：存储无法处理的消息。</li>
+</ul>
+<h3 id="成功秘诀："><a href="#成功秘诀：" class="headerlink" title="成功秘诀："></a>成功秘诀：</h3><ul>
+<li>对于顺序敏感的任务，使用<strong>FIFO 队列。</strong></li>
+<li>实施<strong>重试机制</strong>和<strong>DLQ</strong>来<a target="_blank" rel="noopener" href="https://documentation.endgrate.com/docs/error-handling">处理错误</a>。</li>
+<li>利用<strong>集群</strong>和<strong>分区</strong>来扩展大容量系统。</li>
+</ul>
+<h2 id="消息队列系统的组成部分"><a href="#消息队列系统的组成部分" class="headerlink" title="消息队列系统的组成部分"></a>消息队列系统的组成部分</h2><p>要设计一个可靠的消息队列系统，了解其主要组件至关重要。下面详细介绍了这些元素如何协同工作以实现可靠的异步通信。</p>
+<h3 id="生产者、消费者和经纪人"><a href="#生产者、消费者和经纪人" class="headerlink" title="生产者、消费者和经纪人"></a>生产者、消费者和经纪人</h3><p>消息队列系统的核心是<strong>生产者</strong>、<strong>消费者</strong>和<strong>代理</strong>。生产者负责创建消息并将其发送到队列。另一方面，消费者则检索和处理这些消息。代理充当中间人，负责路由、过滤和转换消息等任务，以确保顺利交付。此设置可确保消息安全地存储在队列中，即使消费者暂时不可用。</p>
+<h3 id="消息格式和元数据"><a href="#消息格式和元数据" class="headerlink" title="消息格式和元数据"></a>消息格式和元数据</h3><p>每条消息都包含两个关键部分：<strong>有效负载</strong>（主要内容）和<strong>元数据</strong>（处理和跟踪的详细信息）。下面简要介绍一下：</p>
+<table>
+<thead>
+<tr>
+<th>成分</th>
+<th>目的</th>
+<th>示例属性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>有效载荷</td>
+<td>主要讯息内容</td>
+<td>JSON 数据、二进制文件、文本</td>
+</tr>
+<tr>
+<td>标头</td>
+<td>处理说明</td>
+<td>消息ID、时间戳、优先级</td>
+</tr>
+<tr>
+<td>路由信息</td>
+<td>配送指南</td>
+<td>队列名称、路由键</td>
+</tr>
+<tr>
+<td>系统元数据</td>
+<td>技术细节</td>
+<td>保留期限、可见性超时</td>
+</tr>
+</tbody></table>
+<p><strong>示例消息结构：</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;headers&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;messageId&quot;</span>: <span class="string">&quot;12345&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;timestamp&quot;</span>: <span class="string">&quot;2024-11-23T10:00:00Z&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;priority&quot;</span>: <span class="string">&quot;high&quot;</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">&quot;routingKey&quot;</span>: <span class="string">&quot;orders.processing&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;payload&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;orderId&quot;</span>: <span class="string">&quot;ORD-789&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;customerId&quot;</span>: <span class="string">&quot;CUST-456&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;items&quot;</span>: [...]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>元数据确保消息得到有效处理和正确路由，而有效负载则保存正在传输的实际数据。</p>
+<h3 id="队列和模式的类型"><a href="#队列和模式的类型" class="headerlink" title="队列和模式的类型"></a>队列和模式的类型</h3><p>消息队列有不同的类型，每种类型都是为特定用例而设计的：</p>
+<ul>
+<li><strong>点对点 (P2P)：</strong>此模式确保消息被传递给单个消费者。它非常适合订单处理等任务，因为每个消息只需一个系统处理。</li>
+<li><strong>发布-订阅 (Pub/Sub)：</strong>在此，消息会同时广播给多个消费者。这对于通知、分析或跨各种服务分发实时日志等事件非常有用。</li>
+</ul>
+<blockquote>
+<p>“消息队列从根本上来说是一种充当消息缓冲区的技术 - 它接受消息并按照到达的顺序排列它们。”</p>
+<p>Nyior Clement，freeCodeCamp。</p>
+</blockquote>
+<p>另一种重要的类型是**死信队列 (DLQ)**。这些队列存储无法处理的消息，有助于防止数据丢失并使调试问题变得更容易。</p>
+<p>考虑到这些组件，您就可以深入了解构建高效、可靠的消息队列的最佳实践。</p>
+<h2 id="消息队列设计技巧"><a href="#消息队列设计技巧" class="headerlink" title="消息队列设计技巧"></a>消息队列设计技巧</h2><p>创建可靠的消息队列系统需要对错误处理、消息顺序和可扩展性进行周密的规划。让我们分解一下每个方面的一些实用策略。</p>
+<h3 id="处理错误和失败"><a href="#处理错误和失败" class="headerlink" title="处理错误和失败"></a>处理错误和失败</h3><p>消息处理过程中难免会出现故障。为了最大限度地减少中断并避免丢失数据，您可以使用**死信队列 (DLQ)**和有效的重试机制。DLQ 充当安全网，存储无法处理的消息，以便您稍后进行分析和重新处理。</p>
+<p>以下是错误处理的几个关键做法：</p>
+<ul>
+<li>使用具有<strong>指数退避重试</strong>的 DLQ （增加重试之间的延迟以避免系统不堪重负）。</li>
+<li>监控故障模式以识别重复出现的问题并从根本上解决它们。</li>
+</ul>
+<p>以下是有效处理不同类型故障的方法：</p>
+<table>
+<thead>
+<tr>
+<th>故障类型</th>
+<th>处理策略</th>
+<th>恢复行动</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>暂时网络问题</td>
+<td>自动重试并退避</td>
+<td>重试几次，然后根据需要路由到 DLQ</td>
+</tr>
+<tr>
+<td>消息格式错误</td>
+<td>立即 DLQ 路由</td>
+<td>审阅并手动更正消息</td>
+</tr>
+<tr>
+<td>消费者失败</td>
+<td><a target="_blank" rel="noopener" href="https://endgrate.com/blog/circuit-breaker-pattern-in-service-mesh-guide">断路器模式</a></td>
+<td>故障转移到备份消费者</td>
+</tr>
+</tbody></table>
+<p>通过有效解决错误，您可以确保系统保持稳定。但稳定性还不够 - 保持消息的正确顺序同样重要。</p>
+<h3 id="保持信息有序"><a href="#保持信息有序" class="headerlink" title="保持信息有序"></a>保持信息有序</h3><p>保持消息顺序至关重要，尤其是对于金融交易或需要按顺序进行的操作等情况。FIFO <strong>（先进先出）队列</strong>是按照接收顺序处理消息的好方法。</p>
+<p>为了保持秩序，您可以使用以下技巧：</p>
+<ul>
+<li>向消息添加序列号或时间戳。</li>
+<li>按类别对消息进行分组（例如，金融系统的订单 ID）。</li>
+<li>在分布式系统中使用分区键来保持一致性。</li>
+</ul>
+<h3 id="扩展并提高系统可靠性"><a href="#扩展并提高系统可靠性" class="headerlink" title="扩展并提高系统可靠性"></a>扩展并提高系统可靠性</h3><p>随着系统的增长，分布式队列和分区可以帮助管理更高的负载，而不会牺牲性能。以下是确保扩展时可靠性的方法：</p>
+<ul>
+<li>通过运行多个同步队列服务器来设置<strong>集群以提高可用性。</strong></li>
+<li>使用分区<strong>的水平扩展</strong>来均匀分配负载。</li>
+<li>添加负载平衡以将流量分散到多个队列实例。</li>
+</ul>
+<p>对于高容量系统，Kafka 或 RabbitMQ 等工具是极佳的选择。它们内置对分布式操作和容错的支持，非常适合要求严格的环境。</p>
+<h2 id="提高性能"><a href="#提高性能" class="headerlink" title="提高性能"></a>提高性能</h2><p>提高消息队列系统的性能需要关注直接影响其速度和可靠性的几个关键因素。让我们深入探讨一些有效的方法，让您的消息队列更快、更可靠。</p>
+<h3 id="使用批处理和缓冲"><a href="#使用批处理和缓冲" class="headerlink" title="使用批处理和缓冲"></a>使用批处理和缓冲</h3><p>批量处理消息可以大幅提高吞吐量，同时减少开销。批量处理不是一次处理一条消息，而是允许同时处理多条消息，从而减少网络调用次数并提高效率。</p>
+<p>以下是批次大小如何影响性能的一个例子：</p>
+<table>
+<thead>
+<tr>
+<th>批次大小</th>
+<th>消息/秒</th>
+<th>网络调用</th>
+<th>资源使用情况</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>单条消息</td>
+<td>1,000</td>
+<td>1,000</td>
+<td>高的</td>
+</tr>
+<tr>
+<td>100 条消息</td>
+<td>10,000</td>
+<td>100</td>
+<td>中等的</td>
+</tr>
+<tr>
+<td>1,000 条消息</td>
+<td>5万</td>
+<td>50</td>
+<td>低的</td>
+</tr>
+</tbody></table>
+<p>为了获得最佳效果，请根据系统需要调整批次大小，设置不完整批次的超时，并密切关注延迟以平衡速度和资源使用。</p>
+<h3 id="跟踪指标和监控"><a href="#跟踪指标和监控" class="headerlink" title="跟踪指标和监控"></a>跟踪指标和监控</h3><p>密切关注关键指标对于确保系统平稳运行至关重要。以下是需要关注的首要指标：</p>
+<ul>
+<li><strong>消息吞吐量</strong>：每秒处理多少条消息。</li>
+<li><strong>队列深度</strong>：等待处理的消息数量。</li>
+<li><strong>处理延迟</strong>：消息从添加到队列到被使用所需的时间。</li>
+</ul>
+<p>定期监控这些指标可以帮助您在问题变得更严重之前发现潜在的瓶颈。</p>
+<h3 id="管理资源"><a href="#管理资源" class="headerlink" title="管理资源"></a>管理资源</h3><p>仅靠监控是不够的 - 高效的资源管理对于保持性能至关重要，尤其是在高负载下。例如，当内存使用率超过 80% 时，性能通常会开始下降。</p>
+<p>以下是一些资源管理技巧：</p>
+<ul>
+<li>为队列服务器设置适当的内存限制，以避免过载。</li>
+<li>使用连接池来减少资源开销。</li>
+<li>密切关注磁盘使用情况，特别是持久队列，以防止与存储相关的减速。</li>
+</ul>
+<p>对于分布式系统，跨多个节点对消息进行分区有助于平衡负载。这可确保即使在高流量期间也能保持处理稳定。通过分散工作负载，您可以保持一致的吞吐量并避免单个节点过载。</p>
+<p><strong>资料</strong></p>
+<p><a target="_blank" rel="noopener" href="https://endgrate.com/blog/ultimate-guide-to-message-queue-design">https://endgrate.com/blog/ultimate-guide-to-message-queue-design</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/01/18/deepseek-ai-001/" rel="prev" title="用AI将需求转换成代码">
+      <i class="fa fa-chevron-left"></i> 用AI将需求转换成代码
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/01/22/ai-practice-001/" rel="next" title="AI帮你写测试脚本和文档">
+      AI帮你写测试脚本和文档 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E7%9A%84%E4%B8%BB%E8%A6%81%E4%BC%98%E7%82%B9%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">消息队列的主要优点：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E7%94%A8%E4%BE%8B%EF%BC%9A"><span class="nav-number">2.</span> <span class="nav-text">常见用例：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%EF%BC%9A"><span class="nav-number">3.</span> <span class="nav-text">核心组件：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%EF%BC%9A"><span class="nav-number">4.</span> <span class="nav-text">模式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%90%E5%8A%9F%E7%A7%98%E8%AF%80%EF%BC%9A"><span class="nav-number">5.</span> <span class="nav-text">成功秘诀：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%BB%84%E6%88%90%E9%83%A8%E5%88%86"><span class="nav-number"></span> <span class="nav-text">消息队列系统的组成部分</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85%E3%80%81%E6%B6%88%E8%B4%B9%E8%80%85%E5%92%8C%E7%BB%8F%E7%BA%AA%E4%BA%BA"><span class="nav-number">1.</span> <span class="nav-text">生产者、消费者和经纪人</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E6%A0%BC%E5%BC%8F%E5%92%8C%E5%85%83%E6%95%B0%E6%8D%AE"><span class="nav-number">2.</span> <span class="nav-text">消息格式和元数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%9F%E5%88%97%E5%92%8C%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">队列和模式的类型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E8%AE%BE%E8%AE%A1%E6%8A%80%E5%B7%A7"><span class="nav-number"></span> <span class="nav-text">消息队列设计技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E9%94%99%E8%AF%AF%E5%92%8C%E5%A4%B1%E8%B4%A5"><span class="nav-number">1.</span> <span class="nav-text">处理错误和失败</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%9D%E6%8C%81%E4%BF%A1%E6%81%AF%E6%9C%89%E5%BA%8F"><span class="nav-number">2.</span> <span class="nav-text">保持信息有序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A9%E5%B1%95%E5%B9%B6%E6%8F%90%E9%AB%98%E7%B3%BB%E7%BB%9F%E5%8F%AF%E9%9D%A0%E6%80%A7"><span class="nav-number">3.</span> <span class="nav-text">扩展并提高系统可靠性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%90%E9%AB%98%E6%80%A7%E8%83%BD"><span class="nav-number"></span> <span class="nav-text">提高性能</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%89%B9%E5%A4%84%E7%90%86%E5%92%8C%E7%BC%93%E5%86%B2"><span class="nav-number">1.</span> <span class="nav-text">使用批处理和缓冲</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%9F%E8%B8%AA%E6%8C%87%E6%A0%87%E5%92%8C%E7%9B%91%E6%8E%A7"><span class="nav-number">2.</span> <span class="nav-text">跟踪指标和监控</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E8%B5%84%E6%BA%90"><span class="nav-number">3.</span> <span class="nav-text">管理资源</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">98</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
