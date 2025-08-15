@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="公众号开发记录">
+<meta property="og:type" content="article">
+<meta property="og:title" content="微信公众号开发">
+<meta property="og:url" content="http://www.sanmuzi.com/2021/10/21/weixin-manual/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="公众号开发记录">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://www.sanmuzi.com/.com//P1.png">
+<meta property="og:image" content="http://www.sanmuzi.com/.com//P3.jpg">
+<meta property="og:image" content="http://www.sanmuzi.com/.com//P4.png">
+<meta property="og:image" content="http://www.sanmuzi.com/.com//P6.png">
+<meta property="og:image" content="http://www.sanmuzi.com/.com//P5.png">
+<meta property="og:image" content="http://www.sanmuzi.com/.com//P7.png">
+<meta property="og:image" content="http://www.sanmuzi.com/.com//P8.png">
+<meta property="og:image" content="http://www.sanmuzi.com/.com//P9.png">
+<meta property="og:image" content="http://www.sanmuzi.com/.com//P10.png">
+<meta property="og:image" content="http://www.sanmuzi.com/.com//P11.png">
+<meta property="og:image" content="http://www.sanmuzi.com/.com//P12.png">
+<meta property="article:published_time" content="2021-10-21T12:48:07.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.379Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://www.sanmuzi.com/.com//P1.png">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2021/10/21/weixin-manual/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>微信公众号开发 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2021/10/21/weixin-manual/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          微信公众号开发
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-10-21 20:48:07" itemprop="dateCreated datePublished" datetime="2021-10-21T20:48:07+08:00">2021-10-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>公众号开发记录</p>
+<span id="more"></span>
+
+<p>  最近做了个公司公众号推送功能。这里记录下开发流程。</p>
+<p><strong>相关地址</strong></p>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/debug/cgi-bin/sandboxinfo?action=showinfo&t=sandbox/index">测试公众号地址</a></p>
+<p><a target="_blank" rel="noopener" href="https://developers.weixin.qq.com/doc/offiaccount/Getting_Started/Overview.html">公众号开发文档</a></p>
+<h3 id="测试公众号开发"><a href="#测试公众号开发" class="headerlink" title="测试公众号开发"></a>测试公众号开发</h3><h4 id="注册测试公众号"><a href="#注册测试公众号" class="headerlink" title="注册测试公众号"></a>注册测试公众号</h4><p>进入<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/debug/cgi-bin/sandboxinfo?action=showinfo&t=sandbox/index">测试公众号地址</a>，扫码登录。</p>
+<p><img src="/.com//P1.png" alt="P1.png"></p>
+<h4 id="接口配置信息"><a href="#接口配置信息" class="headerlink" title="接口配置信息"></a>接口配置信息</h4><p>接口配置信息这里配置你的回调地址。配置回调地址作用是微信会主动调你，同时给你推送一些事件，你获取这些事件后做相关业务处理。</p>
+<h4 id="创建回调服务"><a href="#创建回调服务" class="headerlink" title="创建回调服务"></a>创建回调服务</h4><p>可以自己创建一个springboot服务，写两个方法，一个接收GET校验，一个接收POST微信事件。</p>
+<p><strong>作用一：验证消息是否来自微信服务器</strong></p>
+<p>验证流程</p>
+<p><img src="/.com//P3.jpg" alt="P3.jpg"></p>
+<p>回调服务主要用于验证填写的接口配置，微信服务器将发送GET请求到填写的服务器地址URL上，GET请求携带参数如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>signature</td>
+<td>微信加密签名，signature结合了开发者填写的token参数和请求中的timestamp参数、nonce参数。</td>
+</tr>
+<tr>
+<td>timestamp</td>
+<td>时间戳</td>
+</tr>
+<tr>
+<td>nonce</td>
+<td>随机数</td>
+</tr>
+<tr>
+<td>echostr</td>
+<td>随机字符串</td>
+</tr>
+</tbody></table>
+<p>开发者通过检验signature对请求进行校验（下面有校验方式）。若确认此次GET请求来自微信服务器，<strong>会原样返回echostr参数内容</strong>，则接入生效，成为开发者成功，否则接入失败。加密/校验流程如下：</p>
+<p>1）将token、timestamp、nonce三个参数进行字典序排序 </p>
+<p>2）将三个参数字符串拼接成一个字符串进行sha1加密 </p>
+<p>3）开发者获得加密后的字符串可与signature对比，标识该请求来源于微信</p>
+<p>具体加密实现可以参考<a target="_blank" rel="noopener" href="https://developers.weixin.qq.com/doc/oplatform/Third-party_Platforms/2.0/api/Before_Develop/Message_encryption_and_decryption.html">微信官网</a>，也可以点击这里<a target="_blank" rel="noopener" href="https://res.wx.qq.com/op_res/-serEQ6xSDVIjfoOHcX78T1JAYX-pM_fghzfiNYoD8uHVd3fOeC0PC_pvlg4-kmP">下载实例代码</a></p>
+<p>注意：如果回调地址调用失败,会有如下提示，说明微信调用你服务失败，是不能添加成功，需要自己检查下网络。</p>
+<p><img src="/.com//P4.png" alt="P4.png"></p>
+<blockquote>
+<p>由于一般都是本地环境开发，自己可以搞一个内网穿透工具，这里推荐<a target="_blank" rel="noopener" href="https://natapp.cn/">natapp</a>。具体使用自行研究。</p>
+</blockquote>
+<p><strong>作用二：依据回调内容实现自定义业务逻辑</strong></p>
+<p>​    用户每次向公众号发送消息、或者产生自定义菜单、或产生微信支付订单等情况时，开发者填写的服务器配置URL将得到微信服务器推送过来的消息和事件，开发者可以依据自身业务逻辑进行响应，如回复消息。</p>
+<blockquote>
+<p> 假如服务器无法保证在五秒内处理回复，则必须回复“success”或者“”（空串），否则微信后台会发起三次重试。解释一下为何有这么奇怪的规定。发起重试是微信后台为了尽可以保证粉丝发送的内容开发者均可以收到。如果开发者不进行回复，微信后台没办法确认开发者已收到消息，只好重试。</p>
+</blockquote>
+<h3 id="业务开发"><a href="#业务开发" class="headerlink" title="业务开发"></a>业务开发</h3><p>业务开发就是回调服务的第二个功能。本次业务开发实现了公众号生成带二维码参数、模板消息推送、自动回复功能。这里简要说明下。</p>
+<h4 id="前置条件"><a href="#前置条件" class="headerlink" title="前置条件"></a>前置条件</h4><p><strong>1、 获取access_token</strong></p>
+<p>调用微信接口都需要先获取access_token。access_token是公众号的全局唯一接口调用凭据，公众号调用各接口时都需使用access_token。开发者需要进行妥善保存。access_token的存储至少要保留512个字符空间。access_token的有效期目前为2个小时，需定时刷新，重复获取将导致上次获取的access_token失效。</p>
+<p>本次开发是把access_token放到redis缓存的。设置2个小时有效期。</p>
+<p>请求地址如下，对应<a target="_blank" rel="noopener" href="https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Get_access_token.html">文档</a></p>
+<p>请求方式： GET</p>
+<p>URL:  <a target="_blank" rel="noopener" href="https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&amp;appid=APPID&amp;secret=APPSECRET">https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&amp;appid=APPID&amp;secret=APPSECRET</a></p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>是否必填</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>grant_type</td>
+<td>是</td>
+<td>获取access_token填写client_credential</td>
+</tr>
+<tr>
+<td>appid</td>
+<td>是</td>
+<td>第三方用户唯一凭证</td>
+</tr>
+<tr>
+<td>secret</td>
+<td>是</td>
+<td>第三方用户唯一凭证密钥，即appsecret</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>测试公众号里有这两个appid和secret</p>
+</blockquote>
+<p>正常返回结果如下，access_token 就是值保存起，调用其他接口都会带上</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="attr">&quot;access_token&quot;</span>:<span class="string">&quot;ACCESS_TOKEN&quot;</span>,<span class="attr">&quot;expires_in&quot;</span>:<span class="number">7200</span>&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>2 、H5相关配置</strong></p>
+<p>​    如果是H5开发，需要在公众号配置中添加H5地址。配置项目为“网页授权获取用户基本信息”；实例如下</p>
+<p><img src="/.com//P6.png" alt="P6.png"></p>
+<p><strong>3 、 获取用户基本信息</strong></p>
+<p>​        由于不能直接拿到用户openId,需要通过code获取用户信息。请求如下</p>
+<p>​        请求方式：GET</p>
+<p>​        URL: <a target="_blank" rel="noopener" href="https://api.weixin.qq.com/sns/userinfo?access_token=%25s&amp;openid=%25s&amp;lang=zh_CN">https://api.weixin.qq.com/sns/userinfo?access_token=%s&amp;openid=%s&amp;lang=zh_CN</a></p>
+<p>​        请求对象返回如下：</p>
+<p>​        </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserInfoResponse</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String openid;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String nickname;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Integer sex;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String province;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String city;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String country;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String headimgurl;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Integer errcode;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>4、特别提醒</strong></p>
+<p>​    接受微信相关事件需要自己写一个接口。返回参数有讲究。如果是自动回复就需要按照XML格式返回，如果不是回复文字信息，就需要返回“success”或者“”（空串）。</p>
+<h4 id="自动回复"><a href="#自动回复" class="headerlink" title="自动回复"></a>自动回复</h4><p>自动回复就是用户首次关注公众号后，发送欢迎语。处理逻辑如下</p>
+<p>1、如果收到的是event=subscribe的事件并且eventKey是空，就推送自动回复消息。</p>
+<p>2、 构造回复消息对象并返回。回复对象如下：</p>
+<p>​    </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Setter</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@ToString</span></span><br><span class="line"><span class="meta">@XmlRootElement(name=&quot;xml&quot;)</span></span><br><span class="line"><span class="meta">@XmlAccessorType(XmlAccessType.FIELD)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OutMsgEntity</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 发送方的账号</span></span><br><span class="line">    <span class="meta">@XmlElement(name=&quot;FromUserName&quot;)</span></span><br><span class="line">    <span class="keyword">protected</span> String FromUserName;</span><br><span class="line">    <span class="comment">// 接收方的账号(OpenID)</span></span><br><span class="line">    <span class="meta">@XmlElement(name=&quot;ToUserName&quot;)</span></span><br><span class="line">    <span class="keyword">protected</span> String ToUserName;</span><br><span class="line">    <span class="comment">// 消息创建时间</span></span><br><span class="line">    <span class="meta">@XmlElement(name=&quot;CreateTime&quot;)</span></span><br><span class="line">    <span class="keyword">protected</span> Long CreateTime;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 消息类型</span></span><br><span class="line"><span class="comment">     * text 文本消息</span></span><br><span class="line"><span class="comment">     * image 图片消息</span></span><br><span class="line"><span class="comment">     * voice 语音消息</span></span><br><span class="line"><span class="comment">     * video 视频消息</span></span><br><span class="line"><span class="comment">     * music 音乐消息</span></span><br><span class="line"><span class="comment">     * news 图文消息</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@XmlElement(name=&quot;MsgType&quot;)</span></span><br><span class="line">    <span class="keyword">protected</span> String MsgType;</span><br><span class="line">    <span class="comment">// 文本内容</span></span><br><span class="line">    <span class="meta">@XmlElement(name=&quot;Content&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String Content;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>入参的FromUserName是返回对象ToUserName，入参的ToUserName是返回对象的FromUserName。</p>
+</blockquote>
+<h4 id="带参数二维码"><a href="#带参数二维码" class="headerlink" title="带参数二维码"></a>带参数二维码</h4><p>目前有2种类型的二维码：</p>
+<p>1、临时二维码，是有过期时间的，最长可以设置为在二维码生成后的30天（即2592000秒）后过期，但能够生成较多数量。临时二维码主要用于帐号绑定等不要求二维码永久保存的业务场景</p>
+<p> 2、永久二维码，是无过期时间的，但数量较少（目前为最多10万个）。永久二维码主要用于适用于帐号绑定、用户来源统计等场景。</p>
+<p>用户扫描带场景值二维码时，推送以下两种事件：</p>
+<p>1） 如果用户还未关注公众号，则用户可以关注公众号，关注后微信会将带场景值关注事件(event=subscribe)推送给开发者。</p>
+<p>2）如果用户已经关注公众号，在用户扫描后会自动进入会话，会将带场景值扫描事件(event=SCAN)推送给开发者。</p>
+<p>获取带参数的二维码的过程包括两步，首先创建二维码ticket，然后凭借ticket到指定URL换取二维码。</p>
+<p><strong>创建二维码ticket</strong></p>
+<p>每次创建二维码ticket需要提供一个开发者自行设定的参数（scene_id），分别介绍临时二维码和永久二维码的创建二维码ticket过程。</p>
+<p>请求方式：POST</p>
+<p>URL : <a target="_blank" rel="noopener" href="https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=TOKEN">https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=TOKEN</a></p>
+<p><strong>请求body:</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="attr">&quot;action_name&quot;</span>: <span class="string">&quot;QR_LIMIT_STR_SCENE&quot;</span>,</span><br><span class="line">	<span class="attr">&quot;action_info&quot;</span>: &#123;</span><br><span class="line">		<span class="attr">&quot;scene&quot;</span>: &#123;</span><br><span class="line">			<span class="attr">&quot;scene_str&quot;</span>: <span class="string">&quot;test&quot;</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>参数说明</strong></p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>scene_str</td>
+<td>这里就是你自己业务设置的参数。</td>
+</tr>
+<tr>
+<td>action_name</td>
+<td>二维码类型，QR_SCENE为临时的整型参数值，QR_STR_SCENE为临时的字符串参数值，QR_LIMIT_SCENE为永久的整型参数值，QR_LIMIT_STR_SCENE为永久的字符串参数值；这里选择的是QR_LIMIT_STR_SCENE</td>
+</tr>
+<tr>
+<td>action_info</td>
+<td>二维码信息</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p><strong>返回样例：</strong> url就是二维码地址</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="attr">&quot;ticket&quot;</span>:<span class="string">&quot;gQH47joAAAAAAAAAASxodHRwOi8vd2VpeGluLnFxLmNvbS9xL2taZ2Z3TVRtNzJXV1Brb3ZhYmJJAAIEZ23sUwMEmm</span></span><br><span class="line"><span class="string">3sUw==&quot;</span>,<span class="attr">&quot;expire_seconds&quot;</span>:<span class="number">60</span>,<span class="attr">&quot;url&quot;</span>:<span class="string">&quot;http://weixin.qq.com/q/kZgfwMTm72WWPkovabbI&quot;</span>&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="模板消息推送"><a href="#模板消息推送" class="headerlink" title="模板消息推送"></a>模板消息推送</h4><p><a target="_blank" rel="noopener" href="https://developers.weixin.qq.com/doc/offiaccount/Message_Management/Template_Message_Interface.html">文档地址</a></p>
+<p>请求方式：POST</p>
+<p>URL: <a target="_blank" rel="noopener" href="https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN">https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN</a></p>
+<p>请求Body:</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">          <span class="attr">&quot;touser&quot;</span>:<span class="string">&quot;OPENID&quot;</span>,</span><br><span class="line">          <span class="attr">&quot;template_id&quot;</span>:<span class="string">&quot;ngqIpbwh8bUfcSsECmogfXcV14J0tQlEpBO27izEYtY&quot;</span>,</span><br><span class="line">          <span class="attr">&quot;url&quot;</span>:<span class="string">&quot;http://weixin.qq.com/download&quot;</span>,  </span><br><span class="line">          <span class="attr">&quot;miniprogram&quot;</span>:&#123;</span><br><span class="line">            <span class="attr">&quot;appid&quot;</span>:<span class="string">&quot;xiaochengxuappid12345&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;pagepath&quot;</span>:<span class="string">&quot;index?foo=bar&quot;</span></span><br><span class="line">          &#125;,          </span><br><span class="line">          <span class="attr">&quot;data&quot;</span>:&#123;</span><br><span class="line">                  <span class="attr">&quot;first&quot;</span>: &#123;</span><br><span class="line">                      <span class="attr">&quot;value&quot;</span>:<span class="string">&quot;恭喜你购买成功！&quot;</span>,</span><br><span class="line">                      <span class="attr">&quot;color&quot;</span>:<span class="string">&quot;#173177&quot;</span></span><br><span class="line">                  &#125;,</span><br><span class="line">                  <span class="attr">&quot;keyword1&quot;</span>:&#123;</span><br><span class="line">                      <span class="attr">&quot;value&quot;</span>:<span class="string">&quot;巧克力&quot;</span>,</span><br><span class="line">                      <span class="attr">&quot;color&quot;</span>:<span class="string">&quot;#173177&quot;</span></span><br><span class="line">                  &#125;,</span><br><span class="line">                  <span class="attr">&quot;keyword2&quot;</span>: &#123;</span><br><span class="line">                      <span class="attr">&quot;value&quot;</span>:<span class="string">&quot;39.8元&quot;</span>,</span><br><span class="line">                      <span class="attr">&quot;color&quot;</span>:<span class="string">&quot;#173177&quot;</span></span><br><span class="line">                  &#125;,</span><br><span class="line">                  <span class="attr">&quot;keyword3&quot;</span>: &#123;</span><br><span class="line">                      <span class="attr">&quot;value&quot;</span>:<span class="string">&quot;2014年9月22日&quot;</span>,</span><br><span class="line">                      <span class="attr">&quot;color&quot;</span>:<span class="string">&quot;#173177&quot;</span></span><br><span class="line">                  &#125;,</span><br><span class="line">                  <span class="attr">&quot;remark&quot;</span>:&#123;</span><br><span class="line">                      <span class="attr">&quot;value&quot;</span>:<span class="string">&quot;欢迎再次购买！&quot;</span>,</span><br><span class="line">                      <span class="attr">&quot;color&quot;</span>:<span class="string">&quot;#173177&quot;</span></span><br><span class="line">                  &#125;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>注意：first，keyword1，keyword2 这些都是替换参数，替换成你自己的业务参数。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>是否必填</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>touser</td>
+<td>是</td>
+<td>接收者openid</td>
+</tr>
+<tr>
+<td>template_id</td>
+<td>是</td>
+<td>模板ID(需要先配置好)</td>
+</tr>
+<tr>
+<td>url</td>
+<td>否</td>
+<td>模板跳转链接</td>
+</tr>
+<tr>
+<td>data</td>
+<td>是</td>
+<td>模板数据</td>
+</tr>
+</tbody></table>
+<p>测试公众号上是可以配置模板的。样例如下</p>
+<p><img src="/.com//P5.png" alt="P5.png"></p>
+<h3 id="正式公众号配置"><a href="#正式公众号配置" class="headerlink" title="正式公众号配置"></a>正式公众号配置</h3><p>当把微信功能开发好后，进入服务器配置时。如下截图</p>
+<p><img src="/.com//P7.png" alt="P7.png"></p>
+<p>当你启用配置时，弹框页面会提示你自定义菜单和自动回复失效。遇到这样的情况我们处理方法如下：</p>
+<p>​    1 、先截图自定义菜单，目的是保存样式（如果存在）。</p>
+<p>​    <img src="/.com//P8.png" alt="P8.png"></p>
+<p>​    2、 保存自动回复消息内容（如果存在）。</p>
+<p>​    3、 进入 微信公众平台接口调试工具<a target="_blank" rel="noopener" href="http://mp.weixin.qq.com/debug?token=1274810508&lang=zh_CN">页面</a></p>
+<p>​        3.1 首先获取accessToken,如果你能获取到，就不用再做如下请求。</p>
+<p><img src="/.com//P9.png" alt="P9.png"></p>
+<p>​        3.2  获取已经定义好的菜单列表。截图如下</p>
+<p><img src="/.com//P10.png" alt="P10.png"></p>
+<p>​        3.3  创建菜单 截图如下,将获取的菜单json修改下然后再作为body参数请求（目的就是还原之前的自定义菜单）</p>
+<p><img src="/.com//P11.png" alt="P11.png"></p>
+<p>   4、 自动回复需要再回调接口中返回。前面已经有说明</p>
+<p>菜单自定义功能详情说明<a target="_blank" rel="noopener" href="https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Creating_Custom-Defined_Menu.html">点击这里</a></p>
+<h4 id="H5配置"><a href="#H5配置" class="headerlink" title="H5配置"></a>H5配置</h4><p>如果是H5网页开发。还要把H5地址添加到公众号功能设置里面。详情参见截图。网页授权域名、JS接口安全域名 两项配置。</p>
+<p><img src="/.com//P12.png" alt="P12.png"></p>
+<h3 id="部分代码"><a href="#部分代码" class="headerlink" title="部分代码"></a>部分代码</h3><p>以下是webflux方式实现，与spring mvc稍有不同。由于需要返回字符串。所以自动回复只能放到 ServerHttpResponse返回出去。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">    * 微信回调入口</span></span><br><span class="line"><span class="comment">    *</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@param</span> entity</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">   <span class="meta">@RequestMapping(value = &quot;/callback&quot;, method = RequestMethod.POST, consumes = &#123;&quot;text/xml;charset=UTF-8&quot;&#125;, produces = &#123;&quot;text/xml;charset=UTF-8&quot;&#125;)</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> Mono&lt;String&gt; <span class="title">event</span><span class="params">(<span class="meta">@RequestBody</span> InMsgEntity entity, ServerWebExchange exchange)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">       log.warn(<span class="string">&quot;微信回调地址:&#123;&#125;&quot;</span>, entity.toString());</span><br><span class="line">       <span class="comment">// 首次订阅公众号 推送自动回复</span></span><br><span class="line">       <span class="keyword">if</span> (isSubscribleEvent(entity.getEvent()) &amp;&amp; StringUtils.isEmpty(entity.getEventKey())) &#123;</span><br><span class="line">           String replay = getReplay(entity);</span><br><span class="line">           <span class="comment">//返回参数构造，返回参数为xml格式</span></span><br><span class="line">           ServerHttpResponse response = exchange.getResponse();</span><br><span class="line">           DataBuffer buffer = response.bufferFactory().wrap(replay.getBytes(StandardCharsets.UTF_8));</span><br><span class="line">           response.getHeaders().setContentType(MediaType.TEXT_XML);</span><br><span class="line">           <span class="keyword">return</span> exchange.getResponse().writeWith(Mono.just(buffer)).thenReturn(<span class="string">&quot;&quot;</span>);</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">//这里是对应的业务消息处理</span></span><br><span class="line">       <span class="keyword">return</span> doEvent(entity).thenReturn(<span class="string">&quot;success&quot;</span>);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id><a href="#" class="headerlink" title></a></h3>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/10/13/ddd-overview/" rel="prev" title="DDD概览">
+      <i class="fa fa-chevron-left"></i> DDD概览
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/11/01/linux-tools/" rel="next" title="linux性能查看命令">
+      linux性能查看命令 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E5%85%AC%E4%BC%97%E5%8F%B7%E5%BC%80%E5%8F%91"><span class="nav-number">1.</span> <span class="nav-text">测试公众号开发</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B3%A8%E5%86%8C%E6%B5%8B%E8%AF%95%E5%85%AC%E4%BC%97%E5%8F%B7"><span class="nav-number">1.1.</span> <span class="nav-text">注册测试公众号</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E9%85%8D%E7%BD%AE%E4%BF%A1%E6%81%AF"><span class="nav-number">1.2.</span> <span class="nav-text">接口配置信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%9B%9E%E8%B0%83%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.3.</span> <span class="nav-text">创建回调服务</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%9A%E5%8A%A1%E5%BC%80%E5%8F%91"><span class="nav-number">2.</span> <span class="nav-text">业务开发</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%89%8D%E7%BD%AE%E6%9D%A1%E4%BB%B6"><span class="nav-number">2.1.</span> <span class="nav-text">前置条件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E5%9B%9E%E5%A4%8D"><span class="nav-number">2.2.</span> <span class="nav-text">自动回复</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%A6%E5%8F%82%E6%95%B0%E4%BA%8C%E7%BB%B4%E7%A0%81"><span class="nav-number">2.3.</span> <span class="nav-text">带参数二维码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E6%9D%BF%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81"><span class="nav-number">2.4.</span> <span class="nav-text">模板消息推送</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A3%E5%BC%8F%E5%85%AC%E4%BC%97%E5%8F%B7%E9%85%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">正式公众号配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#H5%E9%85%8D%E7%BD%AE"><span class="nav-number">3.1.</span> <span class="nav-text">H5配置</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%83%A8%E5%88%86%E4%BB%A3%E7%A0%81"><span class="nav-number">4.</span> <span class="nav-text">部分代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">5.</span> <span class="nav-text"></span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

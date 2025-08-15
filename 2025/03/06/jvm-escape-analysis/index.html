@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="逃逸分析是一种静态编译时分析技术，用于确定对象的作用域是否仅限于方法内部。简单来说，它帮助JVM确定一个对象是否可能“逃逸”出方法的局部作用域，或被其他线程访问。如果JVM判定对象不会逃逸出局部方法，则该对象便可进行特定的优化，例如栈上分配、标量替换以及消除不必要的同步操作。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM之逃逸分析">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/03/06/jvm-escape-analysis/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="逃逸分析是一种静态编译时分析技术，用于确定对象的作用域是否仅限于方法内部。简单来说，它帮助JVM确定一个对象是否可能“逃逸”出方法的局部作用域，或被其他线程访问。如果JVM判定对象不会逃逸出局部方法，则该对象便可进行特定的优化，例如栈上分配、标量替换以及消除不必要的同步操作。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-03-06T14:50:56.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.357Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/03/06/jvm-escape-analysis/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>JVM之逃逸分析 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/03/06/jvm-escape-analysis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JVM之逃逸分析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-03-06 22:50:56" itemprop="dateCreated datePublished" datetime="2025-03-06T22:50:56+08:00">2025-03-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>逃逸分析是一种静态编译时分析技术，用于确定对象的作用域是否仅限于方法内部。简单来说，它帮助JVM确定一个对象是否可能“逃逸”出方法的局部作用域，或被其他线程访问。如果JVM判定对象不会逃逸出局部方法，则该对象便可进行特定的优化，例如栈上分配、标量替换以及消除不必要的同步操作。</p>
+<span id="more"></span>
+
+<h3 id="为什么需要逃逸分析？"><a href="#为什么需要逃逸分析？" class="headerlink" title="为什么需要逃逸分析？"></a>为什么需要逃逸分析？</h3><p>Java以其强大的内存管理和自动垃圾回收(GC)机制著称，但这些便利也带来了额外开销。频繁的堆内存分配和垃圾回收动作，尤其是当对象生命周期极短时，会严重影响程序性能。通过逃逸分析，JVM能够识别出哪些对象不会逃离当前线程或者方法，从而对它们进行更高效的内存管理方式，从根本上减少内存分配和回收成本。</p>
+<h3 id="JVM逃逸分析的基本原理"><a href="#JVM逃逸分析的基本原理" class="headerlink" title="JVM逃逸分析的基本原理"></a>JVM逃逸分析的基本原理</h3><p>JVM执行Java代码大致经历以下几个阶段：</p>
+<ol>
+<li>加载字节码</li>
+<li>解释执行</li>
+<li>识别热点代码</li>
+<li>JIT编译优化</li>
+<li>生成机器码</li>
+</ol>
+<p>逃逸分析发生在第4阶段，即JIT编译优化过程中。HotSpot VM有两种JIT编译器：C1（客户端编译器）和C2（服务端编译器）。逃逸分析主要在C2编译器中实现。</p>
+<p>逃逸分析的原理可概括为以下几点：</p>
+<p><strong>对象逃逸的判断</strong>：如果对象在方法外部被引用，或被存储在其他对象中，它就被视为“逃逸对象”。否则，如果对象只在方法内部使用且未传递给外部调用，则可视为非逃逸对象。</p>
+<p><strong>逃逸分析的触发与执行</strong>：通常在即时编译阶段，HotSpot JVM的C2编译器会自动进行逃逸分析。分析主要在字节码层面进行，并结合上下文和控制流图精确判断对象逃逸情况。</p>
+<p><strong>三种核心优化手段</strong>：</p>
+<ul>
+<li><strong>栈上分配</strong>：如果一个对象不会逃逸，JVM可在栈而非堆上为它分配内存，生命周期随方法调用结束而快速释放，无需GC。</li>
+<li><strong>标量替换</strong>：非逃逸对象的属性直接分解成基本类型变量存储，避免完整对象的分配。</li>
+<li><strong>同步消除</strong>：对只被单个线程访问的对象移除锁机制（例如去掉无意义的<code>synchronized</code>）。</li>
+</ul>
+<h3 id="JVM逃逸分析的实战优化"><a href="#JVM逃逸分析的实战优化" class="headerlink" title="JVM逃逸分析的实战优化"></a>JVM逃逸分析的实战优化</h3><h4 id="1-栈上分配实战"><a href="#1-栈上分配实战" class="headerlink" title="1. 栈上分配实战"></a>1. 栈上分配实战</h4><p>举一个最简单的示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EscapeExample</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">       </span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10000000</span>; i++) &#123;</span><br><span class="line">            createObject();</span><br><span class="line">        &#125;</span><br><span class="line">      </span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">   <span class="comment">// 对象不会逃逸</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">createObject</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Point p = <span class="keyword">new</span> Point(<span class="number">1</span>, <span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如上代码，<code>Point</code>对象生命周期仅限于<code>createObject()</code>方法。经过逃逸分析后，JVM很可能会直接在栈上分配该对象，极大提高运行速度，减少垃圾回收次数。</p>
+<h4 id="2-标量替换实例"><a href="#2-标量替换实例" class="headerlink" title="2. 标量替换实例"></a>2. 标量替换实例</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">scalarReplaceExample</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> x = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1000000</span>; i++) &#123;</span><br><span class="line">        Point p = <span class="keyword">new</span> Point(<span class="number">1</span>, <span class="number">2</span>);</span><br><span class="line">        x += p.x + p.y;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上述示例中，由于<code>Point</code>对象不会逃逸，JVM可将其直接分解为两个int变量，完全无需进行对象创建与分配。</p>
+<h4 id="3-同步消除实例"><a href="#3-同步消除实例" class="headerlink" title="3. 同步消除实例"></a>3. 同步消除实例</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">syncMethod</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="comment">// 仅局部使用的锁对象</span></span><br><span class="line">    <span class="keyword">synchronized</span> (<span class="keyword">new</span> Object()) &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;hello world&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>因为对象仅在当前线程方法内部使用，逃逸分析可以轻松识别并消除同步开销，进一步提升执行效率。</p>
+<h3 id="逃逸分析的局限性和误区"><a href="#逃逸分析的局限性和误区" class="headerlink" title="逃逸分析的局限性和误区"></a>逃逸分析的局限性和误区</h3><p>尽管逃逸分析强大，但它并非万能。尤其注意以下几点：</p>
+<ul>
+<li>JVM进行逃逸分析的过程存在一定开销，仅会在热点代码路径进行。</li>
+<li>存在对象间复杂关系或动态调用场景时，逃逸分析可能无法彻底识别，无法实现优化。</li>
+<li>编写Java代码时，不应过度依赖逃逸分析自动优化，应尽量遵循最佳实践（如对象池、缓存等）主动减少对象创建。</li>
+</ul>
+<h3 id="JVM参数与逃逸分析调优"><a href="#JVM参数与逃逸分析调优" class="headerlink" title="JVM参数与逃逸分析调优"></a>JVM参数与逃逸分析调优</h3><p>通过以下JVM参数可以显式控制逃逸分析行为：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-server -XX:+DoEscapeAnalysis  # 启用逃逸分析</span><br><span class="line">-XX:+PrintEscapeAnalysis      # 打印逃逸分析细节</span><br><span class="line">-XX:+EliminateAllocations     # 启用标量替换</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/03/05/huidurenzhi/" rel="prev" title="灰度认知和黑白决策">
+      <i class="fa fa-chevron-left"></i> 灰度认知和黑白决策
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/03/06/jvm-volatile/" rel="next" title="JVM之Volatile">
+      JVM之Volatile <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">为什么需要逃逸分析？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">JVM逃逸分析的基本原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90%E7%9A%84%E5%AE%9E%E6%88%98%E4%BC%98%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">JVM逃逸分析的实战优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E6%A0%88%E4%B8%8A%E5%88%86%E9%85%8D%E5%AE%9E%E6%88%98"><span class="nav-number">3.1.</span> <span class="nav-text">1. 栈上分配实战</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E6%A0%87%E9%87%8F%E6%9B%BF%E6%8D%A2%E5%AE%9E%E4%BE%8B"><span class="nav-number">3.2.</span> <span class="nav-text">2. 标量替换实例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%90%8C%E6%AD%A5%E6%B6%88%E9%99%A4%E5%AE%9E%E4%BE%8B"><span class="nav-number">3.3.</span> <span class="nav-text">3. 同步消除实例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90%E7%9A%84%E5%B1%80%E9%99%90%E6%80%A7%E5%92%8C%E8%AF%AF%E5%8C%BA"><span class="nav-number">4.</span> <span class="nav-text">逃逸分析的局限性和误区</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM%E5%8F%82%E6%95%B0%E4%B8%8E%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90%E8%B0%83%E4%BC%98"><span class="nav-number">5.</span> <span class="nav-text">JVM参数与逃逸分析调优</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

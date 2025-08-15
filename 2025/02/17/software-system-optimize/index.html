@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="软件系统的指标以及监控方法。 CPU 进程与线程 进程调度 CPU调度 中断系统 CPU缓存 NUMA   性能指标 平均负载 用户CPU 系统CPU IOWAIT CPU使用率 软中断 硬中断 负载CPU 客户CPU   上下文切换 自愿上下文切换 非自愿上下文切换   CPU缓存命中率 top&#x2F;ps vmstat mpstat sar   性能剖析 strace perf execsnoop">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件系统优化手段">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/02/17/software-system-optimize/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="软件系统的指标以及监控方法。 CPU 进程与线程 进程调度 CPU调度 中断系统 CPU缓存 NUMA   性能指标 平均负载 用户CPU 系统CPU IOWAIT CPU使用率 软中断 硬中断 负载CPU 客户CPU   上下文切换 自愿上下文切换 非自愿上下文切换   CPU缓存命中率 top&#x2F;ps vmstat mpstat sar   性能剖析 strace perf execsnoop">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-02-17T02:56:47.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.376Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/02/17/software-system-optimize/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件系统优化手段 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/02/17/software-system-optimize/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件系统优化手段
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-02-17 10:56:47" itemprop="dateCreated datePublished" datetime="2025-02-17T10:56:47+08:00">2025-02-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>软件系统的指标以及监控方法。</p>
+<h4 id="CPU"><a href="#CPU" class="headerlink" title="CPU"></a>CPU</h4><ul>
+<li>进程与线程<ul>
+<li>进程调度</li>
+<li>CPU调度</li>
+<li>中断系统</li>
+<li>CPU缓存</li>
+<li>NUMA</li>
+</ul>
+</li>
+<li>性能指标<ul>
+<li>平均负载</li>
+<li>用户CPU</li>
+<li>系统CPU</li>
+<li>IOWAIT</li>
+<li>CPU使用率</li>
+<li>软中断</li>
+<li>硬中断</li>
+<li>负载CPU</li>
+<li>客户CPU</li>
+</ul>
+</li>
+<li>上下文切换<ul>
+<li>自愿上下文切换</li>
+<li>非自愿上下文切换</li>
+</ul>
+</li>
+<li>CPU缓存命中率<ul>
+<li>top/ps</li>
+<li>vmstat</li>
+<li>mpstat</li>
+<li>sar</li>
+</ul>
+</li>
+<li>性能剖析<ul>
+<li>strace</li>
+<li>perf</li>
+<li>execsnoop</li>
+<li>proc文件系统</li>
+<li>CPU绑定</li>
+<li>进程CPU资源限制</li>
+<li>进程优先级调整</li>
+<li>中断负载均衡</li>
+<li>CPU缓存</li>
+<li>NUMA优化</li>
+</ul>
+</li>
+</ul>
+<h4 id="内存"><a href="#内存" class="headerlink" title="内存"></a>内存</h4><ul>
+<li>内存管理<ul>
+<li>地址空间</li>
+<li>虚拟内存</li>
+<li>内存分配与回收</li>
+<li>缓存与缓冲区</li>
+<li>SWAP</li>
+<li>系统内存使用量</li>
+<li>进程内存使用量</li>
+<li>缓存与缓冲区命中率</li>
+<li>SWAP使用量</li>
+</ul>
+</li>
+<li>性能指标<ul>
+<li>free</li>
+<li>top</li>
+<li>sar</li>
+<li>vmstat</li>
+<li>cachestat</li>
+<li>cachetop</li>
+<li>memleak</li>
+<li>proc文件系统</li>
+<li>利用缓存与缓冲区</li>
+<li>减少SWAP使用</li>
+<li>减少动态内存分配</li>
+<li>优化NUMA</li>
+<li>限制进程内存资源</li>
+<li>使用HugePage</li>
+</ul>
+</li>
+</ul>
+<h4 id="文件系统"><a href="#文件系统" class="headerlink" title="文件系统"></a>文件系统</h4><ul>
+<li>虚拟文件系统</li>
+<li>文件系统IO栈</li>
+<li>文件系统缓存</li>
+<li>文件系统种类</li>
+<li>性能指标<ul>
+<li>吞吐量</li>
+<li>IOPS</li>
+<li>缓存命中率</li>
+<li>df</li>
+<li>strace</li>
+<li>vmstat</li>
+<li>sar</li>
+<li>perf</li>
+<li>proc文件系统</li>
+<li>文件系统类型</li>
+<li>利用文件系统缓存</li>
+<li>I/O隔离</li>
+</ul>
+</li>
+<li>调优方法</li>
+</ul>
+<h4 id="Linux内核"><a href="#Linux内核" class="headerlink" title="Linux内核"></a>Linux内核</h4><ul>
+<li>内核态<ul>
+<li>DPF</li>
+<li>perf</li>
+<li>proc文件系统</li>
+<li>内核选择</li>
+<li>内核调优</li>
+</ul>
+</li>
+<li>内核管理</li>
+</ul>
+<h4 id="应用程序"><a href="#应用程序" class="headerlink" title="应用程序"></a>应用程序</h4><ul>
+<li>性能剖析<ul>
+<li>吞吐量</li>
+<li>响应时间</li>
+<li>资源利用率</li>
+</ul>
+</li>
+<li>性能指标<ul>
+<li>堆栈率</li>
+<li>内存泄漏</li>
+<li>线程分析</li>
+<li>I/O剖析</li>
+<li>系统调用</li>
+<li>热点函数</li>
+<li>动态追踪</li>
+</ul>
+</li>
+<li>性能调优<ul>
+<li>APM</li>
+<li>逻辑优化</li>
+<li>编译语言</li>
+<li>算法调优</li>
+<li>多线程I/O</li>
+<li>调优方法</li>
+</ul>
+</li>
+</ul>
+<h4 id="架构设计"><a href="#架构设计" class="headerlink" title="架构设计"></a>架构设计</h4><ul>
+<li>异步操作与事件驱动</li>
+<li>处理回收</li>
+<li>缓存</li>
+<li>缓冲区</li>
+<li>元余数据</li>
+<li>压缩编码</li>
+<li>页面交换</li>
+<li>多线程</li>
+<li>多进程</li>
+<li>并行处理</li>
+<li>分布式</li>
+<li>异步I/O</li>
+<li>消息队列</li>
+<li>事件处理</li>
+</ul>
+<h4 id="性能监控"><a href="#性能监控" class="headerlink" title="性能监控"></a>性能监控</h4><ul>
+<li>历史趋势分析</li>
+<li>性能模型构建</li>
+<li>未来趋势预测</li>
+<li>服务调用链路跟踪</li>
+<li>服务调用性能分析</li>
+<li>服务调用指标扩展</li>
+<li>趋势图</li>
+<li>热点图</li>
+<li>数据可视化</li>
+<li>视图</li>
+<li>视图选择</li>
+<li>报警策略</li>
+<li>报警通知</li>
+<li>通知渠道</li>
+</ul>
+<h4 id="性能测试"><a href="#性能测试" class="headerlink" title="性能测试"></a>性能测试</h4><ul>
+<li>系统资源需求</li>
+<li>应用程序需求</li>
+<li>合理性假设</li>
+<li>生产环境模拟</li>
+<li>生产负载模拟</li>
+<li>基准测试</li>
+<li>负载测试</li>
+<li>压力测试</li>
+<li>应用性能测试</li>
+<li>数据库性能测试</li>
+<li>结果分析</li>
+<li>系统资源瓶颈</li>
+</ul>
+<h4 id="网络"><a href="#网络" class="headerlink" title="网络"></a>网络</h4><ul>
+<li>网络原理<ul>
+<li>TCP/IP协议</li>
+<li>网络收发流程</li>
+<li>路由选择</li>
+<li>网络QoS</li>
+<li>网络防火墙</li>
+<li>C10K与C100K</li>
+</ul>
+</li>
+<li>性能指标<ul>
+<li>BPS</li>
+<li>PPS</li>
+<li>QPS</li>
+<li>RPS</li>
+<li>延迟</li>
+<li>丢包</li>
+<li>TCP重传</li>
+<li>ethtool</li>
+<li>sar</li>
+<li>ping</li>
+<li>netstat/ss</li>
+<li>ifstat</li>
+<li>nload</li>
+<li>tcpdump</li>
+<li>wireshark</li>
+<li>iptables</li>
+<li>traceroute</li>
+<li>geotrack</li>
+<li>perf</li>
+</ul>
+</li>
+<li>调优方法<ul>
+<li>MTU</li>
+<li>队列长度</li>
+<li>错误聚合</li>
+<li>HTTP</li>
+<li>TCP</li>
+<li>Overlay</li>
+<li>流量控制</li>
+<li>QoS</li>
+<li>NAT优化</li>
+<li>功能卸载</li>
+<li>负载均衡</li>
+<li>DPDK</li>
+</ul>
+</li>
+</ul>
+<h4 id="磁盘IO"><a href="#磁盘IO" class="headerlink" title="磁盘IO"></a>磁盘IO</h4><ul>
+<li>磁盘原理<ul>
+<li>磁盘类型</li>
+<li>磁盘接口</li>
+<li>磁盘I/O栈</li>
+</ul>
+</li>
+<li>性能指标<ul>
+<li>IOPS</li>
+<li>吞吐量</li>
+<li>IOWAIT</li>
+<li>datstat</li>
+<li>sar</li>
+<li>iostat</li>
+<li>pidstat</li>
+</ul>
+</li>
+<li>性能剖析<ul>
+<li>iotop</li>
+<li>blktrace</li>
+<li>fio</li>
+<li>perf</li>
+</ul>
+</li>
+<li>调优方法<ul>
+<li>系统调用</li>
+<li>I/O资源控制</li>
+<li>充分利用缓存</li>
+<li>RAID</li>
+<li>I/O调度</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/02/13/Write-Skew/" rel="prev" title="什么是Write Skew（写偏差）">
+      <i class="fa fa-chevron-left"></i> 什么是Write Skew（写偏差）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/02/18/software-arch-prinpl/" rel="next" title="软件架构原则">
+      软件架构原则 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#CPU"><span class="nav-number">1.</span> <span class="nav-text">CPU</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AD%98"><span class="nav-number">2.</span> <span class="nav-text">内存</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="nav-number">3.</span> <span class="nav-text">文件系统</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Linux%E5%86%85%E6%A0%B8"><span class="nav-number">4.</span> <span class="nav-text">Linux内核</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F"><span class="nav-number">5.</span> <span class="nav-text">应用程序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="nav-number">6.</span> <span class="nav-text">架构设计</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7"><span class="nav-number">7.</span> <span class="nav-text">性能监控</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95"><span class="nav-number">8.</span> <span class="nav-text">性能测试</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C"><span class="nav-number">9.</span> <span class="nav-text">网络</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A3%81%E7%9B%98IO"><span class="nav-number">10.</span> <span class="nav-text">磁盘IO</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

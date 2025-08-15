@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Apache Kafka 基础介绍">
+<meta property="og:type" content="article">
+<meta property="og:title" content="主流消息队列技术调研">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/03/19/mq-design/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="Apache Kafka 基础介绍">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-03-19T11:30:24.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.365Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="MQ">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/03/19/mq-design/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>主流消息队列技术调研 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/03/19/mq-design/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          主流消息队列技术调研
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-03-19 19:30:24" itemprop="dateCreated datePublished" datetime="2025-03-19T19:30:24+08:00">2025-03-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MQ/" itemprop="url" rel="index"><span itemprop="name">MQ</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Apache Kafka 基础介绍</p>
+<span id="more"></span>
+
+<h2 id="1-主流消息队列技术概述"><a href="#1-主流消息队列技术概述" class="headerlink" title="1. 主流消息队列技术概述"></a>1. 主流消息队列技术概述</h2><h3 id="1-1-介绍消息队列的重要性与应用场景"><a href="#1-1-介绍消息队列的重要性与应用场景" class="headerlink" title="1.1 介绍消息队列的重要性与应用场景"></a>1.1 介绍消息队列的重要性与应用场景</h3><p>在现代分布式系统架构中，消息队列扮演着至关重要的角色。它们不仅是实现不同服务之间异步通信的关键基础设施，更是构建高可用性、可伸缩性和弹性的应用程序的基石。消息队列通过在生产者和消费者之间引入一个中间层，实现了服务之间的解耦，使得各个服务可以独立地进行开发、部署和扩展 1。这种松耦合的特性极大地提高了系统的灵活性和可维护性。</p>
+<p>消息队列的应用场景非常广泛。<strong>异步通信</strong>是其最基本的功能之一。例如，在一个电子商务系统中，用户下单后，订单服务可以将订单信息发送到消息队列，然后由库存服务、支付服务、物流服务等异步地从队列中获取订单信息并进行处理，而无需订单服务等待所有下游服务的响应 1. 这种方式显著提升了用户体验，因为用户无需长时间等待所有业务流程完成。</p>
+<p><strong>解耦</strong>是消息队列的另一个核心价值。通过消息队列，服务之间不再需要直接依赖彼此的接口和状态。生产者服务只需要将消息发送到队列，而消费者服务则独立地从队列中消费消息。这种模式降低了服务之间的耦合度，使得修改或替换某个服务时，不会影响到其他服务 1.</p>
+<p><strong>流量削峰</strong>是消息队列在应对高并发场景下的重要作用。当系统在短时间内接收到大量请求时，消息队列可以充当一个缓冲区，将请求暂时存储起来，然后由消费者服务按照其处理能力逐步地从队列中取出请求进行处理. 这种方式可以有效地防止后端服务因突发流量过载而崩溃，保证系统的稳定性。</p>
+<p><strong>日志聚合</strong>是消息队列在监控和分析领域的一个常见应用。分布式系统中的各个服务可以将其产生的日志信息发送到同一个消息队列，然后由专门的日志处理服务从队列中读取并进行聚合、分析和存储 5. 这种集中式的日志管理方式方便了问题的排查和系统的监控。</p>
+<p><strong>事件驱动架构</strong>是近年来兴起的一种架构模式，消息队列在其中扮演着核心角色。在事件驱动架构中，系统中的各个服务通过发布和订阅事件进行通信。当某个服务发生状态变化时，它会发布一个事件到消息队列，而其他对该事件感兴趣的服务则会订阅该队列并接收事件进行相应的处理 1. 这种模式使得系统具有高度的灵活性和实时性，能够快速响应业务变化。</p>
+<p>除了上述场景，消息队列还广泛应用于实时数据处理、运营指标监控、数据集成等领域. 它们已经成为构建现代、可扩展、可靠分布式系统的关键组成部分。</p>
+<h3 id="1-2-主流消息队列技术概览"><a href="#1-2-主流消息队列技术概览" class="headerlink" title="1.2 主流消息队列技术概览"></a>1.2 主流消息队列技术概览</h3><p>当前，市场上存在多种主流的消息队列技术，每种技术都有其独特的特点、优势和适用场景。一些广泛使用的消息队列技术包括：</p>
+<ul>
+<li><strong>Apache Kafka:</strong> 最初由 LinkedIn 开发，后贡献给 Apache 基金会，是一个分布式的流处理平台。Kafka 以其高吞吐量、低延迟和可持久化存储的特性而闻名，特别适合处理大规模的实时数据流 1.</li>
+<li><strong>RabbitMQ:</strong> 一个开源的消息代理软件，实现了高级消息队列协议 (AMQP)。RabbitMQ 以其可靠性、灵活性和易用性而著称，支持多种消息传递模式，适用于各种复杂的路由场景 5.</li>
+<li><strong>Apache ActiveMQ:</strong> 另一个流行的开源消息代理，支持多种协议，包括 AMQP、MQTT、OpenWire 等。ActiveMQ 具有成熟的社区和广泛的应用，适用于传统的企业级消息传递场景。</li>
+<li><strong>Amazon SQS (Simple Queue Service):</strong> 亚马逊云提供的一种完全托管的消息队列服务。SQS 具有高可用性、高可靠性和可伸缩性，用户无需管理底层的基础设施，按需付费。</li>
+<li><strong>Google Cloud Pub/Sub:</strong> 谷歌云提供的全球性的、实时的消息传递服务。Pub/Sub 具有高吞吐量和低延迟，支持发布/订阅模式，适用于构建大规模的事件驱动应用。</li>
+</ul>
+<p>这些消息队列技术在架构设计、核心功能、特性以及适用场景等方面存在差异。例如，Kafka 更侧重于高吞吐量的数据流处理和持久化存储，而 RabbitMQ 则在消息的可靠性和灵活的路由方面更具优势。在选择合适的消息队列技术时，需要根据具体的业务需求、系统架构和性能要求进行综合评估。本报告将重点对这些主流消息队列技术的架构设计进行深入的调研和分析，特别是针对 Apache Kafka 进行详细的剖析。</p>
+<h2 id="2-Apache-Kafka-架构设计"><a href="#2-Apache-Kafka-架构设计" class="headerlink" title="2. Apache Kafka 架构设计"></a>2. Apache Kafka 架构设计</h2><p>Apache Kafka 的架构设计旨在构建一个高吞吐量、低延迟、可伸缩且具备容错能力的数据流平台 1. 其核心架构由多个相互协作的组件构成，共同实现了 Kafka 的强大功能。</p>
+<h3 id="2-1-核心架构组件"><a href="#2-1-核心架构组件" class="headerlink" title="2.1 核心架构组件"></a>2.1 核心架构组件</h3><p>Kafka 的核心架构组件包括 Broker、Topic、Partition、Offset、Producer、Consumer 以及用于元数据管理的 ZooKeeper（在传统架构中）或 KRaft（在较新版本中）。</p>
+<h4 id="2-1-1-Broker-代理"><a href="#2-1-1-Broker-代理" class="headerlink" title="2.1.1 Broker (代理)"></a>2.1.1 Broker (代理)</h4><p>Broker 是 Kafka 集群中的基本服务单元，本质上是一个 Kafka 服务器实例 . 它的主要作用是接收生产者发送的消息，将这些消息存储在磁盘上，并响应消费者的读取请求，将存储的消息发送给消费者 . 一个 Kafka 集群通常由一个或多个 Broker 组成，这些 Broker 协同工作，共同管理集群中的所有 Topic 和 Partition . 每个 Broker 在集群中通过唯一的 ID 进行标识 . Broker 负责处理消息的存储和检索，确保了分布式数据的管理 1 随着业务需求的增长，可以通过简单地增加 Broker 的数量来扩展 Kafka 集群的存储和处理能力 .</p>
+<h4 id="2-1-2-Topic-主题"><a href="#2-1-2-Topic-主题" class="headerlink" title="2.1.2 Topic (主题)"></a>2.1.2 Topic (主题)</h4><p>Topic 是 Kafka 中消息的逻辑分类，可以将其类比于数据库中的表或者文件系统中的文件夹 . 生产者将特定类型的消息发布到相应的 Topic 中，而消费者则订阅感兴趣的 Topic，从而接收并处理这些消息 . 一个 Kafka 集群可以创建多个 Topic，用于组织不同类型的消息流 . Topic 的名称在整个 Kafka 集群中是唯一的 .</p>
+<h4 id="2-1-3-Partition-分区"><a href="#2-1-3-Partition-分区" class="headerlink" title="2.1.3 Partition (分区)"></a>2.1.3 Partition (分区)</h4><p>为了实现高吞吐量和可伸缩性，Kafka 将每个 Topic 分割成一个或多个有序的日志序列，这些序列被称为 Partition . 每个 Partition 都是一个独立且有序的消息队列，可以存储在 Kafka 集群中的不同 Broker 上 . 一个 Topic 可以包含多个 Partition，这使得 Kafka 能够将数据分散存储在多个 Broker 上，从而实现水平扩展 . 值得注意的是，每个 Partition 内部的消息是严格有序的，按照它们被生产出来的顺序进行存储和传递 2. 然而，对于一个 Topic 的多个 Partition 来说，它们之间的消息顺序是没有保证的 </p>
+<h4 id="2-1-4-Offset-偏移量"><a href="#2-1-4-Offset-偏移量" class="headerlink" title="2.1.4 Offset (偏移量)"></a>2.1.4 Offset (偏移量)</h4><p>Offset 是 Partition 中每条消息的唯一标识，它是一个自增的整数，表示消息在 Partition 中的位置 . Offset 在同一个 Partition 内部是唯一的且顺序递增的 . 消费者使用 Offset 来跟踪它们在每个 Partition 中已经读取到的位置。通过记录和管理 Offset，Kafka 实现了消息的可靠传递和消费 。 消费者可以根据需要重置 Offset，从而实现消息的重新消费 .</p>
+<h4 id="2-1-5-Producer-生产者"><a href="#2-1-5-Producer-生产者" class="headerlink" title="2.1.5 Producer (生产者)"></a>2.1.5 Producer (生产者)</h4><p>Producer 是负责将应用程序产生的数据写入 Kafka 的客户端应用程序 . 当 Producer 发送一条消息到某个 Topic 时，它可以选择将消息写入哪个 Partition。通常情况下，Producer 可以基于消息的 Key 使用特定的分区策略来决定消息应该发送到哪个 Partition . 如果没有指定 Key，Producer 可以使用轮询等策略将消息均匀地分布到不同的 Partition 上 . Producer 的配置选项允许开发者控制消息的可靠性和性能，例如，可以通过配置确认机制来保证消息被成功写入 Broker .</p>
+<h4 id="2-1-6-Consumer-消费者"><a href="#2-1-6-Consumer-消费者" class="headerlink" title="2.1.6 Consumer (消费者)"></a>2.1.6 Consumer (消费者)</h4><p>Consumer 是负责从 Kafka 的 Topic 读取并处理消息的客户端应用程序 1. 为了实现可伸缩性和并行处理，Consumer 通常会组成一个 Consumer Group . Consumer Group 中的多个 Consumer 实例共同消费一个或多个 Topic 的消息，每个 Partition 只会被一个 Consumer Group 中的一个 Consumer 实例消费 2. Kafka 会自动地将 Topic 的 Partition 分配给 Consumer Group 中的 Consumer 实例，并在 Consumer 实例加入或离开群组时进行重新平衡，以确保负载均衡 .</p>
+<h4 id="2-1-7-ZooKeeper-KRaft-Kafka-Raft"><a href="#2-1-7-ZooKeeper-KRaft-Kafka-Raft" class="headerlink" title="2.1.7 ZooKeeper  / KRaft (Kafka Raft)"></a>2.1.7 ZooKeeper  / KRaft (Kafka Raft)</h4><p>在传统的 Kafka 架构中，ZooKeeper 是一个独立的分布式协调服务，Kafka 依赖它来管理 Broker 的配置信息，进行集群的协调工作，例如 Controller Broker 的选举、Topic 和 Partition 元数据的存储和管理等 . 然而，为了简化架构，提高可伸缩性和可维护性，Kafka 在较新的版本中引入了一种名为 KRaft (Kafka Raft) 的新的元数据管理方式. KRaft 旨在取代 ZooKeeper，将元数据管理的功能集成到 Kafka Broker 内部 . 在 KRaft 模式下，一部分 Kafka Broker 会被指定为 Controller 节点，它们通过 Raft 一致性协议来管理集群的元数据 . 这种方式减少了对外部系统的依赖，简化了部署和运维 .</p>
+<p>以下表格对比了 ZooKeeper 和 KRaft 两种元数据管理方式的主要特点：</p>
+<table>
+<thead>
+<tr>
+<th><strong>特性</strong></th>
+<th><strong>ZooKeeper</strong></th>
+<th><strong>KRaft</strong></th>
+<th><strong>优势</strong></th>
+<th><strong>劣势</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>依赖</strong></td>
+<td>外部依赖</td>
+<td>内部集成</td>
+<td>架构简单，减少外部依赖</td>
+<td>迁移成本，社区成熟度</td>
+</tr>
+<tr>
+<td><strong>一致性协议</strong></td>
+<td>ZAB</td>
+<td>Raft</td>
+<td>更强的事务性保证</td>
+<td>协议相对较新</td>
+</tr>
+<tr>
+<td><strong>部署</strong></td>
+<td>需要独立部署和管理</td>
+<td>与 Kafka Broker 一起部署</td>
+<td>简化部署和管理</td>
+<td>对现有系统有较大改动</td>
+</tr>
+<tr>
+<td><strong>可伸缩性</strong></td>
+<td>可能成为大规模集群的瓶颈</td>
+<td>理论上可以支持更大的集群</td>
+<td>提高元数据管理的伸缩性</td>
+<td>尚需大规模生产环境验证</td>
+</tr>
+<tr>
+<td><strong>性能</strong></td>
+<td>在高并发场景下可能存在延迟</td>
+<td>旨在提高元数据管理的性能</td>
+<td>更高效的元数据传播</td>
+<td>性能优化仍在进行中</td>
+</tr>
+</tbody></table>
+<h3 id="2-2-元数据管理-Metadata-Management-ZooKeeper-and-KRaft"><a href="#2-2-元数据管理-Metadata-Management-ZooKeeper-and-KRaft" class="headerlink" title="2.2 元数据管理 (Metadata Management: ZooKeeper and KRaft)"></a>2.2 元数据管理 (Metadata Management: ZooKeeper and KRaft)</h3><p>元数据管理是 Kafka 集群正常运行的关键。它涉及到集群中所有 Broker、Topic、Partition 以及 Consumer Group 的状态和配置信息的维护。Kafka 使用 ZooKeeper（在传统模式下）或 KRaft（在新模式下）来负责这项重要的任务.</p>
+<h4 id="2-2-1-ZooKeeper-模式下的元数据管理"><a href="#2-2-1-ZooKeeper-模式下的元数据管理" class="headerlink" title="2.2.1 ZooKeeper 模式下的元数据管理"></a>2.2.1 ZooKeeper 模式下的元数据管理</h4><p>在 ZooKeeper 模式下，Kafka 集群中的每个 Broker 在启动时都会将自己的信息（例如 Broker ID、IP 地址、端口号等）注册到 ZooKeeper 中，并定期发送心跳来维持其在线状态 . ZooKeeper 负责监控这些 Broker 的状态，并在 Broker 发生故障时通知 Kafka Controller .</p>
+<p>Controller Broker 是 Kafka 集群中负责管理和协调其他 Broker 的特殊 Broker . 在 ZooKeeper 的帮助下，Kafka 集群会选举出一个 Broker 作为 <strong>Active Controller</strong>，负责处理集群范围内的管理任务，例如 Partition 的 Leader 选举、Topic 的创建和删除、Broker 的加入和离开等 . 当 Active Controller 发生故障时，ZooKeeper 会触发新的 Controller 选举，从剩余的 Broker 中选出一个新的 Active Controller .</p>
+<p>Topic 和 Partition 的元数据信息，例如 Topic 的名称、Partition 的数量、每个 Partition 的 Leader Broker 是哪个、以及 Follower Broker 的列表等，都存储在 ZooKeeper 中 . 当 Producer 需要向某个 Topic 发送消息时，或者 Consumer 需要从某个 Topic 读取消息时，它们会先从 ZooKeeper 获取相关的元数据信息，然后与相应的 Leader Broker 进行通信 .</p>
+<p>虽然 ZooKeeper 在 Kafka 的早期版本中扮演了重要的角色，但随着 Kafka 集群规模的不断扩大，ZooKeeper 逐渐成为性能瓶颈和运维复杂性的来源 .</p>
+<h4 id="2-2-2-KRaft-模式下的元数据管理"><a href="#2-2-2-KRaft-模式下的元数据管理" class="headerlink" title="2.2.2 KRaft 模式下的元数据管理"></a>2.2.2 KRaft 模式下的元数据管理</h4><p>为了解决 ZooKeeper 带来的问题，Kafka 引入了 KRaft 模式. KRaft 基于 Raft 一致性协议，将元数据管理的功能直接集成到 Kafka Broker 内部  在 KRaft 模式下，一部分 Broker 被配置为 Controller 节点，它们共同组成一个 Raft 仲裁组，负责管理集群的元数据日志 45. Raft 协议保证了元数据在多个 Controller 节点之间的一致性和可靠性 .</p>
+<p>在 KRaft 集群中，会选举出一个 Leader Controller，负责处理所有的元数据更新请求，并将这些更新复制到 Follower Controller 节点上 . 其他 Broker 节点则作为普通的 Broker，负责处理消息的读写请求，并从 Controller 节点获取最新的元数据信息 .</p>
+<p>KRaft 模式带来了诸多优势。首先，它简化了 Kafka 的架构，不再需要独立部署和管理 ZooKeeper 集群 . 其次，KRaft 旨在提高元数据管理的性能和可伸缩性，可以支持更大规模的 Kafka 集群 . 此外，KRaft 还提供了更强的事务性保证和更高效的元数据传播机制. 为了防止元数据日志无限增长，KRaft 引入了元数据快照（Metadata Snapshots）机制，Controller 和 Broker 会定期将内存中的元数据缓存保存到磁盘文件中.</p>
+<h3 id="2-3-消息模型-Message-Model"><a href="#2-3-消息模型-Message-Model" class="headerlink" title="2.3 消息模型 (Message Model)"></a>2.3 消息模型 (Message Model)</h3><p>Kafka 的消息模型定义了在 Kafka 集群中传输和存储数据的基本结构。理解这个模型对于正确地使用和配置 Kafka 至关重要.</p>
+<h4 id="2-3-1-Event-事件-Record-记录"><a href="#2-3-1-Event-事件-Record-记录" class="headerlink" title="2.3.1 Event (事件) / Record (记录)"></a>2.3.1 Event (事件) / Record (记录)</h4><p>在 Kafka 中，Event（或称为 Record）是消息流中的基本数据单元 2. 每个 Event 都包含了关于某个特定事件发生的信息，例如用户行为、系统状态变化、业务交易等 .</p>
+<h4 id="2-3-2-Key-键"><a href="#2-3-2-Key-键" class="headerlink" title="2.3.2 Key (键)"></a>2.3.2 Key (键)</h4><p>Key 是 Event 的一个可选组成部分，通常用于确定消息应该被写入 Topic 的哪个 Partition 2. Kafka 使用 Key 对其进行哈希，然后根据哈希值将消息分配到特定的 Partition 20. 这样做的一个重要目的是保证具有相同 Key 的所有消息都会被发送到同一个 Partition 中，从而维护了这些相关消息的顺序 2. 如果 Producer 在发送消息时没有指定 Key，Kafka 通常会使用轮询的方式将消息均匀地分布到 Topic 的各个 Partition 上 19.</p>
+<h4 id="2-3-3-Value-值"><a href="#2-3-3-Value-值" class="headerlink" title="2.3.3 Value (值)"></a>2.3.3 Value (值)</h4><p>Value 是 Event 的核心部分，它包含了消息的实际负载数据 2. Value 可以是各种不同的格式，例如简单的字符串、JSON 文档、序列化后的对象（如 Avro 或 Protobuf）等，具体取决于应用程序的需求 2. Kafka 本身并不关心 Value 的具体内容和格式，它只是将其视为一个字节数组进行存储和传输 7.</p>
+<h4 id="2-3-4-Timestamp-时间戳"><a href="#2-3-4-Timestamp-时间戳" class="headerlink" title="2.3.4 Timestamp (时间戳)"></a>2.3.4 Timestamp (时间戳)</h4><p>Timestamp 用于记录 Event 被创建的时间 2. Kafka 支持两种类型的时间戳：CreateTime 指示消息由 Producer 创建的时间，而 LogAppendTime 指示消息被 Broker 附加到日志的时间 29. Timestamp 对于跟踪事件的发生顺序和进行基于时间的分析非常有用 2.</p>
+<h4 id="2-3-5-Headers-消息头"><a href="#2-3-5-Headers-消息头" class="headerlink" title="2.3.5 Headers (消息头)"></a>2.3.5 Headers (消息头)</h4><p>Headers 是 Kafka 在较新版本中引入的一个特性，它允许在 Event 中附加键值对形式的元数据 . Headers 可以用于存储一些与消息内容无关但对于消息的处理和路由非常有用的信息，例如消息的来源、优先级、版本号、目标服务等 29. 通过使用 Headers，开发者可以实现更灵活和精细化的消息处理逻辑，例如基于 Header 中的信息进行消息的过滤和路由.</p>
+<h2 id="3-Apache-Kafka-核心功能与特性"><a href="#3-Apache-Kafka-核心功能与特性" class="headerlink" title="3. Apache Kafka 核心功能与特性"></a>3. Apache Kafka 核心功能与特性</h2><p>除了基本的架构组件之外，Apache Kafka 还具备一系列核心功能和特性，这些功能和特性共同塑造了 Kafka 作为高性能、可伸缩、可靠的数据流平台的地位.</p>
+<h3 id="3-1-消息存储与持久化"><a href="#3-1-消息存储与持久化" class="headerlink" title="3.1 消息存储与持久化"></a>3.1 消息存储与持久化</h3><p>Kafka 的消息存储和持久化机制是其可靠性的重要保障。Kafka 依赖于文件系统进行消息的存储和缓存，并采用了一系列优化策略来确保高效的数据读写.</p>
+<h4 id="3-1-1-基于文件系统的存储"><a href="#3-1-1-基于文件系统的存储" class="headerlink" title="3.1.1 基于文件系统的存储"></a>3.1.1 基于文件系统的存储</h4><p>Kafka 严重依赖操作系统的文件系统来存储和缓存消息 . 这种设计选择的一个主要原因是，在过去的十年中，硬盘的吞吐量增长速度远超磁盘寻道的延迟. 例如，一个包含六个 7200rpm SATA RAID-5 阵列的 JBOD 配置，其线性写入速度约为 600 MBps，而随机写入速度仅约为 100 Kbps，两者相差超过 6000 倍 . 线性读写提供了可预测的使用模式，并且受到操作系统的深度优化 .</p>
+<p>现代操作系统会将所有空闲内存用作磁盘缓存，当内存被回收时，性能损失很小 4. 所有磁盘的读写操作都会通过这个统一的缓存 . 即使一个进程维护了自己的内存缓存，这些数据很可能也会被操作系统页面缓存重复存储，导致双倍的内存占用 .</p>
+<p>Kafka 是构建在 JVM 之上的，而 Java 的内存使用具有较高的对象开销，通常会使存储的数据大小翻倍甚至更多 . 此外，随着堆内数据的增加，Java 的垃圾回收会变得越来越慢 . 因此，使用<strong>文件系统并依赖内核的页面缓存比使用进程内的内存缓存或其他数据结构更为高效</strong>  页面缓存至少可以提供双倍的可用缓存空间，并且通过存储紧凑的字节结构而不是对象，可能还会再翻倍 . 例如，<strong>通过使用文件系统，一台 32 GB 内存的机器可以拥有高达 28-30GB 的缓存，而不会产生垃圾回收的性能惩罚. 更重要的是，即使服务重启，这个缓存仍然是“热”的，而进程内的缓存则需要很长时间才能重建</strong> .</p>
+<p>Kafka 并不像传统的内存型消息队列那样尽可能多地将数据保存在内存中，而是在内存不足时才刷新到磁盘，而是将所有数据立即写入文件系统上的持久化日志，而无需显式地刷新到磁盘. 这意味着数据实际上是被传输到了内核的页面缓存中. 所有维护缓存和文件系统之间一致性的逻辑都由操作系统负责，这通常比进程内的临时尝试更高效和更正确.</p>
+<h4 id="3-1-2-持久化队列和常数时间复杂度"><a href="#3-1-2-持久化队列和常数时间复杂度" class="headerlink" title="3.1.2 持久化队列和常数时间复杂度"></a>3.1.2 持久化队列和常数时间复杂度</h4><p>典型的消息系统可能会使用每个消费者的队列以及相关的 B-Tree 或类似的数据结构来维护消息元数据 . B-Tree 是一种通用的数据结构，但其开销相当高；B-Tree 的操作通常是 O(log N) 的时间复杂度 . 虽然 O(log N) 通常被认为接近常数时间，但磁盘操作的速度要慢得多 . 磁盘寻道通常需要 10 毫秒，并且每个磁盘一次只能执行一次寻道，因此并行性受到限制 . 这意味着即使 5-6 次磁盘寻道也会导致大量的开销 . 由于存储系统混合了快速的缓存操作和缓慢的物理磁盘操作，随着数据在固定缓存大小下增加，树状结构的性能通常是超线性的，这意味着数据量翻倍会导致性能下降超过两倍 .</p>
+<p>相比之下，一个持久化队列可以基于简单的文件读取和追加操作来构建，就像常见的日志记录解决方案一样 . 这样所有的操作都是 O(1) 的时间复杂度，并且读取操作不会阻塞写入操作，也不会相互阻塞 . 这提供了性能优势，因为性能与数据大小无关 . 一台服务器可以使用多个廉价的、低转速的 1TB 以上的 SATA 硬盘 . 这些硬盘的寻道性能较差，但在处理大型读写操作时表现尚可，并且价格便宜 . Kafka 可以访问几乎无限的磁盘空间而不会有任何性能损失，这意味着 Kafka 可以提供一些通常在消息系统中找不到的功能 . 例如，在 Kafka 中，与其在消息被消费后立即尝试删除它们，不如将消息保留相对较长的时间（例如一周），这为消费者提供了灵活性 .</p>
+<h4 id="3-1-3-消息保留策略"><a href="#3-1-3-消息保留策略" class="headerlink" title="3.1.3 消息保留策略"></a>3.1.3 消息保留策略</h4><p>Kafka 的一个显著特点是它可以长时间甚至永久地保留消息 . 这与许多传统的消息队列在消息被消费后立即删除消息的做法不同 . Kafka 的消息保留策略允许用户根据时间或存储大小来配置消息的保留期限 . 例如，可以配置一个 Topic 的消息保留 7 天，或者保留直到总大小达到 1TB . 用户甚至可以选择永久保留消息 .</p>
+<p>除了基于时间的保留策略，Kafka 还提供了 Log Compaction（日志压缩）的功能 . Log Compaction 是一种按 Key 保留每个 Topic 中每个 Key 的最新值的机制 . 这在某些场景下非常有用，例如当 Kafka 被用作一个 Key-Value 存储时，只需要保留每个 Key 的最新状态 . 通过启用 Log Compaction，Kafka 可以定期地清理旧的、重复的 Key 的消息，只保留最新的消息，从而有效地控制存储空间的使用 .</p>
+<p>消息的持久化存储和灵活的保留策略使得 Kafka 能够支持多种高级用例，例如数据回放（Consumer 可以重新消费旧的消息）、构建基于事件溯源的应用以及实现流处理任务的状态持久化.</p>
+<h3 id="3-2-消息传递语义"><a href="#3-2-消息传递语义" class="headerlink" title="3.2 消息传递语义"></a>3.2 消息传递语义</h3><p>消息传递语义定义了消息在从生产者发送到消费者接收的过程中，消息被传递的保证程度。Kafka 提供了三种主要的消息传递语义：At-Most-Once（最多一次）、At-Least-Once（至少一次）和 Exactly-Once（恰好一次） 30.</p>
+<h4 id="3-2-1-At-Most-Once-最多一次"><a href="#3-2-1-At-Most-Once-最多一次" class="headerlink" title="3.2.1 At-Most-Once (最多一次)"></a>3.2.1 At-Most-Once (最多一次)</h4><p>At-Most-Once 语义保证消息最多会被传递给消费者一次，但可能会发生消息丢失的情况 . 在这种语义下，生产者发送消息后不会等待 Broker 的确认，而消费者在接收到消息后会立即提交 Offset . 如果在消息被写入 Broker 之前或者在 Broker 将消息发送给消费者之后但在消费者提交 Offset 之前发生故障，那么消息可能会丢失 . 这种语义的优点是延迟最低，吞吐量最高，适用于一些可以容忍少量数据丢失的场景，例如某些类型的监控数据或日志数据 .</p>
+<h4 id="3-2-2-At-Least-Once-至少一次"><a href="#3-2-2-At-Least-Once-至少一次" class="headerlink" title="3.2.2 At-Least-Once (至少一次)"></a>3.2.2 At-Least-Once (至少一次)</h4><p>At-Least-Once 语义保证消息至少会被传递给消费者一次，但可能会发生消息重复的情况 . 在这种语义下，生产者在发送消息后会等待 Broker 的确认. 消费者在成功处理完消息后才会提交 Offset . 如果在消费者处理完消息但尚未提交 Offset 时发生故障，那么当消费者重新启动后，它会从上一次提交的 Offset 开始重新消费消息，导致消息被重复处理 . 这种语义的优点是保证了消息不会丢失，适用于对数据可靠性要求较高的场景 . 为了应对消息重复的问题，消费者应用程序需要实现幂等性，即多次处理同一条消息的结果应该与处理一次的结果相同 .</p>
+<h4 id="3-2-3-Exactly-Once-恰好一次"><a href="#3-2-3-Exactly-Once-恰好一次" class="headerlink" title="3.2.3 Exactly-Once (恰好一次)"></a>3.2.3 Exactly-Once (恰好一次)</h4><p>Exactly-Once 语义是最高级别的消息传递保证，它确保每条消息都会被恰好传递给消费者一次，既不会丢失也不会重复. 实现 Exactly-Once 语义需要生产者和消费者以及 Kafka Broker 的协同工作 . Kafka 从 0.11.0.0 版本开始引入了事务性 API，允许生产者将一系列操作（例如发送多条消息到不同的 Partition）原子地提交或回滚. 同样，消费者也可以通过事务性地消费消息并提交 Offset 来实现 Exactly-Once 语义. Kafka Streams API 和 Kafka Connect 也提供了对 Exactly-Once 语义的简化支持. Exactly-Once 语义适用于对数据一致性要求极高的场景，例如金融交易 . 然而，实现 Exactly-Once 语义通常会带来额外的复杂性和一定的性能开销 .</p>
+<p>以下表格总结了这三种消息传递语义的特点：</p>
+<table>
+<thead>
+<tr>
+<th><strong>语义</strong></th>
+<th><strong>保证</strong></th>
+<th><strong>潜在问题</strong></th>
+<th><strong>适用场景</strong></th>
+<th><strong>实现方式</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>At-Most-Once</td>
+<td>最多一次</td>
+<td>可能丢失消息</td>
+<td>允许少量消息丢失，注重低延迟</td>
+<td>消费者接收到消息后立即提交 Offset</td>
+</tr>
+<tr>
+<td>At-Least-Once</td>
+<td>至少一次</td>
+<td>可能重复消息</td>
+<td>不允许消息丢失，可以容忍重复消息</td>
+<td>消费者成功处理完消息后提交 Offset，需要消费者实现幂等性</td>
+</tr>
+<tr>
+<td>Exactly-Once</td>
+<td>恰好一次</td>
+<td>实现复杂，可能影响性能</td>
+<td>对数据一致性要求极高的场景</td>
+<td>生产者和消费者使用事务性 API，Kafka Streams/Connect 提供简化支持</td>
+</tr>
+</tbody></table>
+<h3 id="3-3-消息路由与过滤"><a href="#3-3-消息路由与过滤" class="headerlink" title="3.3 消息路由与过滤"></a>3.3 消息路由与过滤</h3><p>Kafka 提供了灵活的消息路由机制，但其 Broker 本身并不提供复杂的基于内容或属性的消息过滤功能。消息的路由主要依赖于 Topic 和 Key，而消息的过滤通常在 Consumer 端或通过 Kafka 生态系统中的其他组件实现.</p>
+<h4 id="3-3-1-基于-Topic-的路由"><a href="#3-3-1-基于-Topic-的路由" class="headerlink" title="3.3.1 基于 Topic 的路由"></a>3.3.1 基于 Topic 的路由</h4><p>Kafka 的基本路由方式是基于 Topic 的 . Producer 将消息发送到特定的 Topic，而 Consumer 通过订阅感兴趣的 Topic 来接收消息. 这种发布-订阅模式使得不同的应用可以根据其需求订阅不同的数据流 </p>
+<h4 id="3-3-2-基于-Key-的路由"><a href="#3-3-2-基于-Key-的路由" class="headerlink" title="3.3.2 基于 Key 的路由"></a>3.3.2 基于 Key 的路由</h4><p>消息的 Key 在 Kafka 中也扮演着路由的角色 . 如前所述，Kafka 使用 Key 来决定消息应该被写入 Topic 的哪个 Partition . 通过合理地设计 Key，可以将具有相关性的消息发送到同一个 Partition，进而被同一个 Consumer Group 中的同一个 Consumer 实例处理，这对于需要保证消息处理顺序的场景非常重要 .</p>
+<h4 id="3-3-3-消息过滤"><a href="#3-3-3-消息过滤" class="headerlink" title="3.3.3 消息过滤"></a>3.3.3 消息过滤</h4><p>Kafka Broker 本身不提供基于消息内容或属性的复杂过滤功能 . 然而，可以在 Consumer 端实现消息的过滤 . Consumer 在接收到消息后，可以根据消息的 Value 或 Headers 中的信息来判断是否需要处理该消息，从而实现简单的过滤 .</p>
+<p>此外，Kafka 生态系统中的其他组件也提供了更强大的消息过滤能力。例如，Kafka Connect 的 Transforms 功能允许在数据从外部系统导入到 Kafka 或从 Kafka 导出到外部系统时对数据进行转换和过滤 . 通过配置 Filter 类型的 Transform，可以根据特定的条件过滤掉不需要的消息 .</p>
+<p>Kafka Streams 和 ksqlDB 等流处理引擎也提供了丰富的 API 和 SQL 语法，可以对 Kafka Topic 中的数据流进行复杂的过滤、转换和聚合操作 . 这些工具使得开发者可以构建复杂的实时数据处理管道，实现灵活的消息过滤逻辑 .</p>
+<p>在某些场景下，也可以利用消息的 Headers 进行过滤 . Producer 在发送消息时可以将一些属性信息添加到 Headers 中，Consumer 在接收到消息后可以读取这些 Headers，并根据 Header 中的值来决定是否处理该消息 .</p>
+<h4 id="3-3-4-不支持-Broker-端的复杂路由和过滤"><a href="#3-3-4-不支持-Broker-端的复杂路由和过滤" class="headerlink" title="3.3.4 不支持 Broker 端的复杂路由和过滤"></a>3.3.4 不支持 Broker 端的复杂路由和过滤</h4><p>与一些其他消息队列技术（例如 RabbitMQ）不同，Kafka Broker 本身并不提供复杂的基于内容或属性的路由和过滤功能. Kafka 的设计哲学是保持 Broker 的轻量级和高性能，将复杂的路由和过滤逻辑下放到 Consumer 端或通过流处理引擎来实现 . 这种设计选择有助于 Kafka 实现高吞吐量和可伸缩性 . 然而，这也意味着如果需要在 Broker 端进行复杂的路由和过滤，Kafka 并不是一个直接合适的选择 .</p>
+<h3 id="3-4-消费者组与协调"><a href="#3-4-消费者组与协调" class="headerlink" title="3.4 消费者组与协调"></a>3.4 消费者组与协调</h3><p>Consumer Group 是 Kafka 实现可伸缩和容错消费的关键机制。通过 Consumer Group，多个 Consumer 实例可以协同消费 Topic 的消息，实现并行处理和负载均衡.</p>
+<h4 id="3-4-1-Consumer-Group-的概念和作用"><a href="#3-4-1-Consumer-Group-的概念和作用" class="headerlink" title="3.4.1 Consumer Group 的概念和作用"></a>3.4.1 Consumer Group 的概念和作用</h4><p>Consumer Group 是由具有相同应用逻辑的多个 Consumer 实例组成的集合 . 当一个 Consumer 实例启动时，它会通过配置中的 <code>group.id</code> 加入到指定的 Consumer Group 中 . 一个 Topic 通常包含多个 Partition，Consumer Group 的作用就是将这些 Partition 分配给 Group 中的 Consumer 实例，使得每个 Partition 只会被 Group 中的一个 Consumer 实例消费 . 这样就实现了并行消费，提高了整个 Consumer Group 的吞吐量 . 如果 Consumer Group 中的某个 Consumer 实例发生故障，Kafka 会自动将它负责的 Partition 重新分配给 Group 中的其他存活的 Consumer 实例，从而实现了容错 .</p>
+<h4 id="3-4-2-Group-Coordinator-和-Group-Leader"><a href="#3-4-2-Group-Coordinator-和-Group-Leader" class="headerlink" title="3.4.2 Group Coordinator 和 Group Leader"></a>3.4.2 Group Coordinator 和 Group Leader</h4><p>Consumer Group 的协调工作由 Kafka Broker 中的 Group Coordinator 和 Consumer Group 中的 Group Leader 共同完成. 当一个 Consumer Group 首次启动或有新的 Consumer 实例加入时，会选举出一个 Broker 作为该 Group 的 Group Coordinator . Group Coordinator 负责跟踪 Group 中的所有 Consumer 实例以及它们订阅的 Topic 和 Partition.</p>
+<p>在 Consumer Group 中，还会选举出一个 Consumer 实例作为 Group Leader. Group Leader 的主要职责是在发生 Partition Rebalance 时，根据配置的分区分配策略，决定将哪些 Partition 分配给 Group 中的哪些 Consumer 实例 . Group Leader 会将分配结果告知 Group Coordinator，然后由 Group Coordinator 将这些信息同步给 Group 中的所有 Consumer 实例 .</p>
+<h4 id="3-4-3-Partition-Rebalance"><a href="#3-4-3-Partition-Rebalance" class="headerlink" title="3.4.3 Partition Rebalance"></a>3.4.3 Partition Rebalance</h4><p>Partition Rebalance 是指当 Consumer Group 的成员发生变化（例如有新的 Consumer 实例加入或已有的 Consumer 实例离开）或者 Topic 的 Partition 数量发生变化时，Kafka 会重新将 Topic 的 Partition 分配给 Consumer Group 中的 Consumer 实例的过程 2. Rebalance 的目的是确保 Group 中的每个 Consumer 实例都能公平地消费 Topic 的 Partition，并且在 Consumer 实例发生故障时能够自动地进行故障转移 17.</p>
+<p>Rebalance 的过程通常包括以下步骤：Group Coordinator 检测到 Group 成员变化或 Partition 数量变化；选举新的 Group Leader（如果需要）；Group Leader 根据分配策略生成新的 Partition 分配方案；Group Leader 将分配方案发送给 Group Coordinator；Group Coordinator 将分配方案通知给 Group 中的所有 Consumer 实例；Consumer 实例根据新的分配方案开始消费相应的 Partition 28.</p>
+<p>在 Rebalance 过程中，Consumer Group 中的所有 Consumer 实例都会停止消费，直到 Rebalance 完成并重新分配到新的 Partition 后才会继续消费 24. 因此，频繁的 Rebalance 可能会对 Consumer Group 的整体吞吐量产生一定的影响 24. Kafka 提供了多种 Partition 分配策略，例如 RangeAssignor 和 RoundRobinAssignor 25，用户可以根据自己的需求选择合适的策略。</p>
+<h4 id="3-4-4-Consumer-Offset-的管理"><a href="#3-4-4-Consumer-Offset-的管理" class="headerlink" title="3.4.4 Consumer Offset 的管理"></a>3.4.4 Consumer Offset 的管理</h4><p>为了跟踪 Consumer Group 在每个 Partition 中的消费进度，Kafka 使用 Consumer Offset 来记录 Consumer Group 已经消费到的每条消息的 Offset 4. Consumer Offset 通常存储在 Kafka Broker 的一个内部 Topic <code>__consumer_offsets</code> 中 10.</p>
+<p>Consumer 在消费完一条或多条消息后，需要将对应的 Offset 提交（Commit）给 Broker 4. 提交 Offset 的方式可以是自动的，也可以是手动的 4. 自动提交是指 Consumer 客户端会定期地自动将当前消费到的 Offset 提交给 Broker 4. 手动提交则允许开发者在应用程序中显式地控制 Offset 的提交时机 26. 手动提交通常用于需要更精确地控制消息传递语义的场景，例如在 At-Least-Once 或 Exactly-Once 语义中，需要在消息被成功处理之后再提交 Offset 26.</p>
+<p>当 Consumer Group 中的一个 Consumer 实例重启或发生故障后，新的 Consumer 实例（可能是同一个实例重启后，也可能是 Group 中的其他实例）会从上次提交的 Offset 位置开始继续消费 25. 因此，正确地管理 Consumer Offset 对于保证消息的可靠消费至关重要 26.</p>
+<h3 id="3-5-可伸缩性"><a href="#3-5-可伸缩性" class="headerlink" title="3.5 可伸缩性"></a>3.5 可伸缩性</h3><p>Kafka 的架构设计天生就具备良好的可伸缩性，可以方便地通过增加 Broker 节点、增加 Topic 的 Partition 数量以及增加 Consumer Group 中的 Consumer 实例数量来应对不断增长的数据量和用户请求.</p>
+<h4 id="3-5-1-Partition-的水平扩展"><a href="#3-5-1-Partition-的水平扩展" class="headerlink" title="3.5.1 Partition 的水平扩展"></a>3.5.1 Partition 的水平扩展</h4><p>Partition 是 Kafka 实现水平扩展的基本单元 . 通过将一个 Topic 分割成多个 Partition，Kafka 可以将数据分散存储在多个 Broker 上，并且允许 Consumer Group 中的多个 Consumer 实例并行地消费不同的 Partition，从而显著提高系统的吞吐量 . 增加 Topic 的 Partition 数量是提高 Kafka 集群处理能力的一种常见方法 . 然而，Partition 的数量也决定了 Consumer Group 中能够并行消费的 Consumer 实例的最大数量 .</p>
+<h4 id="3-5-2-Consumer-Group-的横向扩展"><a href="#3-5-2-Consumer-Group-的横向扩展" class="headerlink" title="3.5.2 Consumer Group 的横向扩展"></a>3.5.2 Consumer Group 的横向扩展</h4><p>Consumer Group 提供了消费端的水平扩展能力. 当需要提高某个 Topic 的消费能力时，可以简单地在同一个 Consumer Group 中增加 Consumer 实例的数量 . Kafka 会自动地将 Topic 的 Partition 重新分配给 Group 中新增的 Consumer 实例，实现负载均衡和并行消费. 为了达到最大的并行度，Consumer Group 中的 Consumer 实例数量通常应该与 Topic 的 Partition 数量相匹配.</p>
+<h4 id="3-5-3-Broker-的横向扩展"><a href="#3-5-3-Broker-的横向扩展" class="headerlink" title="3.5.3 Broker 的横向扩展"></a>3.5.3 Broker 的横向扩展</h4><p>Kafka 集群可以通过增加 Broker 节点来扩展其存储和处理能力. 当向 Kafka 集群添加新的 Broker 节点时，可以将现有的 Topic 的 Partition 迁移到新的 Broker 上，也可以在创建新的 Topic 时将其 Partition 分布到新的 Broker 上 . Kafka 提供了 Partition Reassignment（分区重分配）的工具，允许管理员在不停止服务的情况下将 Partition 从一个 Broker 迁移到另一个 Broker . 此外，一些较新的 Kafka 版本还引入了 Self-Balancing Clusters（自平衡集群）的特性，可以自动地监控集群的负载情况，并在需要时自动地进行 Partition 的迁移，进一步简化了集群的扩展和管理 .</p>
+<h3 id="3-6-高可用性与容错"><a href="#3-6-高可用性与容错" class="headerlink" title="3.6 高可用性与容错"></a>3.6 高可用性与容错</h3><p>Kafka 通过多种机制来保证其高可用性和容错能力，即使在部分 Broker 节点发生故障的情况下，系统仍然能够持续地提供服务，并且不会丢失数据.</p>
+<h4 id="3-6-1-Partition-Replication"><a href="#3-6-1-Partition-Replication" class="headerlink" title="3.6.1 Partition Replication"></a>3.6.1 Partition Replication</h4><p>Partition Replication 是 Kafka 实现高可用性和容错性的主要机制 . 对于每个 Topic 的每个 Partition，Kafka 都会将其数据复制到多个 Broker 上，形成多个副本 . 复制的副本数量由 Replication Factor（复制因子）来决定 . 例如，如果一个 Topic 的复制因子设置为 ，那么该 Topic 的每个 Partition 在 Kafka 集群中都会有 个副本，分布在不同的 Broker 上 .</p>
+<h4 id="3-6-2-Leader-and-Follower-Replicas"><a href="#3-6-2-Leader-and-Follower-Replicas" class="headerlink" title="3.6.2 Leader and Follower Replicas"></a>3.6.2 Leader and Follower Replicas</h4><p>在每个 Partition 的多个副本中，会选举出一个副本作为 Leader Replica，负责处理该 Partition 的所有读写请求. 其他的副本则作为 Follower Replicas，它们会不断地从 Leader Replica 同步数据，保持与 Leader 的数据一致. Producer 发送的消息总是先写入到 Leader Replica，然后 Leader Replica 将数据同步给所有的 Follower Replicas. Consumer 也总是从 Leader Replica 读取数据 .</p>
+<h4 id="3-6-3-In-Sync-Replicas-ISR"><a href="#3-6-3-In-Sync-Replicas-ISR" class="headerlink" title="3.6.3 In-Sync Replicas (ISR)"></a>3.6.3 In-Sync Replicas (ISR)</h4><p>In-Sync Replicas（ISR）是指与 Leader Replica 保持数据同步的 Follower Replicas 的集合 . 只有 ISR 中的副本才被认为是“活”的，并且有资格在当前的 Leader Replica 发生故障时被选举为新的 Leader . 如果一个 Follower Replica 长时间没有与 Leader Replica 同步数据，它将被从 ISR 集合中移除，直到它重新赶上 Leader 的进度 .</p>
+<h4 id="3-6-4-自动故障转移"><a href="#3-6-4-自动故障转移" class="headerlink" title="3.6.4 自动故障转移"></a>3.6.4 自动故障转移</h4><p>当一个 Partition 的 Leader Broker 发生故障时，Kafka 会自动地从该 Partition 的 ISR 集合中选择一个新的 Follower Replica 作为新的 Leader 14. 这个过程是由 Kafka Controller（在 ZooKeeper 模式下）或 Controller 节点（在 KRaft 模式下）负责协调完成的 . 故障转移的过程对于 Producer 和 Consumer 来说通常是透明的，它们会继续与新的 Leader Replica 进行通信，从而保证了服务的连续性 .</p>
+<h4 id="3-6-5-跨数据中心复制-Cross-Data-Center-Replication-MirrorMaker"><a href="#3-6-5-跨数据中心复制-Cross-Data-Center-Replication-MirrorMaker" class="headerlink" title="3.6.5 跨数据中心复制 (Cross-Data Center Replication) / MirrorMaker"></a>3.6.5 跨数据中心复制 (Cross-Data Center Replication) / MirrorMaker</h4><p>对于一些对可用性要求极高的应用场景，Kafka 还提供了跨数据中心复制（Cross-Data Center Replication, CDCR）的解决方案，例如使用 Kafka MirrorMaker 工具. MirrorMaker 可以将一个 Kafka 集群的数据镜像到另一个 Kafka 集群，通常部署在不同的地理位置或数据中心. 这样，即使一个数据中心发生故障，应用程序仍然可以切换到另一个数据中心中的 Kafka 集群继续运行，从而实现灾难恢复 . MirrorMaker 支持多种部署模式，例如 Active-Active 和 Active-Passive .</p>
+<h3 id="3-7-安全性"><a href="#3-7-安全性" class="headerlink" title="3.7 安全性"></a>3.7 安全性</h3><p>随着 Kafka 在企业级应用中的普及，安全性变得越来越重要。Kafka 提供了多种安全特性，包括数据加密、身份验证和授权，以保护 Kafka 集群中的数据和资源.</p>
+<h4 id="3-7-1-数据加密"><a href="#3-7-1-数据加密" class="headerlink" title="3.7.1 数据加密"></a>3.7.1 数据加密</h4><p>Kafka 支持使用 SSL/TLS 协议对在 Producer、Consumer 和 Broker 之间传输的数据进行加密 38. 通过启用数据加密，可以防止网络上的中间人窃取或篡改 Kafka 集群中的数据，保证了数据的机密性 .</p>
+<h4 id="3-7-2-身份验证"><a href="#3-7-2-身份验证" class="headerlink" title="3.7.2 身份验证"></a>3.7.2 身份验证</h4><p>Kafka 提供了多种身份验证机制来验证客户端（Producer 和 Consumer）和 Broker 的身份 38. 常用的身份验证方式包括基于 SSL 的双向认证以及基于 SASL（Simple Authentication and Security Layer）的各种机制，例如 PLAIN、SCRAM 和 GSSAPI (Kerberos) 等 38. 通过身份验证，可以确保只有经过授权的客户端才能连接到 Kafka 集群 .</p>
+<h4 id="3-7-3-授权"><a href="#3-7-3-授权" class="headerlink" title="3.7.3 授权"></a>3.7.3 授权</h4><p>Kafka 使用访问控制列表（Access Control Lists, ACLs）来控制用户或应用程序对 Kafka 资源的访问权限 38. 通过配置 ACLs，可以限制特定的用户或应用程序对特定的 Topic、Consumer Group 或其他 Kafka 资源执行特定的操作（例如读、写、创建、删除等） 38. ACLs 提供了细粒度的访问控制，帮助组织构建安全的 Kafka 应用 54.</p>
+<h3 id="3-8-监控与管理"><a href="#3-8-监控与管理" class="headerlink" title="3.8 监控与管理"></a>3.8 监控与管理</h3><p>对于一个生产环境的 Kafka 集群来说，有效的监控和管理至关重要。监控可以帮助我们了解集群的健康状况和性能指标，及时发现和解决潜在的问题；管理则涉及到集群的配置、维护和升级等操作.</p>
+<h4 id="3-8-1-关键监控指标"><a href="#3-8-1-关键监控指标" class="headerlink" title="3.8.1 关键监控指标"></a>3.8.1 关键监控指标</h4><p>在监控 Kafka 集群时，需要关注多个关键指标 4. 这些指标包括：</p>
+<ul>
+<li><strong>Broker 状态:</strong> 例如 CPU 使用率、内存使用率、磁盘使用率、网络流量等，用于评估单个 Broker 节点的健康状况 .</li>
+<li><strong>Topic 吞吐量:</strong> 包括生产速率和消费速率，用于衡量 Kafka 集群的数据处理能力 .</li>
+<li><strong>Partition 状态:</strong> 例如 Leader 副本、Follower 副本、ISR 集合的大小、Under-Replicated Partitions 的数量等，用于评估数据的冗余和一致性 6.</li>
+<li><strong>Consumer Lag:</strong> 指 Consumer Group 当前消费的 Offset 与最新的 Producer Offset 之间的差距，用于衡量 Consumer 的消费速度是否跟得上 Producer 的生产速度 .</li>
+<li><strong>请求延迟:</strong> Producer 和 Consumer 向 Broker 发送请求的延迟，用于评估系统的响应速度 .</li>
+<li><strong>ZooKeeper/KRaft 状态:</strong> 例如连接数、延迟等，用于评估元数据管理服务的健康状况.</li>
+</ul>
+<h4 id="3-8-2-管理工具"><a href="#3-8-2-管理工具" class="headerlink" title="3.8.2 管理工具"></a>3.8.2 管理工具</h4><p>Kafka 提供了多种管理工具 . 最基本的是 Kafka 自带的命令行工具，例如 <code>kafka-topics.sh</code> 用于管理 Topic，<code>kafka-console-producer.sh</code> 和 <code>kafka-console-consumer.sh</code> 用于发送和接收消息，<code>kafka-consumer-groups.sh</code> 用于管理 Consumer Group 等 18.</p>
+<p>此外，还有一些图形化管理界面可以帮助用户更直观地监控和管理 Kafka 集群，例如 Confluent Control Center 和 Kafka UI. 这些工具通常提供了更丰富的监控指标展示、更便捷的配置管理功能以及更友好的用户界面 .</p>
+<h4 id="3-8-3-告警"><a href="#3-8-3-告警" class="headerlink" title="3.8.3 告警"></a>3.8.3 告警</h4><p>配置合适的告警机制对于及时发现和处理 Kafka 集群中的潜在问题至关重要 6. 可以基于关键的监控指标设置告警规则，例如当 Broker 的 CPU 使用率过高、Under-Replicated Partitions 的数量超过阈值、Consumer Lag 过大时，系统可以自动发送告警通知给运维人员，以便及时采取措施 .</p>
+<h2 id="4-其他主流消息队列技术"><a href="#4-其他主流消息队列技术" class="headerlink" title="4. 其他主流消息队列技术"></a>4. 其他主流消息队列技术</h2><p>（由于提供的研究材料主要集中在 Apache Kafka 上，本节将简要提及其他主流消息队列技术，更详细的架构设计分析需要进一步的研究。）</p>
+<ul>
+<li><strong>RabbitMQ 架构设计:</strong> RabbitMQ 基于 AMQP 协议，其核心组件包括 Exchange（交换机）、Queue（队列）和 Binding（绑定）。Exchange 接收生产者发送的消息，并根据 Binding 规则将消息路由到一个或多个 Queue 中。Consumer 从 Queue 中消费消息。RabbitMQ 支持多种 Exchange 类型（例如 Direct、Fanout、Topic、Headers），提供了灵活的消息路由机制。</li>
+<li><strong>Apache ActiveMQ 架构设计:</strong> ActiveMQ 是一个多协议的消息代理，支持 JMS、AMQP、MQTT 等多种标准。其核心架构包括 Broker、Queue、Topic 和 Message。ActiveMQ 提供了丰富的消息特性，例如消息持久化、事务、消息组等。</li>
+<li><strong>Amazon SQS 架构设计:</strong> SQS 是一个分布式队列服务，其架构基于分布式系统，具有高可用性和可伸缩性。Producer 将消息发送到 Queue，Consumer 从 Queue 中拉取消息进行处理。SQS 提供 At-Least-Once 的消息传递语义。</li>
+<li><strong>Google Cloud Pub/Sub 架构设计:</strong> Pub/Sub 是一个全球性的消息传递服务，其架构基于发布/订阅模式。Publisher 将消息发布到 Topic，Subscriber 订阅 Topic 以接收消息。Pub/Sub 具有高吞吐量和低延迟，并提供至少一次的消息传递保证。</li>
+<li><strong>不同消息队列技术的对比分析:</strong> 每种消息队列技术都有其优势和劣势，适用于不同的应用场景。例如，Kafka 适用于高吞吐量的数据流处理，RabbitMQ 在消息路由方面更灵活，而云服务提供的消息队列则具有易用性和免运维的优势。选择合适的技术需要根据具体的需求进行权衡。</li>
+</ul>
+<h2 id="5-总结与展望"><a href="#5-总结与展望" class="headerlink" title="5. 总结与展望"></a>5. 总结与展望</h2><p>Apache Kafka 凭借其独特的架构设计，例如基于 Partition 的水平扩展、Leader-Follower 的复制机制、灵活的消息传递语义以及强大的流处理能力，已经成为现代分布式系统中处理大规模实时数据流的事实标准。Kafka 的核心优势在于其高吞吐量、低延迟、可伸缩性和容错性，使其在各种应用场景中都表现出色，例如实时数据管道、流式分析、数据集成和事件驱动架构。</p>
+<p>从元数据管理方式的演进来看，Kafka 社区通过引入 KRaft 模式，旨在进一步简化 Kafka 的部署和运维，提高其可伸缩性和性能，使其能够更好地应对未来更大规模的数据流处理需求。</p>
+<p>未来，消息队列技术将继续朝着更高性能、更强可靠性、更易用性以及更智能化的方向发展。随着云计算和边缘计算的普及，云原生和边缘消息队列将扮演越来越重要的角色。同时，与其他技术的集成（例如与 Serverless 计算、AI/ML 平台的集成）也将更加紧密，为构建更加复杂和智能化的应用提供强大的基础设施支撑。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/MQ/" rel="tag"># MQ</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/03/18/communication-skill/" rel="prev" title="几个提供沟通小技巧">
+      <i class="fa fa-chevron-left"></i> 几个提供沟通小技巧
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/03/19/mq-rabbit/" rel="next" title="RabbitMQ 技术架构与队列设计">
+      RabbitMQ 技术架构与队列设计 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E4%B8%BB%E6%B5%81%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">1. 主流消息队列技术概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-%E4%BB%8B%E7%BB%8D%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E7%9A%84%E9%87%8D%E8%A6%81%E6%80%A7%E4%B8%8E%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 介绍消息队列的重要性与应用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-%E4%B8%BB%E6%B5%81%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 主流消息队列技术概览</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Apache-Kafka-%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="nav-number">2.</span> <span class="nav-text">2. Apache Kafka 架构设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E6%A0%B8%E5%BF%83%E6%9E%B6%E6%9E%84%E7%BB%84%E4%BB%B6"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 核心架构组件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-1-Broker-%E4%BB%A3%E7%90%86"><span class="nav-number">2.1.1.</span> <span class="nav-text">2.1.1 Broker (代理)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-2-Topic-%E4%B8%BB%E9%A2%98"><span class="nav-number">2.1.2.</span> <span class="nav-text">2.1.2 Topic (主题)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-3-Partition-%E5%88%86%E5%8C%BA"><span class="nav-number">2.1.3.</span> <span class="nav-text">2.1.3 Partition (分区)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-4-Offset-%E5%81%8F%E7%A7%BB%E9%87%8F"><span class="nav-number">2.1.4.</span> <span class="nav-text">2.1.4 Offset (偏移量)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-5-Producer-%E7%94%9F%E4%BA%A7%E8%80%85"><span class="nav-number">2.1.5.</span> <span class="nav-text">2.1.5 Producer (生产者)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-6-Consumer-%E6%B6%88%E8%B4%B9%E8%80%85"><span class="nav-number">2.1.6.</span> <span class="nav-text">2.1.6 Consumer (消费者)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-7-ZooKeeper-KRaft-Kafka-Raft"><span class="nav-number">2.1.7.</span> <span class="nav-text">2.1.7 ZooKeeper  &#x2F; KRaft (Kafka Raft)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E5%85%83%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86-Metadata-Management-ZooKeeper-and-KRaft"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 元数据管理 (Metadata Management: ZooKeeper and KRaft)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-1-ZooKeeper-%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%9A%84%E5%85%83%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86"><span class="nav-number">2.2.1.</span> <span class="nav-text">2.2.1 ZooKeeper 模式下的元数据管理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-2-KRaft-%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%9A%84%E5%85%83%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86"><span class="nav-number">2.2.2.</span> <span class="nav-text">2.2.2 KRaft 模式下的元数据管理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-%E6%B6%88%E6%81%AF%E6%A8%A1%E5%9E%8B-Message-Model"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 消息模型 (Message Model)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-1-Event-%E4%BA%8B%E4%BB%B6-Record-%E8%AE%B0%E5%BD%95"><span class="nav-number">2.3.1.</span> <span class="nav-text">2.3.1 Event (事件) &#x2F; Record (记录)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-2-Key-%E9%94%AE"><span class="nav-number">2.3.2.</span> <span class="nav-text">2.3.2 Key (键)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-3-Value-%E5%80%BC"><span class="nav-number">2.3.3.</span> <span class="nav-text">2.3.3 Value (值)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-4-Timestamp-%E6%97%B6%E9%97%B4%E6%88%B3"><span class="nav-number">2.3.4.</span> <span class="nav-text">2.3.4 Timestamp (时间戳)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-5-Headers-%E6%B6%88%E6%81%AF%E5%A4%B4"><span class="nav-number">2.3.5.</span> <span class="nav-text">2.3.5 Headers (消息头)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Apache-Kafka-%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD%E4%B8%8E%E7%89%B9%E6%80%A7"><span class="nav-number">3.</span> <span class="nav-text">3. Apache Kafka 核心功能与特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E6%8C%81%E4%B9%85%E5%8C%96"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 消息存储与持久化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-1-%E5%9F%BA%E4%BA%8E%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%AD%98%E5%82%A8"><span class="nav-number">3.1.1.</span> <span class="nav-text">3.1.1 基于文件系统的存储</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-2-%E6%8C%81%E4%B9%85%E5%8C%96%E9%98%9F%E5%88%97%E5%92%8C%E5%B8%B8%E6%95%B0%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="nav-number">3.1.2.</span> <span class="nav-text">3.1.2 持久化队列和常数时间复杂度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-3-%E6%B6%88%E6%81%AF%E4%BF%9D%E7%95%99%E7%AD%96%E7%95%A5"><span class="nav-number">3.1.3.</span> <span class="nav-text">3.1.3 消息保留策略</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-%E6%B6%88%E6%81%AF%E4%BC%A0%E9%80%92%E8%AF%AD%E4%B9%89"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 消息传递语义</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-1-At-Most-Once-%E6%9C%80%E5%A4%9A%E4%B8%80%E6%AC%A1"><span class="nav-number">3.2.1.</span> <span class="nav-text">3.2.1 At-Most-Once (最多一次)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-2-At-Least-Once-%E8%87%B3%E5%B0%91%E4%B8%80%E6%AC%A1"><span class="nav-number">3.2.2.</span> <span class="nav-text">3.2.2 At-Least-Once (至少一次)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-3-Exactly-Once-%E6%81%B0%E5%A5%BD%E4%B8%80%E6%AC%A1"><span class="nav-number">3.2.3.</span> <span class="nav-text">3.2.3 Exactly-Once (恰好一次)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-%E6%B6%88%E6%81%AF%E8%B7%AF%E7%94%B1%E4%B8%8E%E8%BF%87%E6%BB%A4"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 消息路由与过滤</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-1-%E5%9F%BA%E4%BA%8E-Topic-%E7%9A%84%E8%B7%AF%E7%94%B1"><span class="nav-number">3.3.1.</span> <span class="nav-text">3.3.1 基于 Topic 的路由</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-2-%E5%9F%BA%E4%BA%8E-Key-%E7%9A%84%E8%B7%AF%E7%94%B1"><span class="nav-number">3.3.2.</span> <span class="nav-text">3.3.2 基于 Key 的路由</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-3-%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4"><span class="nav-number">3.3.3.</span> <span class="nav-text">3.3.3 消息过滤</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-4-%E4%B8%8D%E6%94%AF%E6%8C%81-Broker-%E7%AB%AF%E7%9A%84%E5%A4%8D%E6%9D%82%E8%B7%AF%E7%94%B1%E5%92%8C%E8%BF%87%E6%BB%A4"><span class="nav-number">3.3.4.</span> <span class="nav-text">3.3.4 不支持 Broker 端的复杂路由和过滤</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E4%B8%8E%E5%8D%8F%E8%B0%83"><span class="nav-number">3.4.</span> <span class="nav-text">3.4 消费者组与协调</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-4-1-Consumer-Group-%E7%9A%84%E6%A6%82%E5%BF%B5%E5%92%8C%E4%BD%9C%E7%94%A8"><span class="nav-number">3.4.1.</span> <span class="nav-text">3.4.1 Consumer Group 的概念和作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-4-2-Group-Coordinator-%E5%92%8C-Group-Leader"><span class="nav-number">3.4.2.</span> <span class="nav-text">3.4.2 Group Coordinator 和 Group Leader</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-4-3-Partition-Rebalance"><span class="nav-number">3.4.3.</span> <span class="nav-text">3.4.3 Partition Rebalance</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-4-4-Consumer-Offset-%E7%9A%84%E7%AE%A1%E7%90%86"><span class="nav-number">3.4.4.</span> <span class="nav-text">3.4.4 Consumer Offset 的管理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-5-%E5%8F%AF%E4%BC%B8%E7%BC%A9%E6%80%A7"><span class="nav-number">3.5.</span> <span class="nav-text">3.5 可伸缩性</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-5-1-Partition-%E7%9A%84%E6%B0%B4%E5%B9%B3%E6%89%A9%E5%B1%95"><span class="nav-number">3.5.1.</span> <span class="nav-text">3.5.1 Partition 的水平扩展</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-5-2-Consumer-Group-%E7%9A%84%E6%A8%AA%E5%90%91%E6%89%A9%E5%B1%95"><span class="nav-number">3.5.2.</span> <span class="nav-text">3.5.2 Consumer Group 的横向扩展</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-5-3-Broker-%E7%9A%84%E6%A8%AA%E5%90%91%E6%89%A9%E5%B1%95"><span class="nav-number">3.5.3.</span> <span class="nav-text">3.5.3 Broker 的横向扩展</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-6-%E9%AB%98%E5%8F%AF%E7%94%A8%E6%80%A7%E4%B8%8E%E5%AE%B9%E9%94%99"><span class="nav-number">3.6.</span> <span class="nav-text">3.6 高可用性与容错</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-6-1-Partition-Replication"><span class="nav-number">3.6.1.</span> <span class="nav-text">3.6.1 Partition Replication</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-6-2-Leader-and-Follower-Replicas"><span class="nav-number">3.6.2.</span> <span class="nav-text">3.6.2 Leader and Follower Replicas</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-6-3-In-Sync-Replicas-ISR"><span class="nav-number">3.6.3.</span> <span class="nav-text">3.6.3 In-Sync Replicas (ISR)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-6-4-%E8%87%AA%E5%8A%A8%E6%95%85%E9%9A%9C%E8%BD%AC%E7%A7%BB"><span class="nav-number">3.6.4.</span> <span class="nav-text">3.6.4 自动故障转移</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-6-5-%E8%B7%A8%E6%95%B0%E6%8D%AE%E4%B8%AD%E5%BF%83%E5%A4%8D%E5%88%B6-Cross-Data-Center-Replication-MirrorMaker"><span class="nav-number">3.6.5.</span> <span class="nav-text">3.6.5 跨数据中心复制 (Cross-Data Center Replication) &#x2F; MirrorMaker</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-7-%E5%AE%89%E5%85%A8%E6%80%A7"><span class="nav-number">3.7.</span> <span class="nav-text">3.7 安全性</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-7-1-%E6%95%B0%E6%8D%AE%E5%8A%A0%E5%AF%86"><span class="nav-number">3.7.1.</span> <span class="nav-text">3.7.1 数据加密</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-7-2-%E8%BA%AB%E4%BB%BD%E9%AA%8C%E8%AF%81"><span class="nav-number">3.7.2.</span> <span class="nav-text">3.7.2 身份验证</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-7-3-%E6%8E%88%E6%9D%83"><span class="nav-number">3.7.3.</span> <span class="nav-text">3.7.3 授权</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-8-%E7%9B%91%E6%8E%A7%E4%B8%8E%E7%AE%A1%E7%90%86"><span class="nav-number">3.8.</span> <span class="nav-text">3.8 监控与管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-8-1-%E5%85%B3%E9%94%AE%E7%9B%91%E6%8E%A7%E6%8C%87%E6%A0%87"><span class="nav-number">3.8.1.</span> <span class="nav-text">3.8.1 关键监控指标</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-8-2-%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7"><span class="nav-number">3.8.2.</span> <span class="nav-text">3.8.2 管理工具</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-8-3-%E5%91%8A%E8%AD%A6"><span class="nav-number">3.8.3.</span> <span class="nav-text">3.8.3 告警</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%85%B6%E4%BB%96%E4%B8%BB%E6%B5%81%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E6%8A%80%E6%9C%AF"><span class="nav-number">4.</span> <span class="nav-text">4. 其他主流消息队列技术</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E6%80%BB%E7%BB%93%E4%B8%8E%E5%B1%95%E6%9C%9B"><span class="nav-number">5.</span> <span class="nav-text">5. 总结与展望</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="“产品做出来了，用户开始增长，但很快你发现：越来越多的人注册，却越来越少的人回来。” 这就是创业者最熟悉的冷水时刻——留存塌了。 留存是任何产品真正“活下去”的基础。如果说获客是“打开水龙头”，那留存就是“堵住水桶底”。 这篇文章，我们来聊聊：  用户留存的本质是什么； 如何系统性地构建留存机制； 三种典型留存系统设计模式； 技术产品在留存上常犯的错误与修正方法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何打造用户留存系统">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/04/13/product-thinking-07/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="“产品做出来了，用户开始增长，但很快你发现：越来越多的人注册，却越来越少的人回来。” 这就是创业者最熟悉的冷水时刻——留存塌了。 留存是任何产品真正“活下去”的基础。如果说获客是“打开水龙头”，那留存就是“堵住水桶底”。 这篇文章，我们来聊聊：  用户留存的本质是什么； 如何系统性地构建留存机制； 三种典型留存系统设计模式； 技术产品在留存上常犯的错误与修正方法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-04-13T06:38:47.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.372Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/04/13/product-thinking-07/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>如何打造用户留存系统 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/04/13/product-thinking-07/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          如何打造用户留存系统
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-04-13 14:38:47" itemprop="dateCreated datePublished" datetime="2025-04-13T14:38:47+08:00">2025-04-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%BA%A7%E5%93%81/" itemprop="url" rel="index"><span itemprop="name">产品</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>“产品做出来了，用户开始增长，但很快你发现：<strong>越来越多的人注册，却越来越少的人回来。</strong>”</p>
+<p>这就是创业者最熟悉的冷水时刻——留存塌了。</p>
+<p>留存是任何产品真正“活下去”的基础。如果说获客是“打开水龙头”，那留存就是“堵住水桶底”。</p>
+<p>这篇文章，我们来聊聊：</p>
+<ul>
+<li>用户留存的本质是什么；</li>
+<li>如何系统性地构建留存机制；</li>
+<li>三种典型留存系统设计模式；</li>
+<li>技术产品在留存上常犯的错误与修正方法。</li>
+</ul>
+<span id="more"></span>
+
+
+
+<h2 id="留存不是“用户回来了”，而是“用户有留下来的理由”"><a href="#留存不是“用户回来了”，而是“用户有留下来的理由”" class="headerlink" title="留存不是“用户回来了”，而是“用户有留下来的理由”"></a>留存不是“用户回来了”，而是“用户有留下来的理由”</h2><p>很多人把留存理解成“用户回访率”：7日留存、30日留存等。</p>
+<p>但<strong>留存的本质是价值持续交付</strong>：</p>
+<blockquote>
+<p>用户回来了，是因为他<strong>上次用过觉得值得</strong>，<br> 并且他相信这次还会获得类似的价值。</p>
+</blockquote>
+<p>留存不是一个“被动指标”，而是一套<strong>由价值感知、行为引导、内容更新、信任机制构成的系统工程</strong>。</p>
+<hr>
+<h2 id="二、构建留存系统的五大核心要素"><a href="#二、构建留存系统的五大核心要素" class="headerlink" title="二、构建留存系统的五大核心要素"></a>二、构建留存系统的五大核心要素</h2><h3 id="1-价值记忆点：用户是否记住了你曾带来的好处？"><a href="#1-价值记忆点：用户是否记住了你曾带来的好处？" class="headerlink" title="1. 价值记忆点：用户是否记住了你曾带来的好处？"></a>1. 价值记忆点：用户是否记住了你曾带来的好处？</h3><p>不是用户离开了，而是他忘了你。</p>
+<ul>
+<li>你有没有创造一个“被记住的瞬间”？（比如GPT第一次写出一篇像样的稿子）</li>
+<li>你有没有强化用户的“成就感”？（比如Notion的看板整理后带来的秩序感）</li>
+<li>你有没有建立“心理锚点”？（用户面对任务时第一时间想到你）</li>
+</ul>
+<blockquote>
+<p>留存的第一步，不是让用户回来，而是让他“记得你曾好用”。</p>
+</blockquote>
+<hr>
+<h3 id="2-行为惯性设计：用户是否能轻松重复使用？"><a href="#2-行为惯性设计：用户是否能轻松重复使用？" class="headerlink" title="2. 行为惯性设计：用户是否能轻松重复使用？"></a>2. 行为惯性设计：用户是否能轻松重复使用？</h3><p>人类是懒惰动物。只要路径复杂、认知负担高，就会中断行为。</p>
+<ul>
+<li>有没有“下一次使用更简单”的设计？</li>
+<li>是否有自动化、快捷入口、默认配置？</li>
+<li>用户是否“越用越顺手”？</li>
+</ul>
+<p>比如：</p>
+<ul>
+<li>Canva 记住你上次的设计风格；</li>
+<li>滴滴记住你常用出发点；</li>
+<li>ChatGPT 自动续上上次话题。</li>
+</ul>
+<p><strong>每降低1个操作阻力，就提升一层留存概率。</strong></p>
+<hr>
+<h3 id="3-内容-数据更新机制：产品是否有“动态感”？"><a href="#3-内容-数据更新机制：产品是否有“动态感”？" class="headerlink" title="3. 内容/数据更新机制：产品是否有“动态感”？"></a>3. 内容/数据更新机制：产品是否有“动态感”？</h3><p>一个静态产品是留不住用户的。</p>
+<ul>
+<li>内容是否每天有新变化？（社区/内容类）</li>
+<li>结果是否随着用户行为而更新？（工具类）</li>
+<li>数据是否随时间发生变化？（分析/个人类）</li>
+</ul>
+<p>例子：</p>
+<ul>
+<li>抖音的视频每天都不一样；</li>
+<li>Notion中的任务看板每天都在动；</li>
+<li>AI工具的结果随着提示词微调而变化。</li>
+</ul>
+<blockquote>
+<p>用户不是回来“看你”，而是回来“看他自己”。</p>
+</blockquote>
+<hr>
+<h3 id="4-通知-召回机制：你是否“合适地提醒”了用户？"><a href="#4-通知-召回机制：你是否“合适地提醒”了用户？" class="headerlink" title="4. 通知/召回机制：你是否“合适地提醒”了用户？"></a>4. 通知/召回机制：你是否“合适地提醒”了用户？</h3><p>很多用户是想回来，但“被生活打断了”。<br> 你要设计合理的“召回点”：</p>
+<ul>
+<li>行为触发：你之前的报告已生成、你收藏的内容有更新；</li>
+<li>时间触发：你上次使用已过去3天，是否继续进度；</li>
+<li>成就/任务触发：你已完成80%，是否完成目标；</li>
+</ul>
+<p>注意：<strong>不要打扰式通知，要任务驱动式召回。</strong></p>
+<blockquote>
+<p>好的召回，不打扰，而是唤醒。</p>
+</blockquote>
+<hr>
+<h3 id="5-关系绑定：产品有没有“把用户的资产锁住”？"><a href="#5-关系绑定：产品有没有“把用户的资产锁住”？" class="headerlink" title="5. 关系绑定：产品有没有“把用户的资产锁住”？"></a>5. 关系绑定：产品有没有“把用户的资产锁住”？</h3><p>一个用户愿意留下来，往往是因为：</p>
+<ul>
+<li>他已经在你这沉淀了内容（知识/作品/历史记录）；</li>
+<li>他和其他人建立了连接（协作/评论/点赞/关注）；</li>
+<li>他已经投入了学习成本（理解你的逻辑，配置了偏好）；</li>
+</ul>
+<p>这些叫做“<strong>留存摩擦力</strong>”——摩擦越大，用户越难离开。</p>
+<p>但前提是：这些资产必须是<strong>有感知的、有用的、有累积性的</strong>。</p>
+<hr>
+<h2 id="三种典型留存系统设计模式"><a href="#三种典型留存系统设计模式" class="headerlink" title="三种典型留存系统设计模式"></a>三种典型留存系统设计模式</h2><h3 id="1-内容更新驱动型（如知乎、小红书）"><a href="#1-内容更新驱动型（如知乎、小红书）" class="headerlink" title="1. 内容更新驱动型（如知乎、小红书）"></a>1. 内容更新驱动型（如知乎、小红书）</h3><p>机制逻辑：</p>
+<blockquote>
+<p>用户消费内容 → 平台根据兴趣推荐更多内容 → 每次回来都不重样 → 建立习惯</p>
+</blockquote>
+<p>核心要素：</p>
+<ul>
+<li>精准兴趣建模；</li>
+<li>稳定的更新频率；</li>
+<li>强推荐算法 or 编辑能力；</li>
+</ul>
+<p>适合内容类社区、资讯产品、短视频平台。</p>
+<hr>
+<h3 id="2-工具习惯养成型（如Notion、TickTick、Midjourney）"><a href="#2-工具习惯养成型（如Notion、TickTick、Midjourney）" class="headerlink" title="2. 工具习惯养成型（如Notion、TickTick、Midjourney）"></a>2. 工具习惯养成型（如Notion、TickTick、Midjourney）</h3><p>机制逻辑：</p>
+<blockquote>
+<p>用户解决任务 → 每次使用都有效果 → 用得越多，配置越丰富 → 留存越稳</p>
+</blockquote>
+<p>核心要素：</p>
+<ul>
+<li>使用价值强；</li>
+<li>越用越顺手；</li>
+<li>明显的“我完成了什么”反馈感；</li>
+</ul>
+<p>适合效率工具、AI工具、协作工具。</p>
+<hr>
+<h3 id="3-网络协作关系型（如Slack、飞书）"><a href="#3-网络协作关系型（如Slack、飞书）" class="headerlink" title="3. 网络协作关系型（如Slack、飞书）"></a>3. 网络协作关系型（如Slack、飞书）</h3><p>机制逻辑：</p>
+<blockquote>
+<p>多人共同使用 → 有效协作 → 网络结构稳定 → 用户绑定在网络中</p>
+</blockquote>
+<p>核心要素：</p>
+<ul>
+<li>邀请机制强；</li>
+<li>多人使用价值远高于单人；</li>
+<li>数据、信息天然在“多人关系中流转”；</li>
+</ul>
+<p>适合B端、组织类、社交类产品。</p>
+<hr>
+<h2 id="技术产品留存常见的三个误区"><a href="#技术产品留存常见的三个误区" class="headerlink" title="技术产品留存常见的三个误区"></a>技术产品留存常见的三个误区</h2><h3 id="误区一：留存靠“运营活动”撑起来"><a href="#误区一：留存靠“运营活动”撑起来" class="headerlink" title="误区一：留存靠“运营活动”撑起来"></a>误区一：留存靠“运营活动”撑起来</h3><p>打卡、送积分、搞抽奖，初期确实有用。<br> 但如果没有产品价值支撑，这些“拉活跃”只会成为“用户焦虑制造机”。</p>
+<p>留存要靠产品内驱动，不是外部奖励维持。</p>
+<hr>
+<h3 id="误区二：以为“功能越来越多”就能留住用户"><a href="#误区二：以为“功能越来越多”就能留住用户" class="headerlink" title="误区二：以为“功能越来越多”就能留住用户"></a>误区二：以为“功能越来越多”就能留住用户</h3><p>你需要的是“能用”、不是“什么都有”。<br> 多功能反而让用户选择困难、路径复杂、决策疲惫。</p>
+<blockquote>
+<p>留存靠的是熟练度和舒适感，不是炫技。</p>
+</blockquote>
+<hr>
+<h3 id="误区三：只盯着“留存率”看，不分析“留存人群”"><a href="#误区三：只盯着“留存率”看，不分析“留存人群”" class="headerlink" title="误区三：只盯着“留存率”看，不分析“留存人群”"></a>误区三：只盯着“留存率”看，不分析“留存人群”</h3><p>30%留存，看起来不错。但你要看：</p>
+<ul>
+<li>是新用户留下的，还是老用户？</li>
+<li>是活跃的留下，还是注册不动的还没流失？</li>
+<li>是A渠道的留得住，还是B渠道流失快？</li>
+</ul>
+<p><strong>好的产品，要留住“对的人”。</strong></p>
+<hr>
+<h2 id="写在最后：留存，是产品真正的护城河"><a href="#写在最后：留存，是产品真正的护城河" class="headerlink" title="写在最后：留存，是产品真正的护城河"></a>写在最后：留存，是产品真正的护城河</h2><p>再快的增长，如果留不住用户，都是“表面红利”。<br> 真正的技术产品，不是“一次使用”，而是“持续价值交付”。</p>
+<blockquote>
+<p>留存不是一个指标，而是一种<strong>信任关系的建立机制</strong>。</p>
+</blockquote>
+<p>用户每一次回来，都是在对你说一句：</p>
+<p><strong>“我还愿意相信你。”</strong></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/04/13/product-thinking-08/" rel="prev" title="技术不是优势，是杠杆">
+      <i class="fa fa-chevron-left"></i> 技术不是优势，是杠杆
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/04/13/product-thinking-06/" rel="next" title="技术产品增长飞轮的构建逻辑">
+      技术产品增长飞轮的构建逻辑 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%95%99%E5%AD%98%E4%B8%8D%E6%98%AF%E2%80%9C%E7%94%A8%E6%88%B7%E5%9B%9E%E6%9D%A5%E4%BA%86%E2%80%9D%EF%BC%8C%E8%80%8C%E6%98%AF%E2%80%9C%E7%94%A8%E6%88%B7%E6%9C%89%E7%95%99%E4%B8%8B%E6%9D%A5%E7%9A%84%E7%90%86%E7%94%B1%E2%80%9D"><span class="nav-number">1.</span> <span class="nav-text">留存不是“用户回来了”，而是“用户有留下来的理由”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%9E%84%E5%BB%BA%E7%95%99%E5%AD%98%E7%B3%BB%E7%BB%9F%E7%9A%84%E4%BA%94%E5%A4%A7%E6%A0%B8%E5%BF%83%E8%A6%81%E7%B4%A0"><span class="nav-number">2.</span> <span class="nav-text">二、构建留存系统的五大核心要素</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%BB%B7%E5%80%BC%E8%AE%B0%E5%BF%86%E7%82%B9%EF%BC%9A%E7%94%A8%E6%88%B7%E6%98%AF%E5%90%A6%E8%AE%B0%E4%BD%8F%E4%BA%86%E4%BD%A0%E6%9B%BE%E5%B8%A6%E6%9D%A5%E7%9A%84%E5%A5%BD%E5%A4%84%EF%BC%9F"><span class="nav-number">2.1.</span> <span class="nav-text">1. 价值记忆点：用户是否记住了你曾带来的好处？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E8%A1%8C%E4%B8%BA%E6%83%AF%E6%80%A7%E8%AE%BE%E8%AE%A1%EF%BC%9A%E7%94%A8%E6%88%B7%E6%98%AF%E5%90%A6%E8%83%BD%E8%BD%BB%E6%9D%BE%E9%87%8D%E5%A4%8D%E4%BD%BF%E7%94%A8%EF%BC%9F"><span class="nav-number">2.2.</span> <span class="nav-text">2. 行为惯性设计：用户是否能轻松重复使用？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%86%85%E5%AE%B9-%E6%95%B0%E6%8D%AE%E6%9B%B4%E6%96%B0%E6%9C%BA%E5%88%B6%EF%BC%9A%E4%BA%A7%E5%93%81%E6%98%AF%E5%90%A6%E6%9C%89%E2%80%9C%E5%8A%A8%E6%80%81%E6%84%9F%E2%80%9D%EF%BC%9F"><span class="nav-number">2.3.</span> <span class="nav-text">3. 内容&#x2F;数据更新机制：产品是否有“动态感”？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E9%80%9A%E7%9F%A5-%E5%8F%AC%E5%9B%9E%E6%9C%BA%E5%88%B6%EF%BC%9A%E4%BD%A0%E6%98%AF%E5%90%A6%E2%80%9C%E5%90%88%E9%80%82%E5%9C%B0%E6%8F%90%E9%86%92%E2%80%9D%E4%BA%86%E7%94%A8%E6%88%B7%EF%BC%9F"><span class="nav-number">2.4.</span> <span class="nav-text">4. 通知&#x2F;召回机制：你是否“合适地提醒”了用户？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%85%B3%E7%B3%BB%E7%BB%91%E5%AE%9A%EF%BC%9A%E4%BA%A7%E5%93%81%E6%9C%89%E6%B2%A1%E6%9C%89%E2%80%9C%E6%8A%8A%E7%94%A8%E6%88%B7%E7%9A%84%E8%B5%84%E4%BA%A7%E9%94%81%E4%BD%8F%E2%80%9D%EF%BC%9F"><span class="nav-number">2.5.</span> <span class="nav-text">5. 关系绑定：产品有没有“把用户的资产锁住”？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E7%A7%8D%E5%85%B8%E5%9E%8B%E7%95%99%E5%AD%98%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">三种典型留存系统设计模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%86%85%E5%AE%B9%E6%9B%B4%E6%96%B0%E9%A9%B1%E5%8A%A8%E5%9E%8B%EF%BC%88%E5%A6%82%E7%9F%A5%E4%B9%8E%E3%80%81%E5%B0%8F%E7%BA%A2%E4%B9%A6%EF%BC%89"><span class="nav-number">3.1.</span> <span class="nav-text">1. 内容更新驱动型（如知乎、小红书）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%B7%A5%E5%85%B7%E4%B9%A0%E6%83%AF%E5%85%BB%E6%88%90%E5%9E%8B%EF%BC%88%E5%A6%82Notion%E3%80%81TickTick%E3%80%81Midjourney%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">2. 工具习惯养成型（如Notion、TickTick、Midjourney）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E7%BD%91%E7%BB%9C%E5%8D%8F%E4%BD%9C%E5%85%B3%E7%B3%BB%E5%9E%8B%EF%BC%88%E5%A6%82Slack%E3%80%81%E9%A3%9E%E4%B9%A6%EF%BC%89"><span class="nav-number">3.3.</span> <span class="nav-text">3. 网络协作关系型（如Slack、飞书）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E4%BA%A7%E5%93%81%E7%95%99%E5%AD%98%E5%B8%B8%E8%A7%81%E7%9A%84%E4%B8%89%E4%B8%AA%E8%AF%AF%E5%8C%BA"><span class="nav-number">4.</span> <span class="nav-text">技术产品留存常见的三个误区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%AF%E5%8C%BA%E4%B8%80%EF%BC%9A%E7%95%99%E5%AD%98%E9%9D%A0%E2%80%9C%E8%BF%90%E8%90%A5%E6%B4%BB%E5%8A%A8%E2%80%9D%E6%92%91%E8%B5%B7%E6%9D%A5"><span class="nav-number">4.1.</span> <span class="nav-text">误区一：留存靠“运营活动”撑起来</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%AF%E5%8C%BA%E4%BA%8C%EF%BC%9A%E4%BB%A5%E4%B8%BA%E2%80%9C%E5%8A%9F%E8%83%BD%E8%B6%8A%E6%9D%A5%E8%B6%8A%E5%A4%9A%E2%80%9D%E5%B0%B1%E8%83%BD%E7%95%99%E4%BD%8F%E7%94%A8%E6%88%B7"><span class="nav-number">4.2.</span> <span class="nav-text">误区二：以为“功能越来越多”就能留住用户</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%AF%E5%8C%BA%E4%B8%89%EF%BC%9A%E5%8F%AA%E7%9B%AF%E7%9D%80%E2%80%9C%E7%95%99%E5%AD%98%E7%8E%87%E2%80%9D%E7%9C%8B%EF%BC%8C%E4%B8%8D%E5%88%86%E6%9E%90%E2%80%9C%E7%95%99%E5%AD%98%E4%BA%BA%E7%BE%A4%E2%80%9D"><span class="nav-number">4.3.</span> <span class="nav-text">误区三：只盯着“留存率”看，不分析“留存人群”</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E%EF%BC%9A%E7%95%99%E5%AD%98%EF%BC%8C%E6%98%AF%E4%BA%A7%E5%93%81%E7%9C%9F%E6%AD%A3%E7%9A%84%E6%8A%A4%E5%9F%8E%E6%B2%B3"><span class="nav-number">5.</span> <span class="nav-text">写在最后：留存，是产品真正的护城河</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在传统的Java编程范式中，方法调用是一种静态链接的行为。编译器在编译时就确定了方法的调用目标，这种早期绑定的机制虽然简单高效，但在面对动态语言和函数式编程等新兴编程范式时，显得有些力不从心。为了更好地支持这些动态特性，JVM在Java 7中引入了invokedynamic指令。invokedynamic指令的出现，使得JVM能够像动态语言一样，在运行时动态地确定方法调用的目标。这不仅为Java语">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM的invokedynamic方法调用">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/03/04/JVM-method-invokedynamic/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="在传统的Java编程范式中，方法调用是一种静态链接的行为。编译器在编译时就确定了方法的调用目标，这种早期绑定的机制虽然简单高效，但在面对动态语言和函数式编程等新兴编程范式时，显得有些力不从心。为了更好地支持这些动态特性，JVM在Java 7中引入了invokedynamic指令。invokedynamic指令的出现，使得JVM能够像动态语言一样，在运行时动态地确定方法调用的目标。这不仅为Java语">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-03-04T12:33:26.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.338Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/03/04/JVM-method-invokedynamic/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>JVM的invokedynamic方法调用 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/03/04/JVM-method-invokedynamic/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JVM的invokedynamic方法调用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-03-04 20:33:26" itemprop="dateCreated datePublished" datetime="2025-03-04T20:33:26+08:00">2025-03-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在传统的Java编程范式中，方法调用是一种静态链接的行为。编译器在编译时就确定了方法的调用目标，这种早期绑定的机制虽然简单高效，但在面对动态语言和函数式编程等新兴编程范式时，显得有些力不从心。为了更好地支持这些动态特性，JVM在Java 7中引入了invokedynamic指令。invokedynamic指令的出现，使得JVM能够像动态语言一样，在运行时动态地确定方法调用的目标。这不仅为Java语言带来了更大的灵活性，也为其他动态语言在JVM上的运行提供了更高效的支持。通过invokedynamic，Java可以更自然地表达和实现函数式编程的概念，如Lambda表达式等。</p>
+<span id="more"></span>
+
+<p>在JSR 292（“Supporting Dynamically Typed Languages on the Java Platform”）提出了一条全新的字节码指令：**<code>invokedynamic</code>**。它允许把方法的选择、链接、调用过程延迟到真正运行时，通过可插拔的“引导方法”（<code>Bootstrap Method</code>）让开发者或语言实现来决定实际要调用什么方法、如何拼装调用参数等。这样做不仅灵活，而且一旦绑定好之后，JVM 还能配合内联缓存（Inline Cache）和即时编译（JIT）进行优化，使后续调用速度接近甚至达到普通静态语言调用的水平。</p>
+<h3 id="在-class-文件中的结构"><a href="#在-class-文件中的结构" class="headerlink" title="在 class` 文件中的结构"></a>在 class` 文件中的结构</h3><p>CONSTANT_InvokeDynamic_info</p>
+<p>在 Java 7 及之后的 <code>.class</code> 文件规范中，新增了一个名为 <code>CONSTANT_InvokeDynamic</code> 的常量池结构（常量类型 tag = 18），用来表示某个 <code>invokedynamic</code> 调用点的信息。这个结构通常包含：</p>
+<ul>
+<li><code>bootstrap_method_attr_index</code>：指向引导方法（Bootstrap Method）在 <code>BootstrapMethods</code> 属性表中的索引；</li>
+<li><code>name_and_type_index</code>：指向 <code>CONSTANT_NameAndType_info</code>，标识了在编译期记录的“方法名”和“方法类型”（也就是 <code>invokedynamic</code> 指令希望调用的方法名称和描述符）；</li>
+</ul>
+<p>当我们在字节码中看到一条指令写着</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">invokedynamic #2</span><br></pre></td></tr></table></figure>
+
+<p>这个 #2 正是指向常量池中某个 <code>CONSTANT_InvokeDynamic_info</code>。当指令首次执行时，JVM 也会透过这个常量项找到对应的引导方法及相应参数，进而完成动态链接。</p>
+<p><strong>BootstrapMethods</strong></p>
+<p>为了让 invokedynamic 更灵活，JVM 需要知道“首次链接时要调用哪个引导方法（Bootstrap Method）以及要传给它哪些附加常量参数”。这个信息放在 <code>.class</code> 文件的一个可选属性：BootstrapMethods中。</p>
+<ul>
+<li>每个 <code>BootstrapMethods</code> 属性包含一个或多个 <code>bootstrap_methods</code> 项；</li>
+<li>每个 bootstrap_methods项里记录：<ul>
+<li><code>bootstrap_method_ref</code>：对应一个 <code>CONSTANT_MethodHandle_info</code>，标识哪个方法句柄是真正的“引导方法”；</li>
+<li><code>num_bootstrap_arguments</code>：附加参数的数量；</li>
+<li><code>bootstrap_arguments[]</code>：紧随其后的参数列表，每个参数可以是 <code>CONSTANT_String</code>、<code>CONSTANT_Class</code>、<code>CONSTANT_Integer</code> 等等任何常量池元素。</li>
+</ul>
+</li>
+</ul>
+<p>当 <code>invokedynamic</code> 首次被执行时，JVM 会读出 <code>CONSTANT_InvokeDynamic_info</code> 里的 <code>bootstrap_method_attr_index</code>，然后从 <code>BootstrapMethods</code> 属性中取出相应的引导方法与它的参数，最终调用它来完成真正的方法链接。</p>
+<p>以上流程就是 invokedynamic #2 → 找到 <code>CONSTANT_InvokeDynamic_info</code> → 指向某个引导方法索引。该引导方法索引在 <code>BootstrapMethods</code> 里是一个 <code>CONSTANT_MethodHandle_info</code>（标识真正要执行的方法）+ 参数。JVM 首次执行会调用这个 method handle，完成链接，然后把返回的 <code>CallSite</code> 绑到这个调用点上。</p>
+<h3 id="invokedynamic指令的核心机制"><a href="#invokedynamic指令的核心机制" class="headerlink" title="invokedynamic指令的核心机制"></a>invokedynamic指令的核心机制</h3><p>invokedynamic指令的核心在于其动态方法调用机制，这种机制主要依赖于以下几个关键概念：</p>
+<h5 id="调用点（CallSite）"><a href="#调用点（CallSite）" class="headerlink" title="调用点（CallSite）"></a>调用点（CallSite）</h5><p>调用点是invokedynamic指令的基础，它表示一个方法调用的位置。在JVM中，调用点被抽象成一个Java类，每个调用点都有一个方法句柄（MethodHandle）与之关联。方法句柄就像是一个指向方法的指针，它保存了方法的调用信息，如方法的所有者类、方法名、参数类型和返回类型等。</p>
+<p>调用点分为两种类型：**动态调用点（DynamicCallSite）**和**静态调用点（StaticCallSite）**。动态调用点在每次调用时都会重新计算方法句柄，而静态调用点则在第一次调用时计算方法句柄，并在后续调用中复用。这种设计使得JVM能够在灵活性和性能之间取得平衡。</p>
+<h5 id="引导方法（Bootstrap-Method）"><a href="#引导方法（Bootstrap-Method）" class="headerlink" title="引导方法（Bootstrap Method）"></a>引导方法（Bootstrap Method）</h5><p>引导方法是invokedynamic指令的另一个关键概念。它是一个在类加载时被调用的静态方法，用于初始化调用点。引导方法的职责是根据调用点的描述符（descriptor），计算并返回一个方法句柄。这个方法句柄将被绑定到调用点，并在后续的方法调用中使用。</p>
+<p>引导方法的签名必须符合特定的规范。它必须是一个静态方法，返回类型为CallSite，并且参数类型必须是MethodHandles.Lookup、String和MethodType。MethodHandles.Lookup提供了对类内部方法的访问权限，String是调用点的名称，MethodType描述了调用点的参数和返回类型。</p>
+<h5 id="方法句柄（MethodHandle）"><a href="#方法句柄（MethodHandle）" class="headerlink" title="方法句柄（MethodHandle）"></a>方法句柄（MethodHandle）</h5><p>方法句柄是invokedynamic指令的核心数据结构。可以理解为“对一个方法或字段的直接可调用引用” 。它类似于函数指针，但更加安全和灵活。方法句柄保存了方法的调用信息，如方法的所有者类、方法名、参数类型和返回类型等。它和 <code>java.lang.reflect.Method</code> 很像，但却是轻量级、强类型、且更易被 JIT 内联的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MethodHandle mh = MethodHandles.lookup()</span><br><span class="line">    .findStatic(A.class, <span class="string">&quot;aMethod&quot;</span>, MethodType.methodType(...));</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>在动态调用场景下，引导方法通常会组装出一个或多个 <code>MethodHandle</code>，并最终将它们返回给 JVM 用作执行目标。由于 <code>MethodHandle</code> 有一套灵活的适配器函数，如 <code>bindTo</code>、<code>asType</code>、<code>dropArguments</code>、<code>foldArguments</code> 等，让我们可以在不改变原方法本体的情况下对参数或返回值进行使用，满足动态语言各种“形参可能不确定”的需求。</p>
+<p>方法句柄有两种类型：直接方法句柄（Direct MethodHandle）和间接方法句柄（Indirect MethodHandle）。直接方法句柄直接指向一个具体的方法，而间接方法句柄则通过一个中间的调用点来间接引用一个方法。间接方法句柄的设计使得JVM能够在运行时动态地改变方法的调用目标。</p>
+<p>MethodHandle封装具体的可调用逻辑及其签名，CallSite为特定的动态调用点管理一个或可变或固定的 MethodHandle  target</p>
+<p>。invokedynamic将二者结合，由引导方法产生一个 CallSite，再把这个调用点与其 target 牢牢绑定。</p>
+<h3 id="invokedynamic-的执行流程："><a href="#invokedynamic-的执行流程：" class="headerlink" title="invokedynamic 的执行流程："></a>invokedynamic 的执行流程：</h3><ol>
+<li><p><strong>类加载、常量池初始化</strong><br>当类被加载时，JVM 会读取其常量池信息，发现有若干 <code>CONSTANT_InvokeDynamic_info</code> 以及一个 <code>BootstrapMethods</code> 属性，但并不会立刻去执行任何引导方法。<code>invokedynamic</code> 的链接是“延迟到实际用到时”才发生的。</p>
+</li>
+<li><p><strong>首次遇到 <code>invokedynamic</code> 指令</strong><br>程序计数器（PC）指向某条 <code>invokedynamic</code> 指令，这是它的首次执行。JVM 看到这是一个尚未解析绑定的动态调用点，于是开始解析它：</p>
+<ul>
+<li>找到 <code>CONSTANT_InvokeDynamic_info</code>；</li>
+<li>解析到 <code>bootstrap_method_attr_index</code>；</li>
+<li>在 <code>BootstrapMethods</code> 属性里取出对应的 <code>CONSTANT_MethodHandle_info</code>（引导方法本身）和所有附加参数；</li>
+<li>调用该方法句柄（即引导方法），并将 <code>MethodHandles.Lookup</code>、方法名（<code>invokedName</code>）、方法类型（<code>invokedType</code>），以及从常量池来的额外参数一起传进去。</li>
+</ul>
+</li>
+<li><p><strong>引导方法执行</strong><br>引导方法通常由开发者或语言实现者编写，签名一般类似于：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public static CallSite bootstrap(</span><br><span class="line">    MethodHandles.Lookup caller,</span><br><span class="line">    String invokedName,</span><br><span class="line">    MethodType invokedType,</span><br><span class="line">) throws Throwable &#123;</span><br><span class="line">  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>它可以根据 <code>invokedName</code>、<code>invokedType</code> 乃至额外的参数进行逻辑判断，构造出正确的 <code>MethodHandle</code>；</li>
+<li>然后将这个句柄封装进某个 <code>CallSite</code> 并返回给 JVM。</li>
+</ul>
+</li>
+<li><p><strong>链接完成，缓存 <code>CallSite</code></strong><br>JVM 拿到引导方法返回的 <code>CallSite</code> 后，会将其 target（<code>MethodHandle</code>）与该调用点进行缓存和关联。将来同一条 <code>invokedynamic</code> 再被执行，就直接调用这个缓存下来的句柄，而不是再去执行引导方法。</p>
+</li>
+<li><p><strong>后续可选更新</strong><br>如果是 <code>MutableCallSite</code> 或 <code>VolatileCallSite</code>，在运行过程中还可以通过特定 API 替换 target，使后续调用分派到新的方法。这对于动态语言的多态场景、元编程功能极其有用。</p>
+</li>
+</ol>
+<p>如此一来，每个 <code>invokedynamic</code> 指令就像一个带有可定制链接逻辑的调用点：第一次使用时需要“用引导方法来打开包装”，后面就能直接用缓存的内容，性能与普通静态调用非常接近。这就是 JVM “一次引导，多次复用” 的动态链接设计。</p>
+<h3 id="invokedynamic指令的应用场景"><a href="#invokedynamic指令的应用场景" class="headerlink" title="invokedynamic指令的应用场景"></a>invokedynamic指令的应用场景</h3><h5 id="Lambda-表达式"><a href="#Lambda-表达式" class="headerlink" title="Lambda 表达式"></a>Lambda 表达式</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Runnable r = () -&gt; System.out.println(<span class="string">&quot;Hello Lambda!&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">List&lt;String&gt; names = Arrays.asList(<span class="string">&quot;A&quot;</span>, <span class="string">&quot;B&quot;</span>, <span class="string">&quot;C&quot;</span>);</span><br><span class="line">names.sort((a, b) -&gt; a.compareTo(b));</span><br></pre></td></tr></table></figure>
+
+
+
+<p>在Java 8之前，Lambda表达式需要编译为匿名内部类。这种方式存在以下问题：每个Lambda生成独立类文件，增加部署体积,隐式持有外部类引用可能导致内存泄漏.初始化开销影响性能。 通过<code>invokedynamic</code>，Java编译器将Lambda表达式转换为私有方法，并通过动态调用机制生成适配器类（Adapter Class）10。这种方式实现了零额外类文件生成，且支持运行时优</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/03/03/constitency-and-manager/" rel="prev" title="分布式一致性与管理">
+      <i class="fa fa-chevron-left"></i> 分布式一致性与管理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/03/04/JVM-method-invoke/" rel="next" title="JVM方法调用">
+      JVM方法调用 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8-class-%E6%96%87%E4%BB%B6%E4%B8%AD%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">在 class&#96; 文件中的结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#invokedynamic%E6%8C%87%E4%BB%A4%E7%9A%84%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6"><span class="nav-number">2.</span> <span class="nav-text">invokedynamic指令的核心机制</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E7%82%B9%EF%BC%88CallSite%EF%BC%89"><span class="nav-number">2.0.1.</span> <span class="nav-text">调用点（CallSite）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BC%95%E5%AF%BC%E6%96%B9%E6%B3%95%EF%BC%88Bootstrap-Method%EF%BC%89"><span class="nav-number">2.0.2.</span> <span class="nav-text">引导方法（Bootstrap Method）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E5%8F%A5%E6%9F%84%EF%BC%88MethodHandle%EF%BC%89"><span class="nav-number">2.0.3.</span> <span class="nav-text">方法句柄（MethodHandle）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#invokedynamic-%E7%9A%84%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%EF%BC%9A"><span class="nav-number">3.</span> <span class="nav-text">invokedynamic 的执行流程：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#invokedynamic%E6%8C%87%E4%BB%A4%E7%9A%84%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">4.</span> <span class="nav-text">invokedynamic指令的应用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Lambda-%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">4.0.1.</span> <span class="nav-text">Lambda 表达式</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

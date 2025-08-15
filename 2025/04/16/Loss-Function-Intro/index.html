@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="损失函数（Loss Function）听起来可能很深奥，但其实用大白话解释起来特别简单：它就像是给神经网络或模型打分的裁判，告诉模型：“你离正确答案差了多少”。 什么是损失函数？简单来说，损失函数用来衡量模型预测的结果和真实结果之间的差距。想象一下你考试后老师打分的过程，满分是100分，如果你的答案和正确答案差距很大，分数就低（损失大）；如果答案接近正确答案，分数就高（损失小）。 损失函数的目的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大白话解释损失函数">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/04/16/Loss-Function-Intro/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="损失函数（Loss Function）听起来可能很深奥，但其实用大白话解释起来特别简单：它就像是给神经网络或模型打分的裁判，告诉模型：“你离正确答案差了多少”。 什么是损失函数？简单来说，损失函数用来衡量模型预测的结果和真实结果之间的差距。想象一下你考试后老师打分的过程，满分是100分，如果你的答案和正确答案差距很大，分数就低（损失大）；如果答案接近正确答案，分数就高（损失小）。 损失函数的目的">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-04-16T14:11:41.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.338Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="架构">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/04/16/Loss-Function-Intro/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>大白话解释损失函数 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/04/16/Loss-Function-Intro/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          大白话解释损失函数
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-04-16 22:11:41" itemprop="dateCreated datePublished" datetime="2025-04-16T22:11:41+08:00">2025-04-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AI/" itemprop="url" rel="index"><span itemprop="name">AI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <span id="more"></span>
+<p>损失函数（Loss Function）听起来可能很深奥，但其实用大白话解释起来特别简单：它就像是给神经网络或模型打分的裁判，告诉模型：“你离正确答案差了多少”。</p>
+<h2 id="什么是损失函数？"><a href="#什么是损失函数？" class="headerlink" title="什么是损失函数？"></a>什么是损失函数？</h2><p>简单来说，损失函数用来衡量模型预测的结果和真实结果之间的差距。想象一下你考试后老师打分的过程，满分是100分，如果你的答案和正确答案差距很大，分数就低（损失大）；如果答案接近正确答案，分数就高（损失小）。</p>
+<p>损失函数的目的就是帮助模型“知道”自己表现得如何，进而指导模型如何调整，以获得更好的预测结果。</p>
+<h2 id="损失函数的常见类型"><a href="#损失函数的常见类型" class="headerlink" title="损失函数的常见类型"></a>损失函数的常见类型</h2><p>虽然损失函数种类很多，但以下几种最常见、最容易理解：</p>
+<h3 id="1-均方误差（Mean-Squared-Error-MSE）"><a href="#1-均方误差（Mean-Squared-Error-MSE）" class="headerlink" title="1. 均方误差（Mean Squared Error, MSE）"></a>1. 均方误差（Mean Squared Error, MSE）</h3><p>均方误差就像在预测考试成绩时，看你预测的分数与实际分数之间差距的平方平均值。比如你预测了三个同学的考试分数：90、85、78，而他们实际分数分别是88、90、80，那你的预测误差就用差值的平方来计算，越小代表预测得越准确。</p>
+<h3 id="2-平均绝对误差（Mean-Absolute-Error-MAE）"><a href="#2-平均绝对误差（Mean-Absolute-Error-MAE）" class="headerlink" title="2. 平均绝对误差（Mean Absolute Error, MAE）"></a>2. 平均绝对误差（Mean Absolute Error, MAE）</h3><p>平均绝对误差则更直观一点，就是直接看预测值与真实值之间的绝对差距，然后取个平均值。比如前面的例子中，你不平方差值，直接算出差距绝对值再平均一下。</p>
+<h3 id="3-交叉熵损失（Cross-Entropy-Loss）"><a href="#3-交叉熵损失（Cross-Entropy-Loss）" class="headerlink" title="3. 交叉熵损失（Cross Entropy Loss）"></a>3. 交叉熵损失（Cross Entropy Loss）</h3><p>交叉熵损失常用于分类问题，比如预测一个邮件是否垃圾邮件。交叉熵衡量的是预测概率与真实类别之间的差距。预测越接近真实类别，交叉熵就越小，反之则越大。</p>
+<h2 id="损失函数在神经网络中的作用"><a href="#损失函数在神经网络中的作用" class="headerlink" title="损失函数在神经网络中的作用"></a>损失函数在神经网络中的作用</h2><p>神经网络训练过程其实就是一个不断减小损失的过程。每次神经网络预测一个结果后，损失函数都会告诉网络：“你错得有点离谱！”或者“不错，这次预测得很准确！”，网络根据这些反馈一步步调整自己的参数，逐渐降低损失值，最终达到较高的预测准确性。</p>
+<h2 id="如何选择合适的损失函数？"><a href="#如何选择合适的损失函数？" class="headerlink" title="如何选择合适的损失函数？"></a>如何选择合适的损失函数？</h2><ul>
+<li>回归问题（预测具体数值，如房价）：通常用均方误差或平均绝对误差。</li>
+<li>分类问题（如是否为垃圾邮件）：通常用交叉熵损失。</li>
+</ul>
+<p>选择正确的损失函数，可以显著提升模型性能。</p>
+<h2 id="损失函数的实际应用"><a href="#损失函数的实际应用" class="headerlink" title="损失函数的实际应用"></a>损失函数的实际应用</h2><h3 id="1-金融预测"><a href="#1-金融预测" class="headerlink" title="1. 金融预测"></a>1. 金融预测</h3><p>股票价格预测、风险评估时通常使用均方误差来衡量预测的准确性。</p>
+<h3 id="2-图像识别"><a href="#2-图像识别" class="headerlink" title="2. 图像识别"></a>2. 图像识别</h3><p>模型识别图像类别（例如动物分类）通常使用交叉熵损失。</p>
+<h3 id="3-医学诊断"><a href="#3-医学诊断" class="headerlink" title="3. 医学诊断"></a>3. 医学诊断</h3><p>诊断疾病时模型需要极高的精确度，通常也采用交叉熵损失。</p>
+<h2 id="损失函数可能遇到的问题"><a href="#损失函数可能遇到的问题" class="headerlink" title="损失函数可能遇到的问题"></a>损失函数可能遇到的问题</h2><p>虽然损失函数看起来简单明确，但实际中也有一些挑战：</p>
+<ul>
+<li>损失函数选择不当可能会导致模型优化困难。</li>
+<li>如果数据中异常值很多，均方误差会被异常值极大影响，而平均绝对误差会表现得更加稳定。</li>
+</ul>
+<p>因此，在选择损失函数时需要结合具体的数据特征和任务需求。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>损失函数是帮助模型理解自己表现好坏的关键工具。通过选择合适的损失函数，模型能够不断自我调整，逐渐接近最佳状态，让预测变得更准确、更可靠。理解了损失函数，你就掌握了模型学习和优化的核心原理之一！</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/04/16/report-observational-development/" rel="prev" title="可观测性发展调研报告">
+      <i class="fa fa-chevron-left"></i> 可观测性发展调研报告
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/04/16/dbh-Linear-Regression-Intro/" rel="next" title="大白话讲解线性回归">
+      大白话讲解线性回归 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">什么是损失函数？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%E7%9A%84%E5%B8%B8%E8%A7%81%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">损失函数的常见类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%9D%87%E6%96%B9%E8%AF%AF%E5%B7%AE%EF%BC%88Mean-Squared-Error-MSE%EF%BC%89"><span class="nav-number">2.1.</span> <span class="nav-text">1. 均方误差（Mean Squared Error, MSE）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%B9%B3%E5%9D%87%E7%BB%9D%E5%AF%B9%E8%AF%AF%E5%B7%AE%EF%BC%88Mean-Absolute-Error-MAE%EF%BC%89"><span class="nav-number">2.2.</span> <span class="nav-text">2. 平均绝对误差（Mean Absolute Error, MAE）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E4%BA%A4%E5%8F%89%E7%86%B5%E6%8D%9F%E5%A4%B1%EF%BC%88Cross-Entropy-Loss%EF%BC%89"><span class="nav-number">2.3.</span> <span class="nav-text">3. 交叉熵损失（Cross Entropy Loss）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%E5%9C%A8%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%AD%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">3.</span> <span class="nav-text">损失函数在神经网络中的作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E5%90%88%E9%80%82%E7%9A%84%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%EF%BC%9F"><span class="nav-number">4.</span> <span class="nav-text">如何选择合适的损失函数？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%E7%9A%84%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8"><span class="nav-number">5.</span> <span class="nav-text">损失函数的实际应用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E9%87%91%E8%9E%8D%E9%A2%84%E6%B5%8B"><span class="nav-number">5.1.</span> <span class="nav-text">1. 金融预测</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%9B%BE%E5%83%8F%E8%AF%86%E5%88%AB"><span class="nav-number">5.2.</span> <span class="nav-text">2. 图像识别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%8C%BB%E5%AD%A6%E8%AF%8A%E6%96%AD"><span class="nav-number">5.3.</span> <span class="nav-text">3. 医学诊断</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%E5%8F%AF%E8%83%BD%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">6.</span> <span class="nav-text">损失函数可能遇到的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

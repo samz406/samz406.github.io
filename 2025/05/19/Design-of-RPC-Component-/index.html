@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="设计一个高质量的 RPC 框架，需要从协议层、性能、安全、可维护性等多维度综合考量。下面按“大方向 → 细节要素”分层罗列主要关注点：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="设计一个高质量的RPC框架需要考虑的问题">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/05/19/Design-of-RPC-Component-/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="设计一个高质量的 RPC 框架，需要从协议层、性能、安全、可维护性等多维度综合考量。下面按“大方向 → 细节要素”分层罗列主要关注点：">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-05-19T13:35:33.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.335Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="架构">
+<meta property="article:tag" content="RPC">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/05/19/Design-of-RPC-Component-/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>设计一个高质量的RPC框架需要考虑的问题 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/05/19/Design-of-RPC-Component-/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          设计一个高质量的RPC框架需要考虑的问题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-05-19 21:35:33" itemprop="dateCreated datePublished" datetime="2025-05-19T21:35:33+08:00">2025-05-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">架构设计</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>设计一个高质量的 RPC 框架，需要从协议层、性能、安全、可维护性等多维度综合考量。下面按“大方向 → 细节要素”分层罗列主要关注点：</p>
+<span id="more"></span>
+
+
+<h2 id="一、协议与接口定义"><a href="#一、协议与接口定义" class="headerlink" title="一、协议与接口定义"></a>一、协议与接口定义</h2><ol>
+<li><p><strong>IDL（接口定义语言）</strong></p>
+<ul>
+<li>选择或设计简洁易读的 IDL（如 Protobuf、Thrift、Avro、gRPC 的 .proto）</li>
+<li>支持接口演进：字段可选/必填、字段号重用规则、向后兼容性</li>
+</ul>
+</li>
+<li><p><strong>协议栈</strong></p>
+<ul>
+<li><strong>传输协议</strong>：TCP、HTTP/2、QUIC——权衡连通性、双向流、拥塞控制</li>
+<li><strong>消息格式</strong>：二进制（Protobuf、FlatBuffers） vs JSON/XML——权衡性能与可调试性</li>
+<li><strong>分帧与粘包处理</strong>：在长连接场景下，必须实现消息长度前缀或特殊分隔符</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="二、性能与可靠性"><a href="#二、性能与可靠性" class="headerlink" title="二、性能与可靠性"></a>二、性能与可靠性</h2><ol>
+<li><p><strong>连接管理</strong></p>
+<ul>
+<li><strong>长连接池</strong>：避免频繁建立/销毁 TCP 连接带来的三次握手开销</li>
+<li><strong>多路复用</strong>：HTTP/2 或自研多路复用减少连接数</li>
+</ul>
+</li>
+<li><p><strong>序列化/反序列化</strong></p>
+<ul>
+<li>选择高速二进制框架、开启零拷贝或 Direct ByteBuffer 技术</li>
+<li>支持局部序列化（只序列化变动字段）和流式序列化</li>
+</ul>
+</li>
+<li><p><strong>异步非阻塞</strong></p>
+<ul>
+<li>Reactor/Proactor 模型或基于 Netty、io_uring 的异步 I/O</li>
+<li>Future/Promise 或 Callback 机制，避免线程阻塞</li>
+</ul>
+</li>
+<li><p><strong>批量与合并</strong></p>
+<ul>
+<li>对高频小请求进行合并调用或批量 RPC，减少网络往返</li>
+</ul>
+</li>
+<li><p><strong>负载均衡 &amp; 路由</strong></p>
+<ul>
+<li>客户端负载均衡：轮询、权重、Consistent Hash</li>
+<li>健康检查：定期探活、自动剔除故障节点</li>
+</ul>
+</li>
+<li><p><strong>限流与熔断</strong></p>
+<ul>
+<li>在客户端或服务端接入令牌桶/漏桶限流，防止雪崩</li>
+<li>基于错误率或延迟的熔断器（Circuit Breaker），快速失败并降级</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="三、健壮性与容错"><a href="#三、健壮性与容错" class="headerlink" title="三、健壮性与容错"></a>三、健壮性与容错</h2><ol>
+<li><p><strong>超时与重试</strong></p>
+<ul>
+<li><strong>超时策略</strong>：连接超时、读写超时、总调用超时；</li>
+<li><strong>幂等与重试</strong>：确保重试不会造成副作用，或限制重试次数和频率</li>
+</ul>
+</li>
+<li><p><strong>错误模型</strong></p>
+<ul>
+<li>定义清晰的错误码体系（业务错误 vs 网络/框架错误）；</li>
+<li>支持错误链（Cause）传递，方便排查</li>
+</ul>
+</li>
+<li><p><strong>降级策略</strong></p>
+<ul>
+<li>关键路径调用失败时，可返回默认值或本地缓存数据</li>
+<li>支持灰度切换不同实现（例如回退到老版本服务）</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="四、安全与合规"><a href="#四、安全与合规" class="headerlink" title="四、安全与合规"></a>四、安全与合规</h2><ol>
+<li><p><strong>认证与鉴权</strong></p>
+<ul>
+<li>TLS 双向认证（mTLS）或 Token/JWT 鉴权</li>
+<li>支持细粒度权限（ACL）控制</li>
+</ul>
+</li>
+<li><p><strong>加密与防篡改</strong></p>
+<ul>
+<li>传输层：TLS</li>
+<li>消息层：消息签名、完整性校验（HMAC）</li>
+</ul>
+</li>
+<li><p><strong>审计与合规</strong></p>
+<ul>
+<li>记录调用链、请求参数（敏感信息脱敏）、响应结果</li>
+<li>日志存储与查询策略，满足安全审计需求</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="五、可观测与运维"><a href="#五、可观测与运维" class="headerlink" title="五、可观测与运维"></a>五、可观测与运维</h2><ol>
+<li><p><strong>链路追踪</strong></p>
+<ul>
+<li>支持分布式 Trace（OpenTracing/OpenTelemetry），自动打点跨服务调用</li>
+</ul>
+</li>
+<li><p><strong>指标监控</strong></p>
+<ul>
+<li>QPS、延迟（p50/p90/p99）、错误率、连接数、并发数</li>
+<li>集成 Prometheus、Grafana 实时可视化</li>
+</ul>
+</li>
+<li><p><strong>日志与告警</strong></p>
+<ul>
+<li>结构化日志 + 聚合检索（ELK/Graylog）</li>
+<li>告警策略：延迟超阈、错误率突增、实例不可用</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="六、可扩展与可维护"><a href="#六、可扩展与可维护" class="headerlink" title="六、可扩展与可维护"></a>六、可扩展与可维护</h2><ol>
+<li><p><strong>插件化架构</strong></p>
+<ul>
+<li>拦截器/过滤器链：支持自定义负载均衡、限流、认证、链路追踪等功能插件</li>
+</ul>
+</li>
+<li><p><strong>版本管理</strong></p>
+<ul>
+<li>支持多版本并存：协议版本、接口版本路由</li>
+</ul>
+</li>
+<li><p><strong>文档与自描述</strong></p>
+<ul>
+<li>提供在线 API 文档（如 gRPC-Gateway + Swagger UI）</li>
+<li>支持服务发现并暴露元数据（健康状态、版本号）</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><blockquote>
+<p><strong>协议清晰、性能优先、健壮容错、安全合规、可观测运维、模块化可扩展</strong></p>
+</blockquote>
+<p>在这几个维度上系统化设计，并通过持续压测、演练与复盘，不断完善，才能支撑海量调用、低延迟、高可用的 RPC 系统。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+              <a href="/tags/RPC/" rel="tag"># RPC</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/05/19/HTTP-Protocol-design/" rel="prev" title="HTTP协议全面调研报告">
+      <i class="fa fa-chevron-left"></i> HTTP协议全面调研报告
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/05/19/high-performance-system-design/" rel="next" title="高性能系统设计方法论">
+      高性能系统设计方法论 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%8D%8F%E8%AE%AE%E4%B8%8E%E6%8E%A5%E5%8F%A3%E5%AE%9A%E4%B9%89"><span class="nav-number">1.</span> <span class="nav-text">一、协议与接口定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%80%A7%E8%83%BD%E4%B8%8E%E5%8F%AF%E9%9D%A0%E6%80%A7"><span class="nav-number">2.</span> <span class="nav-text">二、性能与可靠性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%81%A5%E5%A3%AE%E6%80%A7%E4%B8%8E%E5%AE%B9%E9%94%99"><span class="nav-number">3.</span> <span class="nav-text">三、健壮性与容错</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%AE%89%E5%85%A8%E4%B8%8E%E5%90%88%E8%A7%84"><span class="nav-number">4.</span> <span class="nav-text">四、安全与合规</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%8F%AF%E8%A7%82%E6%B5%8B%E4%B8%8E%E8%BF%90%E7%BB%B4"><span class="nav-number">5.</span> <span class="nav-text">五、可观测与运维</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E5%8F%AF%E6%89%A9%E5%B1%95%E4%B8%8E%E5%8F%AF%E7%BB%B4%E6%8A%A4"><span class="nav-number">6.</span> <span class="nav-text">六、可扩展与可维护</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">6.1.</span> <span class="nav-text">小结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

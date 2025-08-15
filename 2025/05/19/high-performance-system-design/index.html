@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文从性能目标、核心原则、关键模式、实践细节和持续优化五个维度，系统性地阐述高性能系统的设计方法论。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="高性能系统设计方法论">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/05/19/high-performance-system-design/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="本文从性能目标、核心原则、关键模式、实践细节和持续优化五个维度，系统性地阐述高性能系统的设计方法论。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-05-19T13:38:43.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.356Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="架构">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/05/19/high-performance-system-design/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>高性能系统设计方法论 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/05/19/high-performance-system-design/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          高性能系统设计方法论
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-05-19 21:38:43" itemprop="dateCreated datePublished" datetime="2025-05-19T21:38:43+08:00">2025-05-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">架构设计</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文从性能目标、核心原则、关键模式、实践细节和持续优化五个维度，系统性地阐述高性能系统的设计方法论。</p>
+<span id="more"></span>
+
+<h2 id="1-性能目标与指标"><a href="#1-性能目标与指标" class="headerlink" title="1. 性能目标与指标"></a>1. 性能目标与指标</h2><p>明确性能指标是设计高性能系统的前提，这些指标将指导我们在设计中权衡各种策略的优先级：</p>
+<ul>
+<li><strong>吞吐量（Throughput）</strong>：单位时间内系统能处理的请求数或数据量，如每秒查询数（QPS）或数据传输率（MB/s）。</li>
+<li><strong>延迟（Latency）</strong>：单次请求从发起到响应完成的时间分布，通常以百分位数表示（p50、p90、p99），反映用户体验的关键指标。</li>
+<li><strong>资源利用率</strong>：CPU、内存、网络、磁盘等资源的使用效率，既要避免资源浪费，也要防止过度竞争。</li>
+<li><strong>性能成本比</strong>：在满足服务等级协议（SLA）的前提下，如何让单位吞吐量或延迟的资源消耗与成本达到最优。</li>
+</ul>
+<h2 id="2-核心原则"><a href="#2-核心原则" class="headerlink" title="2. 核心原则"></a>2. 核心原则</h2><p>高性能系统设计遵循以下几项核心原则：</p>
+<h3 id="2-1-最小化工作量（Do-Less）"><a href="#2-1-最小化工作量（Do-Less）" class="headerlink" title="2.1 最小化工作量（Do Less）"></a>2.1 最小化工作量（Do Less）</h3><ul>
+<li>只执行必要的计算与I/O操作</li>
+<li>消除重复与冗余操作</li>
+<li>提前过滤，减少后续处理的数据量</li>
+</ul>
+<h3 id="2-2-局部性与并行（Locality-amp-Parallelism）"><a href="#2-2-局部性与并行（Locality-amp-Parallelism）" class="headerlink" title="2.2 局部性与并行（Locality &amp; Parallelism）"></a>2.2 局部性与并行（Locality &amp; Parallelism）</h3><ul>
+<li>数据与代码设计应充分利用CPU缓存局部性</li>
+<li>任务合理拆分后并行执行，提高多核CPU利用率</li>
+<li>数据分片设计应减少跨节点通信</li>
+</ul>
+<h3 id="2-3-非阻塞与批量化（Non-Blocking-amp-Batching）"><a href="#2-3-非阻塞与批量化（Non-Blocking-amp-Batching）" class="headerlink" title="2.3 非阻塞与批量化（Non-Blocking &amp; Batching）"></a>2.3 非阻塞与批量化（Non-Blocking &amp; Batching）</h3><ul>
+<li>采用异步I/O与事件驱动架构，避免线程阻塞等待</li>
+<li>将小粒度请求合并为批量请求，摊销处理成本</li>
+<li>使用预取与后台处理减少关键路径等待</li>
+</ul>
+<h3 id="2-4-资源复用（Reuse）"><a href="#2-4-资源复用（Reuse）" class="headerlink" title="2.4 资源复用（Reuse）"></a>2.4 资源复用（Reuse）</h3><ul>
+<li>池化连接、线程、对象，避免频繁创建销毁带来的性能开销</li>
+<li>缓存计算结果，避免重复计算</li>
+<li>复用已分配内存，减少内存分配与回收压力</li>
+</ul>
+<h3 id="2-5-延迟化与惰性（Lazy-amp-Deferred-Work）"><a href="#2-5-延迟化与惰性（Lazy-amp-Deferred-Work）" class="headerlink" title="2.5 延迟化与惰性（Lazy &amp; Deferred Work）"></a>2.5 延迟化与惰性（Lazy &amp; Deferred Work）</h3><ul>
+<li>将非紧急计算推迟到系统空闲时执行</li>
+<li>仅在真正需要时才执行计算，避免过早优化</li>
+<li>采用异步计算模型，优先保障关键路径响应速度</li>
+</ul>
+<h2 id="3-关键设计模式"><a href="#3-关键设计模式" class="headerlink" title="3. 关键设计模式"></a>3. 关键设计模式</h2><table>
+<thead>
+<tr>
+<th>类别</th>
+<th>模式</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>算法与数据结构</strong></td>
+<td>低复杂度算法<br>并行数据结构</td>
+<td>选择合适的算法（O(n) vs. O(n log n)）<br>使用线程安全且高效的并发容器</td>
+</tr>
+<tr>
+<td><strong>缓存</strong></td>
+<td>多级缓存<br>Cache Aside</td>
+<td>CPU L1/L2缓存 → 本地进程缓存 → 分布式缓存 → 后端存储<br>写入时更新缓存策略，保持一致性</td>
+</tr>
+<tr>
+<td><strong>并发与异步</strong></td>
+<td>Reactor/Proactor<br>Actor Model</td>
+<td>事件驱动、高并发设计模式<br>消息传递模型，避免显式锁争用</td>
+</tr>
+<tr>
+<td><strong>批量处理</strong></td>
+<td>批量写入/读取<br>小文件合并</td>
+<td>I/O与网络按块处理，减少系统调用和包头开销<br>减少随机I/O，提高顺序访问效率</td>
+</tr>
+<tr>
+<td><strong>连接与对象池</strong></td>
+<td>线程池、连接池<br>对象池</td>
+<td>维护固定大小的资源池，避免频繁申请释放<br>重用复杂对象，降低GC压力</td>
+</tr>
+<tr>
+<td><strong>零拷贝</strong></td>
+<td>mmap、sendfile<br>Direct ByteBuffer</td>
+<td>避免用户态与内核态之间的多次数据拷贝<br>直接操作堆外内存，减少JVM堆内存压力</td>
+</tr>
+<tr>
+<td><strong>流量平滑</strong></td>
+<td>令牌桶、漏桶限流</td>
+<td>精确控制突发流量，避免资源瞬时饱和<br>保障系统稳定性与可用性</td>
+</tr>
+</tbody></table>
+<h2 id="4-实践细节"><a href="#4-实践细节" class="headerlink" title="4. 实践细节"></a>4. 实践细节</h2><h3 id="4-1-代码层面优化"><a href="#4-1-代码层面优化" class="headerlink" title="4.1 代码层面优化"></a>4.1 代码层面优化</h3><ul>
+<li><strong>热点路径内联</strong>：将核心小函数内联，减少函数调用栈开销和上下文切换。</li>
+<li><strong>避免GC暂停</strong>：<ul>
+<li>使用长生命周期对象池，减少短生命周期对象创建</li>
+<li>优化内存分配模式，减少分代间对象提升</li>
+<li>根据业务特点调优JVM GC策略（ZGC、G1、Shenandoah等）</li>
+</ul>
+</li>
+<li><strong>减少锁竞争</strong>：<ul>
+<li>采用读写分离锁机制，提高并发读取效率</li>
+<li>实现无锁或乐观并发算法（CAS、StampedLock）</li>
+<li>细化锁粒度，避免热点锁成为瓶颈</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-2-网络与I-O优化"><a href="#4-2-网络与I-O优化" class="headerlink" title="4.2 网络与I/O优化"></a>4.2 网络与I/O优化</h3><ul>
+<li><strong>异步I/O</strong>：<ul>
+<li>采用NIO、io_uring、libuv等高性能I/O框架</li>
+<li>事件驱动模型，一个线程处理多个连接</li>
+<li>避免同步阻塞调用，尤其是在关键路径上</li>
+</ul>
+</li>
+<li><strong>批量与压缩</strong>：<ul>
+<li>使用HTTP/2、gRPC多路复用能力</li>
+<li>采用Protobuf、MessagePack等高效二进制序列化协议</li>
+<li>合理应用压缩算法，在CPU消耗与网络带宽间寻找平衡点</li>
+</ul>
+</li>
+<li><strong>持久连接管理</strong>：<ul>
+<li>维护长连接池，避免频繁TCP握手与慢启动</li>
+<li>实现连接健康检查与自动恢复机制</li>
+<li>优化连接超时与闲置策略</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-3-数据存储优化"><a href="#4-3-数据存储优化" class="headerlink" title="4.3 数据存储优化"></a>4.3 数据存储优化</h3><ul>
+<li><strong>索引与分区</strong>：<ul>
+<li>根据查询模式建立合适的索引结构</li>
+<li>按业务维度进行表分区、分库分表设计</li>
+<li>通过分片键选择，减少跨分片操作</li>
+</ul>
+</li>
+<li><strong>读写分离</strong>：<ul>
+<li>将读操作分流到只读副本，主库专注写入</li>
+<li>实现多级缓存策略，减轻存储层压力</li>
+<li>处理好数据一致性与延迟问题</li>
+</ul>
+</li>
+<li><strong>列式存储与向量化</strong>：<ul>
+<li>对分析型场景，采用列式存储引擎</li>
+<li>利用CPU SIMD指令集加速数据处理</li>
+<li>批量处理减少函数调用开销</li>
+</ul>
+</li>
+</ul>
+<h2 id="5-测试与持续优化"><a href="#5-测试与持续优化" class="headerlink" title="5. 测试与持续优化"></a>5. 测试与持续优化</h2><h3 id="5-1-性能基线与容量规划"><a href="#5-1-性能基线与容量规划" class="headerlink" title="5.1 性能基线与容量规划"></a>5.1 性能基线与容量规划</h3><ul>
+<li>定期在与生产环境配置相同的测试环境中进行基准测试，建立性能基线</li>
+<li>构建精确的负载模型，预测业务增长带来的资源需求</li>
+<li>制定弹性扩容策略，确保系统能够平滑应对流量波动</li>
+</ul>
+<h3 id="5-2-性能剖析（Profiling）"><a href="#5-2-性能剖析（Profiling）" class="headerlink" title="5.2 性能剖析（Profiling）"></a>5.2 性能剖析（Profiling）</h3><ul>
+<li>使用火焰图（Flame Graph）、YourKit、perf等专业工具，精确定位CPU与内存热点</li>
+<li>分析代码路径执行频率与耗时，识别优化机会</li>
+<li>结合线程转储与锁竞争分析，解决并发瓶颈</li>
+</ul>
+<h3 id="5-3-持续压测与验收"><a href="#5-3-持续压测与验收" class="headerlink" title="5.3 持续压测与验收"></a>5.3 持续压测与验收</h3><ul>
+<li>构建自动化压测平台（JMeter、k6、Locust），模拟真实业务场景</li>
+<li>将性能测试纳入CI/CD流程，确保每次代码变更或配置调整不会带来性能退化</li>
+<li>建立明确的性能验收标准，作为发布的必要条件</li>
+</ul>
+<h3 id="5-4-监控与告警"><a href="#5-4-监控与告警" class="headerlink" title="5.4 监控与告警"></a>5.4 监控与告警</h3><ul>
+<li>实时监控关键指标：QPS、延迟分布、GC时长、队列积压等</li>
+<li>设置多层次告警阈值：性能下降预警、延迟超限告警、资源饱和紧急告警</li>
+<li>建立快速响应机制，支持自动或手动触发容量扩容与故障回滚</li>
+</ul>
+<h3 id="5-5-反馈与迭代"><a href="#5-5-反馈与迭代" class="headerlink" title="5.5 反馈与迭代"></a>5.5 反馈与迭代</h3><ul>
+<li>建立性能事件复盘机制，定期分析性能问题根源</li>
+<li>持续更新优化清单，按投入产出比排序实施</li>
+<li>在工程实践中注入性能意识，通过代码审查、性能检查工具确保高质量交付</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>高性能系统设计的核心思想是：**”减少不必要的工作、充分利用并行与局部性、批量与异步处理、资源高效复用”**。</p>
+<p>通过合理应用多级缓存、并行计算、连接池与零拷贝等技术，结合严格的性能测量、代码剖析与自动化压测流程，我们能够构建出具备高吞吐、低延迟、资源高效利用特性的高性能系统，为用户提供卓越的体验，同时实现最优的性能成本比。</p>
+<p>这种系统性的方法论不仅适用于从零构建新系统，也可以指导现有系统的持续优化与演进。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/05/19/Design-of-RPC-Component-/" rel="prev" title="设计一个高质量的RPC框架需要考虑的问题">
+      <i class="fa fa-chevron-left"></i> 设计一个高质量的RPC框架需要考虑的问题
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/05/19/Design-of-Distributed-System-Component-Cluster/" rel="next" title="常用系统集群设计分析">
+      常用系统集群设计分析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E6%80%A7%E8%83%BD%E7%9B%AE%E6%A0%87%E4%B8%8E%E6%8C%87%E6%A0%87"><span class="nav-number">1.</span> <span class="nav-text">1. 性能目标与指标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E6%A0%B8%E5%BF%83%E5%8E%9F%E5%88%99"><span class="nav-number">2.</span> <span class="nav-text">2. 核心原则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E6%9C%80%E5%B0%8F%E5%8C%96%E5%B7%A5%E4%BD%9C%E9%87%8F%EF%BC%88Do-Less%EF%BC%89"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 最小化工作量（Do Less）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E5%B1%80%E9%83%A8%E6%80%A7%E4%B8%8E%E5%B9%B6%E8%A1%8C%EF%BC%88Locality-amp-Parallelism%EF%BC%89"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 局部性与并行（Locality &amp; Parallelism）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-%E9%9D%9E%E9%98%BB%E5%A1%9E%E4%B8%8E%E6%89%B9%E9%87%8F%E5%8C%96%EF%BC%88Non-Blocking-amp-Batching%EF%BC%89"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 非阻塞与批量化（Non-Blocking &amp; Batching）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-%E8%B5%84%E6%BA%90%E5%A4%8D%E7%94%A8%EF%BC%88Reuse%EF%BC%89"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 资源复用（Reuse）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-%E5%BB%B6%E8%BF%9F%E5%8C%96%E4%B8%8E%E6%83%B0%E6%80%A7%EF%BC%88Lazy-amp-Deferred-Work%EF%BC%89"><span class="nav-number">2.5.</span> <span class="nav-text">2.5 延迟化与惰性（Lazy &amp; Deferred Work）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%85%B3%E9%94%AE%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">3. 关键设计模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%AE%9E%E8%B7%B5%E7%BB%86%E8%8A%82"><span class="nav-number">4.</span> <span class="nav-text">4. 实践细节</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-%E4%BB%A3%E7%A0%81%E5%B1%82%E9%9D%A2%E4%BC%98%E5%8C%96"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 代码层面优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-%E7%BD%91%E7%BB%9C%E4%B8%8EI-O%E4%BC%98%E5%8C%96"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 网络与I&#x2F;O优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E4%BC%98%E5%8C%96"><span class="nav-number">4.3.</span> <span class="nav-text">4.3 数据存储优化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E6%B5%8B%E8%AF%95%E4%B8%8E%E6%8C%81%E7%BB%AD%E4%BC%98%E5%8C%96"><span class="nav-number">5.</span> <span class="nav-text">5. 测试与持续优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-%E6%80%A7%E8%83%BD%E5%9F%BA%E7%BA%BF%E4%B8%8E%E5%AE%B9%E9%87%8F%E8%A7%84%E5%88%92"><span class="nav-number">5.1.</span> <span class="nav-text">5.1 性能基线与容量规划</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-%E6%80%A7%E8%83%BD%E5%89%96%E6%9E%90%EF%BC%88Profiling%EF%BC%89"><span class="nav-number">5.2.</span> <span class="nav-text">5.2 性能剖析（Profiling）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-%E6%8C%81%E7%BB%AD%E5%8E%8B%E6%B5%8B%E4%B8%8E%E9%AA%8C%E6%94%B6"><span class="nav-number">5.3.</span> <span class="nav-text">5.3 持续压测与验收</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-4-%E7%9B%91%E6%8E%A7%E4%B8%8E%E5%91%8A%E8%AD%A6"><span class="nav-number">5.4.</span> <span class="nav-text">5.4 监控与告警</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-5-%E5%8F%8D%E9%A6%88%E4%B8%8E%E8%BF%AD%E4%BB%A3"><span class="nav-number">5.5.</span> <span class="nav-text">5.5 反馈与迭代</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="《Philosophy-of-Software-Design》笔记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Philosophy-of-Software-Design-1">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/03/19/Philosophy-of-Software-Design/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="《Philosophy-of-Software-Design》笔记">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-03-19T14:29:41.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.339Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta property="article:tag" content="读书笔记">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/03/19/Philosophy-of-Software-Design/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Philosophy-of-Software-Design-1 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/03/19/Philosophy-of-Software-Design/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Philosophy-of-Software-Design-1
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-03-19 22:29:41" itemprop="dateCreated datePublished" datetime="2025-03-19T22:29:41+08:00">2025-03-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>《Philosophy-of-Software-Design》笔记</p>
+<span id="more"></span>
+
+<h3 id="复杂性的本质"><a href="#复杂性的本质" class="headerlink" title="复杂性的本质"></a>复杂性的本质</h3><h5 id="1-复杂性的定义"><a href="#1-复杂性的定义" class="headerlink" title="1. 复杂性的定义"></a>1. <strong>复杂性的定义</strong></h5><p>复杂性是指任何使软件系统难以理解和修改的结构性因素。</p>
+<ul>
+<li>复杂性可能表现为：<ul>
+<li>理解代码的逻辑或行为困难。</li>
+<li>实现简单功能需要大量工作。</li>
+<li>修改一个地方导致其他地方出错。</li>
+</ul>
+</li>
+<li>一个系统的复杂性与其规模或功能无关，即使是小型系统也可能非常复杂。</li>
+</ul>
+<p>复杂性可以从<strong>开发成本</strong>的角度理解：在复杂系统中，哪怕是微小的改动也可能需要巨大代价；而在简单系统中，大改动所需的努力也较少。</p>
+<h5 id="2-复杂性的三大表现"><a href="#2-复杂性的三大表现" class="headerlink" title="2. 复杂性的三大表现"></a>2. <strong>复杂性的三大表现</strong></h5><p>复杂性主要通过以下方式显现：</p>
+<p>（1）<strong>变化放大（Change Amplification）</strong></p>
+<p>一个看似简单的改动会要求对多个地方进行修改。</p>
+<ul>
+<li>示例：在早期网站中，每个页面都直接硬编码了背景颜色。修改颜色需要手动更新所有页面，这种设计增加了修改代价。</li>
+<li>改进方式：集中式管理，例如通过共享变量统一颜色定义，从而减少需要修改的地方。</li>
+</ul>
+<p>（2）<strong>认知负担（Cognitive Load）</strong></p>
+<p>开发者需要记住或学习大量信息才能完成任务。</p>
+<ul>
+<li>示例：一个函数分配了内存，并要求调用方释放。这种隐含责任增加了开发者的记忆负担，容易导致错误（如内存泄漏）。</li>
+<li>改进方式：将资源的分配和释放责任封装在函数内部，降低调用方的认知负担。</li>
+</ul>
+<p>（3）<strong>未知的未知（Unknown Unknowns）</strong></p>
+<p>开发者在完成任务时，不知道需要修改哪些地方，也不清楚可能涉及的依赖或隐含规则。</p>
+<ul>
+<li>示例：某些页面的颜色强调部分依赖于背景颜色，但开发者未被告知，导致修改背景颜色时忽略这些依赖，从而引发错误。</li>
+<li>特点：未知的未知是最危险的复杂性表现，因为开发者甚至意识不到问题的存在。</li>
+</ul>
+<h5 id="3-复杂性的两大成因"><a href="#3-复杂性的两大成因" class="headerlink" title="3. 复杂性的两大成因"></a>3. <strong>复杂性的两大成因</strong></h5><p>复杂性主要源于以下两种因素：</p>
+<p>（1）<strong>依赖性（Dependencies）</strong></p>
+<ul>
+<li>定义：当代码无法独立存在，需与其他代码协作时，就会引入依赖。</li>
+<li>示例：<ul>
+<li>不同模块之间共享某个全局变量。</li>
+<li>函数签名的变更要求更新所有调用者。</li>
+</ul>
+</li>
+<li>影响：依赖性会导致变化放大和高认知负担，使系统更难维护。</li>
+<li>解决方式：通过模块化设计和接口隐藏，减少模块间的依赖性。</li>
+</ul>
+<p>（2）<strong>晦涩性（Obscurity）</strong></p>
+<ul>
+<li>定义：当系统中的关键信息无法直观获取时，会产生晦涩性。</li>
+<li>示例：<ul>
+<li>变量名过于模糊（如 <code>time</code>），开发者难以理解其用途。</li>
+<li>文档缺乏详细说明，开发者不得不阅读源码才能理解设计意图。</li>
+</ul>
+</li>
+<li>影响：晦涩性会导致未知的未知，增加开发难度。</li>
+<li>解决方式：通过清晰的命名、良好的文档和一致的设计，降低晦涩性。</li>
+</ul>
+<p>依赖性和晦涩性常常共同作用，导致复杂性的各种表现。例如，当多个模块依赖于未显式说明的信息时，晦涩性会加剧依赖的危害。</p>
+<h5 id="4-复杂性的增量累积"><a href="#4-复杂性的增量累积" class="headerlink" title="4. 复杂性的增量累积"></a>4. <strong>复杂性的增量累积</strong></h5><p>复杂性往往以微小的方式逐步累积，形成难以控制的局面。</p>
+<ul>
+<li><p>积累过程</p>
+<ul>
+<li>每次改动引入少量依赖或晦涩性。</li>
+<li>当积累达到一定程度，系统变得难以维护，哪怕是小的改动也会触发连锁反应。</li>
+</ul>
+</li>
+<li><p>应对策略</p>
+<ul>
+<li>采取“零容忍”态度，避免复杂性的每一次不必要增加。</li>
+</ul>
+</li>
+<li><p>识别复杂性“红旗”（如重复代码、隐藏依赖），在每次改动中消除潜在问题。</p>
+</li>
+</ul>
+<h5 id="5-设计的核心目标"><a href="#5-设计的核心目标" class="headerlink" title="5. 设计的核心目标"></a>5. <strong>设计的核心目标</strong></h5><p>优秀的系统设计应：</p>
+<ul>
+<li><p>减少依赖性：使模块之间尽可能独立，避免多处修改。</p>
+</li>
+<li><p>降低晦涩性：通过清晰的接口和一致的设计，使系统更直观。</p>
+</li>
+<li><p>最小化复杂性的表现</p>
+<ul>
+<li>减少需要修改的代码量（对抗变化放大）。</li>
+<li>降低开发者的记忆负担（对抗认知负担）。</li>
+<li>消除隐含规则或未显式的依赖（对抗未知的未知）。</li>
+</ul>
+</li>
+</ul>
+<h3 id="功能代码不足以满足需求"><a href="#功能代码不足以满足需求" class="headerlink" title="功能代码不足以满足需求"></a>功能代码不足以满足需求</h3><h5 id="1-战术编程-vs-战略编程"><a href="#1-战术编程-vs-战略编程" class="headerlink" title="1. 战术编程 vs. 战略编程"></a>1. <strong>战术编程 vs. 战略编程</strong></h5><p>（1）<strong>战术编程（Tactical Programming）</strong></p>
+<ul>
+<li><p>特点</p>
+<ul>
+<li>注重快速实现功能或修复问题。</li>
+<li>优先完成当前任务，不考虑长期设计质量。</li>
+<li>借口为“完成任务优先”，容忍代码复杂性的小幅增加。</li>
+</ul>
+</li>
+<li><p>后果</p>
+<ul>
+<li>每次小的复杂性增加会累积，导致系统逐渐难以维护。</li>
+<li>面对设计问题时，倾向于使用“补丁式”解决方案而非根本性改进。</li>
+<li>系统复杂性恶化，后续开发速度显著降低，进入“修修补补”的恶性循环。</li>
+</ul>
+</li>
+</ul>
+<p>（2）<strong>战略编程（Strategic Programming）</strong></p>
+<ul>
+<li><p>特点</p>
+<ul>
+<li>重视系统设计的长期质量，将减少复杂性和提升可维护性作为主要目标。</li>
+<li>在当前任务中适度投资时间，以实现更好的设计（例如重构、优化接口、编写文档）。</li>
+<li>发现设计问题时，主动修复而非简单绕过问题。</li>
+</ul>
+</li>
+<li><p>优势</p>
+<ul>
+<li>短期可能略慢，但长期内开发速度更快。</li>
+</ul>
+</li>
+<li><p>系统设计更优雅，后续扩展和维护成本更低。</p>
+</li>
+</ul>
+<h5 id="2-复杂性积累的恶性循环"><a href="#2-复杂性积累的恶性循环" class="headerlink" title="2. 复杂性积累的恶性循环"></a>2. <strong>复杂性积累的恶性循环</strong></h5><p>如果采用战术编程：</p>
+<ol>
+<li>为了快速完成任务，开发者引入小的复杂性。</li>
+<li>复杂性逐渐积累，修改代码变得更加困难。</li>
+<li>为完成任务，开发者选择“补丁式”解决方案，进一步增加复杂性。</li>
+<li>系统变得越来越混乱，修复问题和增加新功能的成本显著提高。</li>
+</ol>
+<p>这种恶性循环会导致系统进入“代码腐化”（code rot）状态，甚至可能导致项目失败。</p>
+<h4 id="3-战略编程的投资理念"><a href="#3-战略编程的投资理念" class="headerlink" title="3. 战略编程的投资理念"></a>3. <strong>战略编程的投资理念</strong></h4><p>采用战略编程，开发者需改变心态，视系统设计为长期投资：</p>
+<ul>
+<li><strong>主动投资</strong>：在设计新功能时，花时间探索多个设计方案，选择更简单、通用的解决方案。</li>
+<li><strong>被动投资</strong>：当发现现有设计问题时，进行改进（例如重构代码）以减少复杂性。</li>
+<li><strong>持续优化</strong>：通过不断改进现有设计，维持系统的长期可维护性。</li>
+</ul>
+<p>这种投资理念可以通过持续的小改进积累长期效益，从而避免复杂性恶化。</p>
+<h5 id="4-投资的平衡点"><a href="#4-投资的平衡点" class="headerlink" title="4. 投资的平衡点"></a>4. <strong>投资的平衡点</strong></h5><ul>
+<li>如何投资？<ul>
+<li>每个开发任务中花费 10%-20% 的时间用于改进设计。</li>
+<li>例如，优化模块接口、编写清晰的文档、重构代码以消除依赖。</li>
+<li>这样的投资比重大到足以改进设计，又不会显著影响项目进度。</li>
+</ul>
+</li>
+<li>投资的回报周期<ul>
+<li>初期：战略编程可能让开发稍慢（比战术编程慢 10%-20%）。</li>
+<li>中长期：通过减少复杂性，战略编程将显著提升开发速度和质量。</li>
+</ul>
+</li>
+</ul>
+<h5 id="5-战术编程的典型案例：初创公司"><a href="#5-战术编程的典型案例：初创公司" class="headerlink" title="5. 战术编程的典型案例：初创公司"></a>5. <strong>战术编程的典型案例：初创公司</strong></h5><ul>
+<li>初创公司通常优先快速上线产品，为此采用战术编程。<ul>
+<li>许多初创企业认为，可以在产品成功后“雇更多人清理代码”。</li>
+<li>但实际上，复杂性一旦累积到一定程度，几乎无法挽回。</li>
+</ul>
+</li>
+<li>案例：Facebook 的早期阶段<ul>
+<li>标语“Move fast and break things”鼓励快速开发，导致代码质量低下，维护困难。</li>
+<li>后来改为“Move fast with solid infrastructure”，强调在快速开发中保持系统稳定性。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h5 id="6-成功的战略编程案例"><a href="#6-成功的战略编程案例" class="headerlink" title="6. 成功的战略编程案例"></a>6. <strong>成功的战略编程案例</strong></h5><ul>
+<li><p>Google 和 VMware</p>
+<ul>
+<li>坚持高质量代码和良好设计的文化。</li>
+<li>系统复杂性得到控制，吸引了顶尖工程师加入。</li>
+<li>与 Facebook 的早期文化形成鲜明对比，显示战略编程的可行性和优势。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h5 id="7-总结"><a href="#7-总结" class="headerlink" title="7. 总结"></a>7. <strong>总结</strong></h5><ul>
+<li><strong>长期设计胜过短期功能</strong>：战略编程需要开发者以系统长期健康为目标，而非仅追求短期任务完成。</li>
+<li><strong>持续改进的必要性</strong>：每次开发任务都需要关注设计质量，防止复杂性逐渐积累。</li>
+<li><strong>防止战术编程文化蔓延</strong>：避免延迟设计改进，因为小问题的拖延会导致系统复杂性的指数级增长。</li>
+<li><strong>持续投资是高效开发的关键</strong>：通过适度的时间投资，战略编程能够在短期内实现收益，长期内保障开发效率。</li>
+</ul>
+<p><strong>好的设计需要持续投入，而这种投入最终会显著提高开发效率，成为软件项目成功的基石</strong>。</p>
+<h3 id="模块应具有深度"><a href="#模块应具有深度" class="headerlink" title="模块应具有深度"></a>模块应具有深度</h3><h5 id="1-模块化设计的定义"><a href="#1-模块化设计的定义" class="headerlink" title="1. 模块化设计的定义"></a>1. <strong>模块化设计的定义</strong></h5><p>模块化设计是将软件系统分解为相对独立的模块（如类、子系统或服务），以减少复杂性。</p>
+<ul>
+<li><strong>理想目标</strong>：每个模块独立，开发者可以在一个模块中工作，而无需理解其他模块的实现细节。</li>
+<li><strong>现实限制</strong>：模块之间通常需要依赖，通过函数调用或共享数据协作，因此模块设计的核心是<strong>管理这些依赖性</strong>。</li>
+</ul>
+<hr>
+<h5 id="2-模块的界面和实现"><a href="#2-模块的界面和实现" class="headerlink" title="2. 模块的界面和实现"></a>2. <strong>模块的界面和实现</strong></h5><p>模块由两部分组成：</p>
+<ul>
+<li><p>界面（Interface）</p>
+<ul>
+<li>向外界暴露模块的功能，例如函数签名和公共变量。</li>
+<li>形式上可以由编程语言验证（如方法参数类型），但更复杂的行为（如调用顺序限制）往往需要通过文档描述。</li>
+</ul>
+</li>
+<li><p>实现（Implementation）</p>
+<ul>
+<li>模块内部的具体实现细节，通常不对外暴露。</li>
+</ul>
+</li>
+</ul>
+<p>良好的模块化设计使得开发者只需理解模块的界面，而无需深入了解实现细节。</p>
+<h5 id="3-模块的深度"><a href="#3-模块的深度" class="headerlink" title="3. 模块的深度"></a>3. <strong>模块的深度</strong></h5><p>模块的深度是衡量其界面复杂性与实现功能比值的概念：</p>
+<ul>
+<li><p>深模块</p>
+<ul>
+<li><p>提供强大的功能，同时界面尽量简单。</p>
+</li>
+<li><p>特征：隐藏了实现的复杂性，仅暴露必要信息，用户只需关注“用什么”，而非“怎么做”。</p>
+</li>
+<li><p>优势：减少模块间的依赖性，提高设计的灵活性。</p>
+</li>
+<li><p>示例：</p>
+<ul>
+<li>Unix 文件 I/O：五个简单的系统调用（如 <code>open</code>、<code>read</code>）支持强大的文件操作，隐藏了大量实现细节。</li>
+</ul>
+</li>
+<li><p>垃圾回收器：没有显式的接口，自动管理内存，大幅简化开发者的工作。</p>
+</li>
+</ul>
+</li>
+<li><p>浅模块</p>
+<ul>
+<li><p>功能有限但界面复杂，几乎没有隐藏实现的复杂性。</p>
+</li>
+<li><p>问题：学习和使用浅模块的成本接近直接操作实现细节，没有显著的抽象优势。</p>
+</li>
+<li><p>示例</p>
+<ul>
+<li>链表类：其功能简单（如插入和删除），但界面复杂度与实现几乎相当，难以隐藏细节。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="4-深模块的重要性"><a href="#4-深模块的重要性" class="headerlink" title="4. 深模块的重要性"></a>4. <strong>深模块的重要性</strong></h5><p>深模块的设计原则：</p>
+<ul>
+<li><p>成本与收益</p>
+<ul>
+<li>模块界面的复杂性是其成本，功能是收益。</li>
+<li>深模块在低成本的界面上提供高收益的功能。</li>
+</ul>
+</li>
+<li><p>隐藏复杂性</p>
+<ul>
+<li>深模块封装实现细节，减少对外界的暴露。</li>
+</ul>
+</li>
+<li><p>用户可以通过简单的界面调用复杂功能，而无需理解其内部逻辑。</p>
+</li>
+</ul>
+<h5 id="5-浅模块的典型问题"><a href="#5-浅模块的典型问题" class="headerlink" title="5. 浅模块的典型问题"></a>5. <strong>浅模块的典型问题</strong></h5><ul>
+<li>界面与实现没有明显区别：调用方仍需了解底层细节，模块难以提供真正的抽象。</li>
+<li>额外的学习成本：开发者需要学习和使用额外的接口，而这些接口提供的功能有限。</li>
+<li>增加系统复杂性：浅模块引入新接口，却没有相应减少系统的整体复杂性。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<p>以下方法展示了浅模块的问题：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">addNullValueForAttribute</span><span class="params">(String attribute)</span> </span>&#123;</span><br><span class="line">    data.put(attribute, <span class="keyword">null</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>该方法仅封装了一行简单逻辑，使用者仍需理解内部工作原理（如 <code>data</code> 的作用）。</li>
+<li>方法接口的学习成本高于直接操作 <code>data</code>。</li>
+</ul>
+<p><strong>如果模块界面复杂而功能简单，可能是浅模块的信号，应予以优化。</strong></p>
+<h5 id="6-过度分解与“类病”（Classitis）"><a href="#6-过度分解与“类病”（Classitis）" class="headerlink" title="6. 过度分解与“类病”（Classitis）"></a>6. <strong>过度分解与“类病”（Classitis）</strong></h5><ul>
+<li><p>过度分解模块（或类）是常见的设计错误。</p>
+</li>
+<li><p>“类病”（Classitis）</p>
+<ul>
+<li>由于“类越多越好”的误解，将系统分解为大量浅类。</li>
+<li>每个类功能有限，界面复杂性和实现复杂性接近。</li>
+<li>系统充斥着冗余的接口，导致整体复杂性大幅增加。</li>
+</ul>
+</li>
+</ul>
+<p><strong>示例：</strong></p>
+<p>Java 标准库中，打开文件以读取序列化对象需要三步：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">FileInputStream fileStream = <span class="keyword">new</span> FileInputStream(fileName);</span><br><span class="line">BufferedInputStream bufferedStream = <span class="keyword">new</span> BufferedInputStream(fileStream);</span><br><span class="line">ObjectInputStream objectStream = <span class="keyword">new</span> ObjectInputStream(bufferedStream);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>这些类功能分散，用户必须手动组合多个步骤才能完成常见任务。</li>
+<li>如果设计者默认提供缓冲操作（如 Unix 文件 I/O 的设计），界面将更加简单。</li>
+</ul>
+<h5 id="7-Unix-I-O-的对比示例"><a href="#7-Unix-I-O-的对比示例" class="headerlink" title="7. Unix I/O 的对比示例"></a>7. <strong>Unix I/O 的对比示例</strong></h5><ul>
+<li>Unix 文件 I/O 接口是深模块的典范：<ul>
+<li>五个核心系统调用（如 <code>open</code>、<code>read</code>、<code>write</code>）提供了强大的功能。</li>
+<li>实现隐藏了复杂的存储、调度和权限管理等细节。</li>
+</ul>
+</li>
+<li>设计原则：<strong>常见操作默认简化，不常见操作通过额外调用实现</strong>。</li>
+</ul>
+<p>与此相比，Java 的过度分解导致开发者面临更多浅模块和冗长的操作。</p>
+<h5 id="8-设计深模块的策略"><a href="#8-设计深模块的策略" class="headerlink" title="8. 设计深模块的策略"></a>8. <strong>设计深模块的策略</strong></h5><ul>
+<li>接口简化：通过减少方法数量、降低方法复杂性使模块更易于理解和使用。</li>
+<li>隐藏实现细节：将复杂性留在模块内部，不对外暴露。</li>
+<li>支持常见用例：设计时优先考虑常见操作的便捷性，避免让用户为默认行为做过多配置。</li>
+</ul>
+<h5 id="9-结论"><a href="#9-结论" class="headerlink" title="9. 结论"></a>9. <strong>结论</strong></h5><ul>
+<li>深模块是管理复杂性的关键：<ul>
+<li>它通过简单的界面提供强大的功能，最大限度减少对外暴露的复杂性。</li>
+</ul>
+</li>
+<li>模块设计的核心目标是“深”，而非“多”：<ul>
+<li>较少但深的模块胜过大量浅模块。</li>
+<li>良好的模块化设计能显著提升代码的可维护性和开发效率。</li>
+</ul>
+</li>
+<li>反例（如浅模块和类病）提醒我们，过度分解和浅层抽象可能适得其反。</li>
+</ul>
+<p>模块的深度设计为后续章节中的具体模块设计方法（如信息隐藏）提供了理论支持，同时为构建高质量软件系统奠定了基础。</p>
+<h3 id="信息隐藏与泄漏"><a href="#信息隐藏与泄漏" class="headerlink" title="信息隐藏与泄漏"></a>信息隐藏与泄漏</h3><h5 id="1-信息隐藏的定义"><a href="#1-信息隐藏的定义" class="headerlink" title="1. 信息隐藏的定义"></a>1. <strong>信息隐藏的定义</strong></h5><p>信息隐藏是指模块通过封装特定的设计决策，将这些信息限制在模块内部，使其对其他模块不可见。</p>
+<ul>
+<li><p>隐藏的信息</p>
+<p>：通常包括数据结构、算法实现以及高层设计假设等。例如：</p>
+<ul>
+<li>B-树的存储方式及平衡算法。</li>
+<li>TCP 协议的拥塞控制实现。</li>
+<li>文件系统的物理块分配策略。</li>
+</ul>
+</li>
+<li><p>目标</p>
+<ul>
+<li>简化接口：开发者只需理解模块的抽象功能，无需关心实现细节。</li>
+</ul>
+</li>
+<li><p>增强灵活性：当设计决策发生变化时，只需修改封装该决策的模块，无需影响其他模块。</p>
+</li>
+</ul>
+<h5 id="2-信息隐藏的好处"><a href="#2-信息隐藏的好处" class="headerlink" title="2. 信息隐藏的好处"></a>2. <strong>信息隐藏的好处</strong></h5><p>（1）简化认知负担</p>
+<p>通过隐藏复杂实现细节，开发者只需学习模块的接口即可使用模块，大大降低了认知负担。例如，使用 B-树模块的开发者无需关心节点分裂的算法。</p>
+<p>（2）提升系统可维护性</p>
+<p>信息隐藏降低了模块间的依赖性，使系统更易于演化。例如：</p>
+<ul>
+<li>如果 TCP 协议的实现改变，依赖该模块的代码无需修改。</li>
+<li>修改隐藏的信息不会引发其他模块的级联改动。</li>
+</ul>
+<p>（3）减少复杂性扩散</p>
+<p>通过隔离复杂性，防止其传播到其他模块，从而控制系统的整体复杂性。</p>
+<h5 id="3-信息泄漏的定义"><a href="#3-信息泄漏的定义" class="headerlink" title="3. 信息泄漏的定义"></a>3. <strong>信息泄漏的定义</strong></h5><p>信息泄漏指某一模块的设计决策出现在多个模块中，从而引发依赖关系。</p>
+<ul>
+<li><p>形式</p>
+<ul>
+<li>显式泄漏：设计决策通过模块的公共接口暴露。例如，文件路径解析规则暴露在多个模块中。</li>
+<li>隐式泄漏：设计决策未通过接口显式暴露，但多个模块依赖相同的信息。例如，两个类共享某文件格式的详细知识。</li>
+</ul>
+</li>
+<li><p>危害</p>
+<ul>
+<li>改变泄漏的信息时，多个模块必须同步修改，增加维护成本。</li>
+</ul>
+</li>
+<li><p>隐式泄漏难以发现，问题可能在系统运行时才显现。</p>
+</li>
+</ul>
+<p>示例：</p>
+<p>假设有两个模块分别读取和写入某种文件格式。如果文件格式改变，这两个模块都需要修改。这种隐式依赖是信息泄漏的典型表现。</p>
+<h5 id="4-信息隐藏的实现"><a href="#4-信息隐藏的实现" class="headerlink" title="4. 信息隐藏的实现"></a>4. <strong>信息隐藏的实现</strong></h5><p>（1）通过接口隐藏信息</p>
+<ul>
+<li>模块的接口应暴露尽可能少的信息，仅提供完成功能所需的抽象。例如：<ul>
+<li>垃圾回收器完全隐藏了内存分配和释放的细节，开发者无需关注内存管理。</li>
+</ul>
+</li>
+</ul>
+<p>（2）避免 getter/setter 方法暴露实现细节</p>
+<ul>
+<li>简单的封装（如将字段设为 <code>private</code>，通过 getter/setter 访问）并不等于信息隐藏。</li>
+<li>如果 getter/setter 暴露了字段的存在和用途，本质上并未隐藏信息。</li>
+</ul>
+<p>（3）部分隐藏也有价值</p>
+<ul>
+<li>如果某信息只对少数模块可见，其对系统复杂性的影响较小。例如：<ul>
+<li>一个类提供高级功能，但某些低级细节仅通过特定方法访问，普通用户无需了解。</li>
+</ul>
+</li>
+</ul>
+<h5 id="5-典型信息泄漏"><a href="#5-典型信息泄漏" class="headerlink" title="5. 典型信息泄漏"></a>5. <strong>典型信息泄漏</strong></h5><p>信息泄漏是设计中的重要警示信号。常见的包括：</p>
+<ul>
+<li>多处代码依赖相同信息：例如，多个类都处理某种文件格式。</li>
+<li>模块接口暴露过多细节：导致调用者需要了解底层实现才能正确使用模块。</li>
+<li>隐式依赖：模块之间通过非接口途径共享设计决策。</li>
+</ul>
+<p><strong>优化策略</strong>：</p>
+<ul>
+<li>合并相关模块，将共享信息封装在单一模块中。</li>
+<li>创建新模块专门处理该信息，提供抽象的、简化的接口。</li>
+</ul>
+<h5 id="6-时间分解（Temporal-Decomposition）的问题"><a href="#6-时间分解（Temporal-Decomposition）的问题" class="headerlink" title="6. 时间分解（Temporal Decomposition）的问题"></a>6. <strong>时间分解（Temporal Decomposition）的问题</strong></h5><p>时间分解是信息泄漏的一个常见来源，其设计方式基于操作的时间顺序，而非逻辑分离。</p>
+<p>示例：</p>
+<p>一个应用按以下顺序操作文件：</p>
+<ol>
+<li>读取文件。</li>
+<li>修改内容。</li>
+<li>写回文件。</li>
+</ol>
+<p>如果分别为读取、修改和写入创建三个模块，则文件格式的细节需要在多个模块中共享，形成隐式依赖。</p>
+<p><strong>时间分解的改进策略：</strong></p>
+<ul>
+<li><strong>逻辑分解</strong>：将文件格式的解析和写入逻辑集中到单一模块，其他模块调用其接口即可，避免信息泄漏。</li>
+</ul>
+<h5 id="7-信息隐藏的实际挑战"><a href="#7-信息隐藏的实际挑战" class="headerlink" title="7. 信息隐藏的实际挑战"></a>7. <strong>信息隐藏的实际挑战</strong></h5><p>（1）过度暴露</p>
+<ul>
+<li>接口设计过于复杂，向外暴露太多细节，降低了隐藏效果。</li>
+<li>示例：提供过多 getter/setter 方法使用户不得不理解底层逻辑。</li>
+</ul>
+<p>（2）抽象不足</p>
+<ul>
+<li>如果接口未能隐藏核心实现细节，调用者仍需掌握底层知识，无法真正简化系统复杂性。</li>
+</ul>
+<p>（3）设计抽象的难度</p>
+<ul>
+<li>设计有效的抽象需要深刻理解系统和潜在变化，例如确定哪些信息可以被隐藏，哪些必须暴露。</li>
+</ul>
+<h5 id="8-信息隐藏的最佳实践"><a href="#8-信息隐藏的最佳实践" class="headerlink" title="8. 信息隐藏的最佳实践"></a>8. <strong>信息隐藏的最佳实践</strong></h5><ul>
+<li>设计清晰的接口：尽量减少暴露的信息，只提供抽象层次的必要功能。</li>
+<li>隔离依赖：将依赖设计封装到单一模块，避免扩散。</li>
+<li>减少模块间耦合：设计松散耦合的模块，使其可以独立更改。</li>
+</ul>
+<h5 id="9-总结"><a href="#9-总结" class="headerlink" title="9. 总结"></a>9. <strong>总结</strong></h5><ul>
+<li>信息隐藏是设计深模块的关键技术：通过封装实现细节，简化接口和降低依赖。</li>
+<li>信息泄漏是复杂性的主要来源：一旦设计决策出现在多个模块中，修改代价将显著增加。</li>
+<li>有效的信息隐藏能显著提升系统的可维护性和开发效率，是实现良好设计的重要原则。</li>
+</ul>
+<h3 id="通用模块要深"><a href="#通用模块要深" class="headerlink" title="通用模块要深"></a>通用模块要深</h3><h5 id="1-通用模块的定义"><a href="#1-通用模块的定义" class="headerlink" title="1. 通用模块的定义"></a>1. <strong>通用模块的定义</strong></h5><p>通用模块是指可以应用于多种场景、解决多个问题的模块，而非仅针对特定需求的模块。</p>
+<ul>
+<li><p>特性</p>
+<ul>
+<li>设计具有一定的通用性，能处理多种类似的需求。</li>
+</ul>
+</li>
+<li><p>在保持接口简洁的同时，隐藏了复杂的实现细节。</p>
+</li>
+</ul>
+<h5 id="2-通用模块的好处"><a href="#2-通用模块的好处" class="headerlink" title="2. 通用模块的好处"></a>2. <strong>通用模块的好处</strong></h5><p>（1）更深的模块</p>
+<ul>
+<li>通用模块通常比特定模块更深，因为其提供的功能更多，而接口复杂度相对较低。</li>
+<li>通过通用设计，模块可以封装更多的实现细节，从而减少对外暴露的信息。</li>
+</ul>
+<p>（2）更好的信息隐藏</p>
+<ul>
+<li>通用模块能通过抽象，避免将实现细节暴露给调用者。例如，文件管理模块可以抽象文件存储细节，无需用户关心底层设备的差异。</li>
+</ul>
+<p>（3）减少重复</p>
+<ul>
+<li>通用模块可为多个场景服务，减少系统中的重复代码。</li>
+<li>例如，一个通用的日志模块可以适配不同的日志级别和输出设备，而无需为每种用途设计单独的模块。</li>
+</ul>
+<p>（4）提高灵活性和扩展性</p>
+<ul>
+<li>通用模块设计更适应需求的变化，因为它已考虑到多种可能的使用场景。</li>
+</ul>
+<h5 id="3-设计通用模块的策略"><a href="#3-设计通用模块的策略" class="headerlink" title="3. 设计通用模块的策略"></a>3. <strong>设计通用模块的策略</strong></h5><p>（1）目标：平衡通用性和复杂性</p>
+<ul>
+<li>通用模块不能追求过度通用化，否则会引入不必要的复杂性。</li>
+<li>应通过分析需求和潜在场景，找到适度的通用性。</li>
+</ul>
+<p>（2）避免过早优化</p>
+<ul>
+<li>不要为了通用性而增加接口复杂度或实现冗余功能。</li>
+<li>设计时应优先满足当前需求，同时为未来扩展留有余地。</li>
+</ul>
+<p>（3）面向未来的灵活设计</p>
+<ul>
+<li>考虑未来可能的变化，例如不同的输入类型或额外的功能需求。</li>
+<li>通过参数化设计（如支持多个输入格式）或扩展点（如回调函数）实现灵活性。</li>
+</ul>
+<h5 id="4-通用模块的设计示例"><a href="#4-通用模块的设计示例" class="headerlink" title="4. 通用模块的设计示例"></a>4. <strong>通用模块的设计示例</strong></h5><p>示例 1：文本编辑器中的文本存储</p>
+<ul>
+<li><p><strong>问题</strong>：为文本编辑器设计一个文本存储模块，既能满足基础存储需求，又能支持复杂操作（如多字符操作、撤销/重做）。</p>
+</li>
+<li><p>简单设计</p>
+<p>：为每个字符创建一个对象，支持单字符的插入、删除等操作。</p>
+<ul>
+<li><strong>问题</strong>：效率低，接口复杂，难以满足复杂需求。</li>
+</ul>
+</li>
+<li><p>改进设计</p>
+<p>：通过块存储机制（chunk storage）一次管理多个字符，优化性能，并为未来扩展提供支持。</p>
+<ul>
+<li><strong>优点</strong>：接口简洁，性能高，支持多场景。</li>
+</ul>
+</li>
+</ul>
+<p>示例 2：通用的 API 设计</p>
+<ul>
+<li>差设计：设计过于具体的 API，例如仅支持固定格式的数据。</li>
+<li>改进：设计支持多种格式的通用 API，例如文件操作模块既支持本地文件，也支持云存储，用户无需关心底层差异。</li>
+</ul>
+<h5 id="5-通用性如何促进信息隐藏"><a href="#5-通用性如何促进信息隐藏" class="headerlink" title="5. 通用性如何促进信息隐藏"></a>5. <strong>通用性如何促进信息隐藏</strong></h5><p>（1）通过抽象隐藏细节</p>
+<ul>
+<li>通用模块通过抽象接口将实现细节封装在内部。例如，一个数据库模块可以隐藏具体的 SQL 查询逻辑，只提供查询、插入等操作接口。</li>
+</ul>
+<p>（2）减少使用者的认知负担</p>
+<ul>
+<li>调用者无需关心实现的复杂性，例如如何处理不同类型的数据或优化性能。</li>
+</ul>
+<p>（3）模块复用</p>
+<ul>
+<li>通用模块支持跨场景复用，不仅减少了重复代码，还隐藏了重复代码引发的潜在问题。</li>
+</ul>
+<h5 id="6-通用模块的设计原则"><a href="#6-通用模块的设计原则" class="headerlink" title="6. 通用模块的设计原则"></a>6. <strong>通用模块的设计原则</strong></h5><p>（1）明确功能范围</p>
+<ul>
+<li>通用模块的功能范围应清晰而适度，避免设计过于笼统或复杂。</li>
+<li><strong>示例</strong>：文件模块可以支持基本的读写操作，但不应直接包含文件内容解析功能。</li>
+</ul>
+<p>（2）简化接口</p>
+<ul>
+<li>接口设计应尽可能简洁，同时能满足多种需求。</li>
+<li><strong>示例</strong>：Unix 文件 I/O 的五个基础系统调用（如 <code>open</code>、<code>read</code>），以简单的接口支持复杂功能。</li>
+</ul>
+<p>（3）避免过度参数化</p>
+<ul>
+<li>过于灵活的参数设计可能使接口难以理解和使用。应优先满足常见场景，对少数特殊场景提供可选的扩展方法。</li>
+</ul>
+<h5 id="7-潜在问题与解决方法"><a href="#7-潜在问题与解决方法" class="headerlink" title="7. 潜在问题与解决方法"></a>7. <strong>潜在问题与解决方法</strong></h5><p>（1）过度通用化</p>
+<ul>
+<li>为满足所有可能需求，导致模块设计复杂，接口臃肿。</li>
+<li><strong>解决方法</strong>：聚焦主要需求，避免支持过多不常用功能。</li>
+</ul>
+<p>（2）未来需求的不确定性</p>
+<ul>
+<li>如果对未来的需求预测错误，可能导致模块设计无法满足实际需要。</li>
+<li><strong>解决方法</strong>：优先满足当前需求，同时在设计中留有扩展的余地。</li>
+</ul>
+<p>（3）实现复杂性转移</p>
+<ul>
+<li>通用模块可能因功能强大而内部实现复杂。</li>
+<li><strong>解决方法</strong>：确保实现复杂性被完全隐藏，避免对调用者产生负担。</li>
+</ul>
+<h5 id="8-结论"><a href="#8-结论" class="headerlink" title="8. 结论"></a>8. <strong>结论</strong></h5><ul>
+<li>通用模块更深：相比特定模块，通用模块通过抽象和复用提供了更大的功能，隐藏了更多的实现细节。</li>
+<li>设计的平衡：成功的通用模块需要在通用性与复杂性之间找到平衡，避免过度设计或功能不足。</li>
+<li>价值：通用模块能减少代码重复、提升系统灵活性、促进信息隐藏，是深模块设计的重要方向。</li>
+</ul>
+<h3 id="不同层次，不同抽象"><a href="#不同层次，不同抽象" class="headerlink" title="不同层次，不同抽象"></a>不同层次，不同抽象</h3><h5 id="1-分层设计的意义"><a href="#1-分层设计的意义" class="headerlink" title="1. 分层设计的意义"></a>1. <strong>分层设计的意义</strong></h5><ul>
+<li><p>分层设计：通过将系统划分为不同的层，每一层都提供不同的抽象。上层依赖下层的功能，而下层对上层的细节一无所知。</p>
+</li>
+<li><p>目标</p>
+<ul>
+<li>控制复杂性：每层仅需专注于自身的职责。</li>
+</ul>
+</li>
+<li><p>提高灵活性：层次之间的清晰边界使系统更容易扩展和修改。</p>
+</li>
+</ul>
+<p>示例：</p>
+<p>一个典型的分层设计包括：</p>
+<ol>
+<li>用户界面层（UI）：处理用户交互。</li>
+<li>业务逻辑层（Business Logic）：实现核心功能。</li>
+<li>数据访问层（Data Access）：负责数据存储和检索。</li>
+</ol>
+<h5 id="2-不同层次的抽象应当独立"><a href="#2-不同层次的抽象应当独立" class="headerlink" title="2. 不同层次的抽象应当独立"></a>2. <strong>不同层次的抽象应当独立</strong></h5><p>（1）抽象的独立性</p>
+<ul>
+<li><p>每一层应提供适合自己职责的抽象，避免直接暴露其他层的实现细节。</p>
+</li>
+<li><p>良好设计</p>
+<ul>
+<li>数据访问层提供简单的 CRUD 操作接口，而不关心业务逻辑如何处理数据。</li>
+</ul>
+</li>
+<li><p>业务逻辑层调用数据访问层，而不关心底层存储是数据库还是文件系统。</p>
+</li>
+</ul>
+<p>（2）避免接口重复</p>
+<ul>
+<li>不同层次不应简单复制下层的接口，而应根据上层需求设计新的抽象。</li>
+<li>问题：如果一个中间层只是直接转发底层方法（称为“传递方法”），没有任何抽象化处理，就会导致浪费和复杂性增加。</li>
+</ul>
+<p>示例：</p>
+<ul>
+<li>错误的设计：业务逻辑层直接暴露数据库查询方法（如 <code>executeSQL</code>），使上层代码必须理解 SQL。</li>
+<li>改进设计：业务逻辑层封装数据库操作，提供高层次的功能接口（如 <code>getUserProfile(userId)</code>）。</li>
+</ul>
+<h5 id="3-传递方法的问题"><a href="#3-传递方法的问题" class="headerlink" title="3. 传递方法的问题"></a>3. <strong>传递方法的问题</strong></h5><p>传递方法是指中间层直接调用下层接口，而不添加任何抽象或逻辑。这种方法会增加复杂性而无实际价值。</p>
+<p>问题：</p>
+<ul>
+<li>冗余：方法看似增加了接口，却没有隐藏复杂性或提供抽象。</li>
+<li>依赖扩散：上层调用者仍需理解底层接口的细节，违背了分层设计的初衷。</li>
+</ul>
+<p><strong>优化策略</strong>：</p>
+<ul>
+<li>提高抽象层次，确保每一层都添加实际价值。</li>
+<li>如果某层没有逻辑处理或抽象需求，可以直接省略该层。</li>
+</ul>
+<h5 id="4-接口重复的例外情况"><a href="#4-接口重复的例外情况" class="headerlink" title="4. 接口重复的例外情况"></a>4. <strong>接口重复的例外情况</strong></h5><p>在某些情况下，传递方法可能是合理的：</p>
+<ul>
+<li>装饰器模式（Decorator Pattern）：通过额外的层为方法增加功能（如日志记录或权限检查）。</li>
+<li>中间件架构：某些中间层只负责流量管理和分发，而不修改数据。</li>
+</ul>
+<p>示例：</p>
+<ul>
+<li>一个网络代理层仅转发请求，但可能会附加日志或监控信息。</li>
+<li>在这种情况下，虽然存在传递方法，但它们为系统提供了非功能性特性。</li>
+</ul>
+<h5 id="5-接口与实现的分离"><a href="#5-接口与实现的分离" class="headerlink" title="5. 接口与实现的分离"></a>5. <strong>接口与实现的分离</strong></h5><p>（1）接口关注功能</p>
+<ul>
+<li><p>接口应定义模块的功能，而不暴露实现的具体方式。</p>
+</li>
+<li><p>示例：</p>
+<ul>
+<li>接口：<code>getUserProfile(userId)</code>。</li>
+</ul>
+</li>
+<li><p>实现：从数据库读取用户数据并将其格式化为 JSON。</p>
+</li>
+</ul>
+<p>（2）实现隐藏细节</p>
+<ul>
+<li>上层代码应完全依赖接口，而不是实现细节。</li>
+<li>如果实现需要修改（如从关系型数据库迁移到 NoSQL），只需更新实现模块，而不影响依赖它的代码。</li>
+</ul>
+<h5 id="6-传递变量的问题"><a href="#6-传递变量的问题" class="headerlink" title="6. 传递变量的问题"></a>6. <strong>传递变量的问题</strong></h5><p>类似于传递方法，某些设计中上层直接将下层的变量传递给更高层，可能导致抽象失效。</p>
+<p>问题：</p>
+<ul>
+<li>上层代码必须了解底层实现，导致依赖扩散。</li>
+<li>修改底层逻辑可能破坏整个调用链。</li>
+</ul>
+<p>优化策略：</p>
+<ul>
+<li>将变量包装成更高层的抽象。</li>
+<li>仅暴露必要的信息，而非底层数据结构。</li>
+</ul>
+<p>示例：</p>
+<ul>
+<li>错误设计：UI 层直接传递数据库结果集给前端组件。</li>
+<li>改进设计：业务逻辑层将结果集转换为适合展示的对象，再传递给 UI 层。</li>
+</ul>
+<h5 id="7-设计分层的最佳实践"><a href="#7-设计分层的最佳实践" class="headerlink" title="7. 设计分层的最佳实践"></a>7. <strong>设计分层的最佳实践</strong></h5><p>（1）每层增加实际价值</p>
+<ul>
+<li>确保每层接口增加抽象或提供功能，而非仅仅复制下层接口。</li>
+<li>避免传递方法和变量，减少层间耦合。</li>
+</ul>
+<p>（2）接口设计以需求为导向</p>
+<ul>
+<li>接口设计应基于上层的需求，而非下层的实现细节。</li>
+<li>使用清晰的命名和简洁的参数，确保接口易于理解和使用。</li>
+</ul>
+<p>（3）保持层次的职责清晰</p>
+<ul>
+<li>每层应专注于自身职责，避免跨层混杂。</li>
+<li>例如，UI 层不应处理数据存储逻辑，数据访问层也不应直接涉及用户交互。</li>
+</ul>
+<h5 id="8-分层设计的收益"><a href="#8-分层设计的收益" class="headerlink" title="8. 分层设计的收益"></a>8. <strong>分层设计的收益</strong></h5><ul>
+<li>隔离复杂性：通过分层，系统的复杂性被局限在每一层内。</li>
+<li>提高可维护性：清晰的层次划分使系统更易于修改和扩展。</li>
+<li>增强可扩展性：层与层之间松耦合，可独立优化或替换。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+              <a href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" rel="tag"># 读书笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/03/19/mq-rabbit/" rel="prev" title="RabbitMQ 技术架构与队列设计">
+      <i class="fa fa-chevron-left"></i> RabbitMQ 技术架构与队列设计
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/03/20/System-Fault-Tolerance/" rel="next" title="软件系统容错的常用设计">
+      软件系统容错的常用设计 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%8D%E6%9D%82%E6%80%A7%E7%9A%84%E6%9C%AC%E8%B4%A8"><span class="nav-number">1.</span> <span class="nav-text">复杂性的本质</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-%E5%A4%8D%E6%9D%82%E6%80%A7%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">1.0.1.</span> <span class="nav-text">1. 复杂性的定义</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-%E5%A4%8D%E6%9D%82%E6%80%A7%E7%9A%84%E4%B8%89%E5%A4%A7%E8%A1%A8%E7%8E%B0"><span class="nav-number">1.0.2.</span> <span class="nav-text">2. 复杂性的三大表现</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-%E5%A4%8D%E6%9D%82%E6%80%A7%E7%9A%84%E4%B8%A4%E5%A4%A7%E6%88%90%E5%9B%A0"><span class="nav-number">1.0.3.</span> <span class="nav-text">3. 复杂性的两大成因</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-%E5%A4%8D%E6%9D%82%E6%80%A7%E7%9A%84%E5%A2%9E%E9%87%8F%E7%B4%AF%E7%A7%AF"><span class="nav-number">1.0.4.</span> <span class="nav-text">4. 复杂性的增量累积</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-%E8%AE%BE%E8%AE%A1%E7%9A%84%E6%A0%B8%E5%BF%83%E7%9B%AE%E6%A0%87"><span class="nav-number">1.0.5.</span> <span class="nav-text">5. 设计的核心目标</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E4%BB%A3%E7%A0%81%E4%B8%8D%E8%B6%B3%E4%BB%A5%E6%BB%A1%E8%B6%B3%E9%9C%80%E6%B1%82"><span class="nav-number">2.</span> <span class="nav-text">功能代码不足以满足需求</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-%E6%88%98%E6%9C%AF%E7%BC%96%E7%A8%8B-vs-%E6%88%98%E7%95%A5%E7%BC%96%E7%A8%8B"><span class="nav-number">2.0.1.</span> <span class="nav-text">1. 战术编程 vs. 战略编程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-%E5%A4%8D%E6%9D%82%E6%80%A7%E7%A7%AF%E7%B4%AF%E7%9A%84%E6%81%B6%E6%80%A7%E5%BE%AA%E7%8E%AF"><span class="nav-number">2.0.2.</span> <span class="nav-text">2. 复杂性积累的恶性循环</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E6%88%98%E7%95%A5%E7%BC%96%E7%A8%8B%E7%9A%84%E6%8A%95%E8%B5%84%E7%90%86%E5%BF%B5"><span class="nav-number">2.1.</span> <span class="nav-text">3. 战略编程的投资理念</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#4-%E6%8A%95%E8%B5%84%E7%9A%84%E5%B9%B3%E8%A1%A1%E7%82%B9"><span class="nav-number">2.1.1.</span> <span class="nav-text">4. 投资的平衡点</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-%E6%88%98%E6%9C%AF%E7%BC%96%E7%A8%8B%E7%9A%84%E5%85%B8%E5%9E%8B%E6%A1%88%E4%BE%8B%EF%BC%9A%E5%88%9D%E5%88%9B%E5%85%AC%E5%8F%B8"><span class="nav-number">2.1.2.</span> <span class="nav-text">5. 战术编程的典型案例：初创公司</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#6-%E6%88%90%E5%8A%9F%E7%9A%84%E6%88%98%E7%95%A5%E7%BC%96%E7%A8%8B%E6%A1%88%E4%BE%8B"><span class="nav-number">2.1.3.</span> <span class="nav-text">6. 成功的战略编程案例</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#7-%E6%80%BB%E7%BB%93"><span class="nav-number">2.1.4.</span> <span class="nav-text">7. 总结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E5%BA%94%E5%85%B7%E6%9C%89%E6%B7%B1%E5%BA%A6"><span class="nav-number">3.</span> <span class="nav-text">模块应具有深度</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-%E6%A8%A1%E5%9D%97%E5%8C%96%E8%AE%BE%E8%AE%A1%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">3.0.1.</span> <span class="nav-text">1. 模块化设计的定义</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-%E6%A8%A1%E5%9D%97%E7%9A%84%E7%95%8C%E9%9D%A2%E5%92%8C%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.0.2.</span> <span class="nav-text">2. 模块的界面和实现</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-%E6%A8%A1%E5%9D%97%E7%9A%84%E6%B7%B1%E5%BA%A6"><span class="nav-number">3.0.3.</span> <span class="nav-text">3. 模块的深度</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-%E6%B7%B1%E6%A8%A1%E5%9D%97%E7%9A%84%E9%87%8D%E8%A6%81%E6%80%A7"><span class="nav-number">3.0.4.</span> <span class="nav-text">4. 深模块的重要性</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-%E6%B5%85%E6%A8%A1%E5%9D%97%E7%9A%84%E5%85%B8%E5%9E%8B%E9%97%AE%E9%A2%98"><span class="nav-number">3.0.5.</span> <span class="nav-text">5. 浅模块的典型问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#6-%E8%BF%87%E5%BA%A6%E5%88%86%E8%A7%A3%E4%B8%8E%E2%80%9C%E7%B1%BB%E7%97%85%E2%80%9D%EF%BC%88Classitis%EF%BC%89"><span class="nav-number">3.0.6.</span> <span class="nav-text">6. 过度分解与“类病”（Classitis）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#7-Unix-I-O-%E7%9A%84%E5%AF%B9%E6%AF%94%E7%A4%BA%E4%BE%8B"><span class="nav-number">3.0.7.</span> <span class="nav-text">7. Unix I&#x2F;O 的对比示例</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#8-%E8%AE%BE%E8%AE%A1%E6%B7%B1%E6%A8%A1%E5%9D%97%E7%9A%84%E7%AD%96%E7%95%A5"><span class="nav-number">3.0.8.</span> <span class="nav-text">8. 设计深模块的策略</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#9-%E7%BB%93%E8%AE%BA"><span class="nav-number">3.0.9.</span> <span class="nav-text">9. 结论</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E9%9A%90%E8%97%8F%E4%B8%8E%E6%B3%84%E6%BC%8F"><span class="nav-number">4.</span> <span class="nav-text">信息隐藏与泄漏</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-%E4%BF%A1%E6%81%AF%E9%9A%90%E8%97%8F%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">4.0.1.</span> <span class="nav-text">1. 信息隐藏的定义</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-%E4%BF%A1%E6%81%AF%E9%9A%90%E8%97%8F%E7%9A%84%E5%A5%BD%E5%A4%84"><span class="nav-number">4.0.2.</span> <span class="nav-text">2. 信息隐藏的好处</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-%E4%BF%A1%E6%81%AF%E6%B3%84%E6%BC%8F%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">4.0.3.</span> <span class="nav-text">3. 信息泄漏的定义</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-%E4%BF%A1%E6%81%AF%E9%9A%90%E8%97%8F%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.0.4.</span> <span class="nav-text">4. 信息隐藏的实现</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-%E5%85%B8%E5%9E%8B%E4%BF%A1%E6%81%AF%E6%B3%84%E6%BC%8F"><span class="nav-number">4.0.5.</span> <span class="nav-text">5. 典型信息泄漏</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#6-%E6%97%B6%E9%97%B4%E5%88%86%E8%A7%A3%EF%BC%88Temporal-Decomposition%EF%BC%89%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">4.0.6.</span> <span class="nav-text">6. 时间分解（Temporal Decomposition）的问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#7-%E4%BF%A1%E6%81%AF%E9%9A%90%E8%97%8F%E7%9A%84%E5%AE%9E%E9%99%85%E6%8C%91%E6%88%98"><span class="nav-number">4.0.7.</span> <span class="nav-text">7. 信息隐藏的实际挑战</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#8-%E4%BF%A1%E6%81%AF%E9%9A%90%E8%97%8F%E7%9A%84%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">4.0.8.</span> <span class="nav-text">8. 信息隐藏的最佳实践</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#9-%E6%80%BB%E7%BB%93"><span class="nav-number">4.0.9.</span> <span class="nav-text">9. 总结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E7%94%A8%E6%A8%A1%E5%9D%97%E8%A6%81%E6%B7%B1"><span class="nav-number">5.</span> <span class="nav-text">通用模块要深</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-%E9%80%9A%E7%94%A8%E6%A8%A1%E5%9D%97%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">5.0.1.</span> <span class="nav-text">1. 通用模块的定义</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-%E9%80%9A%E7%94%A8%E6%A8%A1%E5%9D%97%E7%9A%84%E5%A5%BD%E5%A4%84"><span class="nav-number">5.0.2.</span> <span class="nav-text">2. 通用模块的好处</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-%E8%AE%BE%E8%AE%A1%E9%80%9A%E7%94%A8%E6%A8%A1%E5%9D%97%E7%9A%84%E7%AD%96%E7%95%A5"><span class="nav-number">5.0.3.</span> <span class="nav-text">3. 设计通用模块的策略</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-%E9%80%9A%E7%94%A8%E6%A8%A1%E5%9D%97%E7%9A%84%E8%AE%BE%E8%AE%A1%E7%A4%BA%E4%BE%8B"><span class="nav-number">5.0.4.</span> <span class="nav-text">4. 通用模块的设计示例</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-%E9%80%9A%E7%94%A8%E6%80%A7%E5%A6%82%E4%BD%95%E4%BF%83%E8%BF%9B%E4%BF%A1%E6%81%AF%E9%9A%90%E8%97%8F"><span class="nav-number">5.0.5.</span> <span class="nav-text">5. 通用性如何促进信息隐藏</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#6-%E9%80%9A%E7%94%A8%E6%A8%A1%E5%9D%97%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99"><span class="nav-number">5.0.6.</span> <span class="nav-text">6. 通用模块的设计原则</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#7-%E6%BD%9C%E5%9C%A8%E9%97%AE%E9%A2%98%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="nav-number">5.0.7.</span> <span class="nav-text">7. 潜在问题与解决方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#8-%E7%BB%93%E8%AE%BA"><span class="nav-number">5.0.8.</span> <span class="nav-text">8. 结论</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E5%B1%82%E6%AC%A1%EF%BC%8C%E4%B8%8D%E5%90%8C%E6%8A%BD%E8%B1%A1"><span class="nav-number">6.</span> <span class="nav-text">不同层次，不同抽象</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-%E5%88%86%E5%B1%82%E8%AE%BE%E8%AE%A1%E7%9A%84%E6%84%8F%E4%B9%89"><span class="nav-number">6.0.1.</span> <span class="nav-text">1. 分层设计的意义</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-%E4%B8%8D%E5%90%8C%E5%B1%82%E6%AC%A1%E7%9A%84%E6%8A%BD%E8%B1%A1%E5%BA%94%E5%BD%93%E7%8B%AC%E7%AB%8B"><span class="nav-number">6.0.2.</span> <span class="nav-text">2. 不同层次的抽象应当独立</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-%E4%BC%A0%E9%80%92%E6%96%B9%E6%B3%95%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">6.0.3.</span> <span class="nav-text">3. 传递方法的问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-%E6%8E%A5%E5%8F%A3%E9%87%8D%E5%A4%8D%E7%9A%84%E4%BE%8B%E5%A4%96%E6%83%85%E5%86%B5"><span class="nav-number">6.0.4.</span> <span class="nav-text">4. 接口重复的例外情况</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%AE%9E%E7%8E%B0%E7%9A%84%E5%88%86%E7%A6%BB"><span class="nav-number">6.0.5.</span> <span class="nav-text">5. 接口与实现的分离</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#6-%E4%BC%A0%E9%80%92%E5%8F%98%E9%87%8F%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">6.0.6.</span> <span class="nav-text">6. 传递变量的问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#7-%E8%AE%BE%E8%AE%A1%E5%88%86%E5%B1%82%E7%9A%84%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">6.0.7.</span> <span class="nav-text">7. 设计分层的最佳实践</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#8-%E5%88%86%E5%B1%82%E8%AE%BE%E8%AE%A1%E7%9A%84%E6%94%B6%E7%9B%8A"><span class="nav-number">6.0.8.</span> <span class="nav-text">8. 分层设计的收益</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

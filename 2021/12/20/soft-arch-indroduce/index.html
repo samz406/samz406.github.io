@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="《 软件架构：架构模式 特征及实践指南》读书笔记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件架构之概述">
+<meta property="og:url" content="http://www.sanmuzi.com/2021/12/20/soft-arch-indroduce/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="《 软件架构：架构模式 特征及实践指南》读书笔记">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-12-20T11:06:23.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.376Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2021/12/20/soft-arch-indroduce/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件架构之概述 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2021/12/20/soft-arch-indroduce/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件架构之概述
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-12-20 19:06:23" itemprop="dateCreated datePublished" datetime="2021-12-20T19:06:23+08:00">2021-12-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%BD%AF%E4%BB%B6%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">软件架构</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>《<a target="_blank" rel="noopener" href="http://product.dangdang.com/29253859.html"> 软件架构：架构模式 特征及实践指南</a>》读书笔记</p>
+<span id="more"></span>
+
+
+
+<p>学习架构要记住一点：</p>
+<p>​    与许多艺术品一样。架构只能从上下文理解。架构师的许多决策都基于他们所处的实际环境产生。如20世纪后期架构的主要目标之一是最大限度利用资源共享，这是因为当时所有基础设施都是商业化的，并且价格贵得很。可以想象下，你走进一个2002年的数据中心，告诉运营“我有一个革命性架构想法，每个服务都在独立机器上运行并配置专用数据库，需要50个windows许可，30个应用程序服务器许可以及至少50个数据库许可”。在2002 如果是微服务那成本是多高啊。随后几年开源软件以及DevOps的出现，就可以低成本合理实现微服务架构。</p>
+<h3 id="架构师的角色期望"><a href="#架构师的角色期望" class="headerlink" title="架构师的角色期望"></a>架构师的角色期望</h3><ul>
+<li><p>指定架构决策</p>
+<p>​    架构师需要制定架构决策和设计原则，以指导团队、部门或整个企业进行技术决策。架构师应当指导而不是指定技术选择。比如架构师可以要求是开发团队基于响应式前端开发框架，指导开发团队从Angular、React.js、Vue或其他响应式前端开发框架中进行选择。有效的架构决策关键在于架构决策是否指导团队做出正确的技术选择或是否替他们做出技术选择。</p>
+</li>
+<li><p>持续分析架构</p>
+<p>​    架构师需要持续分析架构和当前技术环境，然后给出改进建议。</p>
+</li>
+<li><p>掌握最新趋势</p>
+<p>​    架构师需要掌握最新的技术和行业趋势</p>
+</li>
+<li><p>确保决策被遵守</p>
+<p>​    架构师需要确保架构决策设设计原则被遵守，确保决策被遵守意味着架构师需要不断的验证开发团队是否遵循了那些已经被定义、文档化并且交流沟通的架构决策和设计原则。</p>
+</li>
+<li><p>丰富的经历和经验</p>
+<p>​    架构师需要涉猎各种各样的技术、框架、平台和环境。走出自己舒适区。仅仅专注于一个技术、平台是不行的，一个合格架构师应当积极寻找机会通过接触多种语言、平台和技术积累经验。这就需要知识广度。</p>
+</li>
+<li><p>具备业务领域知识</p>
+<p>​    架构师需要具备一定业务知识，没有业务知识，就无法理解业务问题、目标和需求。也就不能设计出有效的架构。</p>
+</li>
+<li><p>具备人际交往能力</p>
+<p>​    架构师需要具备出色的人际交往能力，其中包括团队合作、引导和领导力。</p>
+</li>
+<li><p>了解并驾驭政治</p>
+<p>​    架构师需要了解企业政治氛围并驾驭政治。</p>
+</li>
+</ul>
+<h3 id="软件架构定律"><a href="#软件架构定律" class="headerlink" title="软件架构定律"></a>软件架构定律</h3><p><strong>定律1：</strong>  <strong>软件架构中的一切都是在做权衡</strong></p>
+<p>对于架构师没有什么简单的选择，每个决策都需要考虑许多相互矛盾的因素。架构师若发现了不需要的东西，很有可能他们只是还没有发现需要舍弃的东西。</p>
+<p><strong>定律2：原因比方法更重要</strong></p>
+<p>架构师面对不了解的系统时，可以知道这个架构师如何工作的，但很难解释某个选择背后的原因。</p>
+<h3 id="架构思维"><a href="#架构思维" class="headerlink" title="架构思维"></a>架构思维</h3><p>​    架构思维是用架构的眼光或视角看待事物。架构思维有四个重要特征：</p>
+<p>​    1） 明白架构和设计之间的区别，了解如何与开发团队合作。使得架构顺利落地。</p>
+<p>​    2） 需要在具备技术广度同时任保持一定技术深度。</p>
+<p>3） 需要理解、分析和协调各种解决方案和技术之间权衡，</p>
+<p>4） 了解业务驱动重要性以及它们是如何转化为架构问题。’</p>
+<h4 id="架构与设计"><a href="#架构与设计" class="headerlink" title="架构与设计"></a>架构与设计</h4><p>先抛出几个问题</p>
+<p>​        1） 架构从哪里开始，又从哪里结束？</p>
+<p>​        2） 架构师应承担哪些责任</p>
+<p>​        3) 架构与设计有什么区别</p>
+<p>从图中可以看出，箭头是单项的，从架构的虚拟到开发的实体之间是单项沟通，架构师所做的决策常常无法传达给开发团队，而开发团队对于架构改动也很反馈给架构师。由于架构师和开发团队是割裂的，所以导致架构很难落地。</p>
+<p>为了是架构落地，就要打破架构师和开发团队的单项沟通，架构师和开发团队应该是双向强关联。</p>
+<h4 id="技术广度"><a href="#技术广度" class="headerlink" title="技术广度"></a><strong>技术广度</strong></h4><p>​        开发人员必须拥有很深的技术深度，而架构师必须具有非常广的技术广度，事情从而才能考虑更全面。架构师的一部分价值是广泛理解技术，并且知道如何利用技术解决特定问题。如果一个问题有五种解决方案比只有一种更好啊；第二个就是根据功能做出与技术限制相匹配的决策。广泛了解各种解决方案是非常有价值。</p>
+<p>​            </p>
+<p>​        架构师与开发人员不同点在于，开发人员将整个职业生涯在磨练专业知识，而转变为架构师则意味着这种观念的转变。这对许多人来说是困难的，这会导致架构师试图在多个领域都保持专业深度，结果无一成功，并且深陷其中，专业知识没有持续更新，经常使用过时的技术决策。作者将这种现象称为“冰封原始人反模式”。为了避免这种结果架构师应该关注技术广度以便在架构设计时丰富工具箱。</p>
+<p>​    </p>
+<h4 id="分析权衡"><a href="#分析权衡" class="headerlink" title="分析权衡"></a>分析权衡</h4><p>​    架构师需要对每种决策进行取舍，无论技术解决方案还是其他解决方案，然后分析这些取舍利弊，最后确定最佳的解决方案。</p>
+<blockquote>
+<p>​    所谓的架构不能通过搜索得到的。</p>
+</blockquote>
+<p>​    </p>
+<p>架构中所有事物都需要权衡，所以“<strong>看情况</strong>”可以回答世间每个架构问题最佳答案。尽管许多人很反感此答案，但是这就是事实。架构取决于部署环境，业务驱动因数、公司文化、预算、时间表、开发人员技能以及许多其他因数。</p>
+<blockquote>
+<p>架构没有对错，唯有取舍 —Neal</p>
+</blockquote>
+<p>架构师不仅要考虑给定解决方案的优势，还要分析解决方案相关负面因素或权衡取舍。</p>
+<blockquote>
+<p>程序员了解所有技术优势，却不关注优势背后的妥协，而架构师需要在其中找到平衡。</p>
+</blockquote>
+<h4 id="理解业务驱动因素"><a href="#理解业务驱动因素" class="headerlink" title="理解业务驱动因素"></a>理解业务驱动因素</h4><p>​        架构师还要理解系统成功所需的业务驱动因素，并将这些需求转换为架构特征（如可伸缩、性能、可用性等）。需要架构师具有一定程度业务领域知识。并需要与关键业务的利益相关者（甲方粑粑）建立好关系。</p>
+<h4 id="平衡架构和动手编码"><a href="#平衡架构和动手编码" class="headerlink" title="平衡架构和动手编码"></a>平衡架构和动手编码</h4><p>​    架构师会面临如何平衡动手编码与设计软件架构。每个架构师应该动手编写代码，并保持一定水平的技术深度。架构师是一般都是设计项目框架代码，由于架构师不是全职开发人员，因此必须在开发人员（编写和测试代码）和架构师（绘制图表、开会）这两个角色之间平衡。拜托这种现象就是将关键路径和框架代码委派给开发团队的其他人员。找一个业务点来做。这样的好处是 架构师获得了动手编码机会。第二是关键路径和框架代码已分发给开发团队，第三是架构师与开发团队一样，编写业务代码代码，可以更好识别开发团队在开发过程中遇到与流程、步骤和开发环境相关的痛点。</p>
+<h3 id="架构特征"><a href="#架构特征" class="headerlink" title="架构特征"></a>架构特征</h3><p>​    架构特征包含了定义需求、发现和分析软件必须包含的全部功能。</p>
+<p>架构特征满足三个标准：</p>
+<ul>
+<li><p>明确非领域涉及的某个注意事项、</p>
+<p>​    设计应用时，需求制定了应用该做什么，架构特征指定了成功的操作和设计标准。涉及如何实现需求以及为何做出某些决策。如一个常见的架构特征为应用指定了一定的性能水平，而这个通常不会出现在需求文档中。</p>
+</li>
+<li><p>影响设计的某些结构项</p>
+<p>​    如架构设计需要考虑安全因素，这会上升到架构特征的层级</p>
+</li>
+<li><p>是否对应用的成功至关重要</p>
+</li>
+</ul>
+<p>架构特征可以分为显示和隐式架构特征。隐式架构特征很少出现在需求中，但它们对项目成功又是必不可少的。如可用性、可靠性、安全性等。显示架构特征初选在需求文档或其他特定说明中。</p>
+<h4 id="运营性架构特征"><a href="#运营性架构特征" class="headerlink" title="运营性架构特征"></a>运营性架构特征</h4><p>运营性架构特征涵盖了性能、可伸缩性、弹性、可用性和可靠性等功能。</p>
+<table>
+<thead>
+<tr>
+<th>术语</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>可用性</td>
+<td>系统需要多长时间可用</td>
+</tr>
+<tr>
+<td>连续性</td>
+<td>灾难恢复能力</td>
+</tr>
+<tr>
+<td>性能</td>
+<td>压力测试、峰值分析、所用功能的频率、所需容量和响应时间分析</td>
+</tr>
+<tr>
+<td>可恢复性</td>
+<td>业务的连续性要求</td>
+</tr>
+<tr>
+<td>可靠性、安全性</td>
+<td>评估系统是否需要故障安全</td>
+</tr>
+<tr>
+<td>健壮性</td>
+<td>互联网中断、断电、硬件故障 。能在运行时处理错误和边界条件</td>
+</tr>
+<tr>
+<td>可伸缩性</td>
+<td>随着用户或请求数量增加，系统执行和操作的能力</td>
+</tr>
+</tbody></table>
+<h4 id="结构性架构特征"><a href="#结构性架构特征" class="headerlink" title="结构性架构特征"></a>结构性架构特征</h4><p>架构师需要代码质量问题负责</p>
+<table>
+<thead>
+<tr>
+<th>术语</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>可配置性</td>
+<td>能够方便更改软件配置</td>
+</tr>
+<tr>
+<td>可扩展性</td>
+<td>能够插入新功能非常重要</td>
+</tr>
+<tr>
+<td>可安装性</td>
+<td>易于在所有必要的平台上安装系统</td>
+</tr>
+<tr>
+<td>可利用性</td>
+<td>能够跨多个产品利用通用组件能力</td>
+</tr>
+<tr>
+<td>可维护性</td>
+<td>应用更改和增强系统非常容易</td>
+</tr>
+<tr>
+<td>可移植性</td>
+<td>系统是否需要再多个系统上运行</td>
+</tr>
+<tr>
+<td>可支持性</td>
+<td>应用需要什么级别的技术支持</td>
+</tr>
+<tr>
+<td>可升级性</td>
+<td>能够轻松快速地将服务器和客户端上的应用或解决方案从先前版本升级到新版本</td>
+</tr>
+</tbody></table>
+<p>​    </p>
+<h4 id="跨领域架构特征"><a href="#跨领域架构特征" class="headerlink" title="跨领域架构特征"></a>跨领域架构特征</h4><p>​    </p>
+<table>
+<thead>
+<tr>
+<th>术语</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>可访问性</td>
+<td>触达所有用户</td>
+</tr>
+<tr>
+<td>可归档性</td>
+<td>一段时间后是否需要归档或删除数据？</td>
+</tr>
+<tr>
+<td>认证</td>
+<td>安全性要求以验证用户身份</td>
+</tr>
+<tr>
+<td>授权</td>
+<td>安全性要求，以确保用户只能访问应用内的某些功能</td>
+</tr>
+<tr>
+<td>法律</td>
+<td>系统在哪些立法约束下运行</td>
+</tr>
+<tr>
+<td>隐式性</td>
+<td>能够向公司内部员工隐藏事务</td>
+</tr>
+<tr>
+<td>安全性</td>
+<td>是否需要再数据库中对数据进行加密</td>
+</tr>
+<tr>
+<td>可支持性</td>
+<td>应用需要什么级别的技术支持</td>
+</tr>
+<tr>
+<td>易用性/可读性</td>
+<td>用户使用应用或解决方案实现其目标所需的培训水平</td>
+</tr>
+</tbody></table>
+<p><strong>永远不要为最好的架构而努力，而要为最差可用的架构而努力。</strong></p>
+<h3 id="识别架构特征"><a href="#识别架构特征" class="headerlink" title="识别架构特征"></a>识别架构特征</h3><h4 id="从领域问题中提取架构特征"><a href="#从领域问题中提取架构特征" class="headerlink" title="从领域问题中提取架构特征"></a>从领域问题中提取架构特征</h4><h4 id><a href="#" class="headerlink" title></a></h4><p>架构师需要“翻译”领域问题，以识别架构特征。比如可伸缩性重要还是容错性重要？要理解关键领域目标和领域知识，架构师可以将这些领域问题转换为具体特征。很多架构师希望和利益相关者确定系统必须支持的最终架构特征的优先级。这是合乎需要的。但是大多数情况下是达不到目标的。更好的做法是让利益相关者从最终列表中任意顺序选择三个最重要的特征。</p>
+<h4 id="从需求中提取架构特征"><a href="#从需求中提取架构特征" class="headerlink" title="从需求中提取架构特征"></a>从需求中提取架构特征</h4><p>一些架构特征来之需求文档的显示声明。如预期用户数。</p>
+<blockquote>
+<p>在架构中没有错误的答案，只有昂贵的答案</p>
+</blockquote>
+<h3 id="度量和治理架构特征"><a href="#度量和治理架构特征" class="headerlink" title="度量和治理架构特征"></a>度量和治理架构特征</h3><h4 id="度量架构特征"><a href="#度量架构特征" class="headerlink" title="度量架构特征"></a>度量架构特征</h4><h5 id="运营性度量"><a href="#运营性度量" class="headerlink" title="运营性度量"></a>运营性度量</h5><p>​        一些架构特征具有明显的直接度量，比如性能和可升缩性，Web应用的请求和响应周期需要多长时间，通过指标分析查看系统运行是否健康</p>
+<h5 id="架构性度量"><a href="#架构性度量" class="headerlink" title="架构性度量"></a>架构性度量</h5><p>代码的可测量是复杂度，代码覆盖率测量</p>
+<h4 id="治理和适应度函数"><a href="#治理和适应度函数" class="headerlink" title="治理和适应度函数"></a>治理和适应度函数</h4><h5 id="治理架构特征"><a href="#治理架构特征" class="headerlink" title="治理架构特征"></a>治理架构特征</h5><p>架构治理范围涵盖了 架构师想要在软件开发过程中施加影响的任何方面，如确保组织内的软件质量属于架构治理的范畴。</p>
+<h5 id="适应度函数"><a href="#适应度函数" class="headerlink" title="适应度函数"></a>适应度函数</h5><p>​    适应度函数是任何对某些架构特征或架构特征组合进行客观的完整性评估机制。有度量、监视器、单元测试、混沌工程方式。</p>
+<h3 id="架构特征范围"><a href="#架构特征范围" class="headerlink" title="架构特征范围"></a>架构特征范围</h3><p>共生性</p>
+<p>​     如果一个组件的变更需要修改另一个组件才能保证系统的整体准确性，则两个组件是共生的。共生包括静态性共生（可通过静态代码分析发现）和动态共生性（涉及运行时行为）。如微服务架构中两个服务共享某个相同的类定义，则它们有静态共生性-更改共享类需要同时更改这两个服务。动态共生性分为同步和异步。两个分布式服务之间的同步调用使调用者等待被调用者的响应。异步调用在事件驱动的架构中允许发出事件后就结束，从而允许两种不同的服务在运营性架构中有所不同。</p>
+<p>​    </p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/12/18/IO/" rel="prev" title="IO模型">
+      <i class="fa fa-chevron-left"></i> IO模型
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/12/29/only-one-thing/" rel="next" title="《人生只有一件事》笔记">
+      《人生只有一件事》笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E5%B8%88%E7%9A%84%E8%A7%92%E8%89%B2%E6%9C%9F%E6%9C%9B"><span class="nav-number">1.</span> <span class="nav-text">架构师的角色期望</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E6%9E%B6%E6%9E%84%E5%AE%9A%E5%BE%8B"><span class="nav-number">2.</span> <span class="nav-text">软件架构定律</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E6%80%9D%E7%BB%B4"><span class="nav-number">3.</span> <span class="nav-text">架构思维</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E4%B8%8E%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.1.</span> <span class="nav-text">架构与设计</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E5%B9%BF%E5%BA%A6"><span class="nav-number">3.2.</span> <span class="nav-text">技术广度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E6%9D%83%E8%A1%A1"><span class="nav-number">3.3.</span> <span class="nav-text">分析权衡</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%90%86%E8%A7%A3%E4%B8%9A%E5%8A%A1%E9%A9%B1%E5%8A%A8%E5%9B%A0%E7%B4%A0"><span class="nav-number">3.4.</span> <span class="nav-text">理解业务驱动因素</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%B3%E8%A1%A1%E6%9E%B6%E6%9E%84%E5%92%8C%E5%8A%A8%E6%89%8B%E7%BC%96%E7%A0%81"><span class="nav-number">3.5.</span> <span class="nav-text">平衡架构和动手编码</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">4.</span> <span class="nav-text">架构特征</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%90%E8%90%A5%E6%80%A7%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">4.1.</span> <span class="nav-text">运营性架构特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E6%80%A7%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">4.2.</span> <span class="nav-text">结构性架构特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B7%A8%E9%A2%86%E5%9F%9F%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">4.3.</span> <span class="nav-text">跨领域架构特征</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%86%E5%88%AB%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">5.</span> <span class="nav-text">识别架构特征</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%8E%E9%A2%86%E5%9F%9F%E9%97%AE%E9%A2%98%E4%B8%AD%E6%8F%90%E5%8F%96%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">5.1.</span> <span class="nav-text">从领域问题中提取架构特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">5.2.</span> <span class="nav-text"></span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%8E%E9%9C%80%E6%B1%82%E4%B8%AD%E6%8F%90%E5%8F%96%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">5.3.</span> <span class="nav-text">从需求中提取架构特征</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%A6%E9%87%8F%E5%92%8C%E6%B2%BB%E7%90%86%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">6.</span> <span class="nav-text">度量和治理架构特征</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BA%A6%E9%87%8F%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">6.1.</span> <span class="nav-text">度量架构特征</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BF%90%E8%90%A5%E6%80%A7%E5%BA%A6%E9%87%8F"><span class="nav-number">6.1.1.</span> <span class="nav-text">运营性度量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E6%80%A7%E5%BA%A6%E9%87%8F"><span class="nav-number">6.1.2.</span> <span class="nav-text">架构性度量</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B2%BB%E7%90%86%E5%92%8C%E9%80%82%E5%BA%94%E5%BA%A6%E5%87%BD%E6%95%B0"><span class="nav-number">6.2.</span> <span class="nav-text">治理和适应度函数</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B2%BB%E7%90%86%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81"><span class="nav-number">6.2.1.</span> <span class="nav-text">治理架构特征</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%80%82%E5%BA%94%E5%BA%A6%E5%87%BD%E6%95%B0"><span class="nav-number">6.2.2.</span> <span class="nav-text">适应度函数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E7%89%B9%E5%BE%81%E8%8C%83%E5%9B%B4"><span class="nav-number">7.</span> <span class="nav-text">架构特征范围</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

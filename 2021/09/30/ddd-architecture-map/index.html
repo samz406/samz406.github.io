@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="领域驱动架构可以方便划分个软件元素、管理元素之间的关系、和伴生的交互。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DDD之同构系统">
+<meta property="og:url" content="http://www.sanmuzi.com/2021/09/30/ddd-architecture-map/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="领域驱动架构可以方便划分个软件元素、管理元素之间的关系、和伴生的交互。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-09-30T01:00:01.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.351Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2021/09/30/ddd-architecture-map/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>DDD之同构系统 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2021/09/30/ddd-architecture-map/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          DDD之同构系统
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-09-30 09:00:01" itemprop="dateCreated datePublished" datetime="2021-09-30T09:00:01+08:00">2021-09-30</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/DDD/" itemprop="url" rel="index"><span itemprop="name">DDD</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>领域驱动架构可以方便划分个软件元素、管理元素之间的关系、和伴生的交互。</p>
+<span id="more"></span>
+
+
+
+<p><strong>同构系统</strong>是指两个复杂结构可以互相映射，并且每一个结构的每一个任务在另一个结构中都有一个相应的部分。</p>
+<p>​    对于一个目标系统，问题空间代表真实世界的真实系统，解空间是一面镜子，利用求解过程照射的光，将真实系统映射为虚拟系统。在领域驱动统一过程的架构映射阶段，从问题空间到解空间的架构映射属于领域驱动的战略设计层面，在该层面获得的解决方案通过架构呈现起战略意义。几乎所有所设计良好的软件系统的架构都是相似，符合优良架构的定义。</p>
+<p>架构映射包括三个阶段</p>
+<ul>
+<li><p>架构定义的概念系统与架构设计的模式系统。对应架构映射阶段的概念层次。</p>
+</li>
+<li><p>问题空间的真实系统与解空间的软件系统，对应架构映射阶段的设计层次。</p>
+</li>
+<li><p>设计方案的架构系统与团队组织的管理系统，对应架构映射阶段管理层次。</p>
+</li>
+</ul>
+<h3 id="概念层次"><a href="#概念层次" class="headerlink" title="概念层次"></a>概念层次</h3><p>概念层次的同构系统围绕架构定义展开映射，在软件领域，架构是最吸引人的。表达了高层次的设计指导、原则、和具体设计模型。</p>
+<h4 id="架构定义"><a href="#架构定义" class="headerlink" title="架构定义"></a>架构定义</h4><p>​    IEEE 1471的架构定义为：架构是以组件、组件之间的关系、组件与环境之间的关系为内容的某一系统的基本组织结构，以及指导上述内容设计与演化的原则。</p>
+<p>​    Philippe Kruchten架构定义为：软件架构包含了关于以下内容的重要决策：软件系统的组织；选择组成系统的结构元素和它们之间的接口，以及当这些元素相互作用时所体现的行为；如何组合这些元素，使它们逐渐合成更大的子系统；用于指导这个系统组织的架构风格流着血元素以及它们的接口、协作和组合。</p>
+<p>卡内基梅隆大学软件工程研究院定义为：软件架构是对系统进行推演获得的一组结构，每个结构均由软件元素、这些元素的关系以及它们的属性组成。</p>
+<p>通过这些架构定义可以提炼出好的架构的基本设计元素：</p>
+<p>​    -&gt; 功能分解的软件元素</p>
+<p>​    -&gt; 软件元素之间的关系</p>
+<p>​    -&gt; 软件元素与外部环境之间的关系</p>
+<p>​    -&gt; 指导架构设计与演化与原则</p>
+<p>​    架构是解空间空间软件复杂度的核心力量。对解空间进行功能分解，并以一个封装良好的软件元素来表达系统的结构。可以有效控制软件系统的规模；管理好软件元素之间的关系以及软件元素与外部环境之间的关系。可以保证系统结构清晰，可以总结为:</p>
+<ol>
+<li><p><strong>软件元素分解能够有效控制规模</strong></p>
+</li>
+<li><p><strong>梳理软件元素以及外部关系可以清晰结构</strong></p>
+</li>
+<li><p> <strong>架构设计与演化原则保证了架构能够响应变化</strong></p>
+</li>
+</ol>
+<h4 id="架构方案的推演"><a href="#架构方案的推演" class="headerlink" title="架构方案的推演"></a>架构方案的推演</h4><p>TOGAF 的架构开发方法将规划了企业架构内容:业务架构、信息系统架构、技术架构。它们分别对应架构模型三个层次：业务层、应用层和技术层。</p>
+<p>在企业架构中，业务架构从企业战略出发，按照企业战略设计业务和业务过程；业务过程需要业务能力支撑，从战略到业务再到业务能力的需要，就形成了支持企业战略实现的能力</p>
+<p>信息系统架构中数据架构梳理和治理企业数据资产，建立数据标准与数据模型，形成企业全域数据的全生命周期管理；</p>
+<p>应用架构描述各种用于支持业务架构并对数据架构所定义的各种数据进行处理的应用系统。应用系统的划分需要从功能布局角度支撑业务架构需要提供的各种数据进行处理的应用系统。</p>
+<p>技术架构需要将应用架构定义的应用组件映射为对应的组件，并从物理层面和逻辑层面对架构进行分解，对技术是实现做出设计决策与技术选型。</p>
+<p>业务架构定义业务能力，指导信息系统架构的设计，确定与之对应的数据模型与应用系统。技术架构根据技术参考模型与所处行业的通用技术模型确定融合了业务逻辑与技术实现的解决方案。它们的观察视角有所不同。不同的观察视角可以分离不同的关注点。</p>
+<p>如果需要调整目标系统的业务架构时，限界上下文根据领域知识语境对业务进行功能分解，体现了独立的业务能力。它可以在业务架构中维护业务边界，同时可以对应用架构的纵向切分来支持业务能力，使得业务架构的业务边界与应用边界保持移动的重叠。</p>
+<p>​    </p>
+<p>​    业务、应用、数据都以限界上下文为边界构成其架构的软件元素，可以确保业务架构、应用架构和数据架构遵循一致的业务变化方向。</p>
+<p>​    <strong>业务复杂度和技术复杂度成因不同，不能将目标系统的技术架构和业务架构绑定</strong>，在DDD中可以设计统一的过程通过在限界上下文内部建立菱形对称架构。可以清晰划分业务逻辑与技术实现边界，确定了业务与技术在架构层次的正交关系。使得引起业务架构与技术架构变化的原因分离开。形成了两种架构的松耦合。</p>
+<h4 id="领域驱动架构风格"><a href="#领域驱动架构风格" class="headerlink" title="领域驱动架构风格"></a>领域驱动架构风格</h4><p>通过限界上下文划分软件元素</p>
+<p>通过限界上下文菱形对称架构管理元素之间关系</p>
+<p>通过系统上下文界定软件元素与外部环境中伴生系统的关系。通过菱形对称架构与系统分层架构管理软件元素与环境资源之间的关系。</p>
+<p>确立以领域为核心驱动力、业务能力为核心关注点为指导架构设计与演化的原则。</p>
+<h3 id="设计层次同构系统"><a href="#设计层次同构系统" class="headerlink" title="设计层次同构系统"></a>设计层次同构系统</h3><p>​    对问题空间的求解，就是从问题空间跨入解空间，遵循领域驱动架构风格，可以将问题空间的价值需求与业务需求分别映射为构成领域驱动架构风格的设计要素。</p>
+<p>​    价值需求以组织视角分析目标系统的愿景与范围，形成以系统上下文为核心的组织级映射；</p>
+<p>​     业务需求的业务服务分析目标系统的具体业务功能，形成以限界上下文与菱形对称架构为核心的业务级映射；</p>
+<p>​     业务需求对子领域的划分从业务价值的角度确定各个业务功能所处层次，形成以系统分层架构为核心的系统级映射。</p>
+<h3 id="管理层次的同构系统"><a href="#管理层次的同构系统" class="headerlink" title="管理层次的同构系统"></a>管理层次的同构系统</h3><pre><code> 管理层次同构系统是对康威定律一种解释。架构设计的目标系统映射到设计方案上，形成了架构系统。
+</code></pre>
+<ul>
+<li><p>目标系统的系统分层架构自底向上分别由基础层、业务价值层、边缘层、客户端层。根据康威定律，基础层限界上下文取决于上下文映射模式，可映射为管理系统的组件团队或领域特性团队。</p>
+</li>
+<li><p>业务价值层由限界上下文体现纵向的业务能力，映射为管理系统的领域特性团队。</p>
+</li>
+<li><p>边缘层与客户端主要面向客户，站在客户体验的角度思考功能的划分，映射为前端组件团队。</p>
+</li>
+</ul>
+<p>注：</p>
+<p>以上是《解析领域驱动设计》第七章笔记记录</p>
+<p>​        </p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/09/29/redis-sentinel/" rel="prev" title="Redis哨兵集群介绍">
+      <i class="fa fa-chevron-left"></i> Redis哨兵集群介绍
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/09/30/redis-cluster/" rel="next" title="Redis切片集群">
+      Redis切片集群 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%E5%B1%82%E6%AC%A1"><span class="nav-number">1.</span> <span class="nav-text">概念层次</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E5%AE%9A%E4%B9%89"><span class="nav-number">1.1.</span> <span class="nav-text">架构定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E6%96%B9%E6%A1%88%E7%9A%84%E6%8E%A8%E6%BC%94"><span class="nav-number">1.2.</span> <span class="nav-text">架构方案的推演</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E6%9E%B6%E6%9E%84%E9%A3%8E%E6%A0%BC"><span class="nav-number">1.3.</span> <span class="nav-text">领域驱动架构风格</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E5%B1%82%E6%AC%A1%E5%90%8C%E6%9E%84%E7%B3%BB%E7%BB%9F"><span class="nav-number">2.</span> <span class="nav-text">设计层次同构系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E5%B1%82%E6%AC%A1%E7%9A%84%E5%90%8C%E6%9E%84%E7%B3%BB%E7%BB%9F"><span class="nav-number">3.</span> <span class="nav-text">管理层次的同构系统</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

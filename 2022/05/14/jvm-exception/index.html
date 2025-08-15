@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="从字节码角度看异常处理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM 异常处理">
+<meta property="og:url" content="http://www.sanmuzi.com/2022/05/14/jvm-exception/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="从字节码角度看异常处理">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://www.sanmuzi.com/.com//ex1.png">
+<meta property="article:published_time" content="2022-05-14T11:27:47.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.357Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://www.sanmuzi.com/.com//ex1.png">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2022/05/14/jvm-exception/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>JVM 异常处理 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2022/05/14/jvm-exception/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JVM 异常处理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-14 19:27:47" itemprop="dateCreated datePublished" datetime="2022-05-14T19:27:47+08:00">2022-05-14</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JAVA/" itemprop="url" rel="index"><span itemprop="name">JAVA</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>从字节码角度看异常处理</p>
+<span id="more"></span>
+
+<h3 id="异常基本概念"><a href="#异常基本概念" class="headerlink" title="异常基本概念"></a>异常基本概念</h3><p>​    在Java中，异常祖先是Throwable类，Throwable有两个亲儿子类。一个是Error，是程序不应捕获的异常。当程序触发 Error 时，它的执行状态已经无法恢复，需要中止线程甚至是中止虚拟机。第二个儿子是 Exception，程序可能需要捕获并且处理的异常。它有个特殊子类 RuntimeException，用来表示“<strong>程序虽然无法继续执行，但是还能抢救一下</strong>”的情况。</p>
+<p>RuntimeException 和 Error 属于 Java 里的非检查异常（<strong>unchecked exception</strong>）。其他异常则属于检查异常（<strong>checked exception</strong>）</p>
+<blockquote>
+<p>检查异常都需要程序显式地捕获，或在方法声明中用 throws 关键字</p>
+</blockquote>
+<p><img src="/.com//ex1.png" alt="封面"></p>
+<p>每个方法都附带一个异常表。异常表中的每一个条目代表一个异常处理器，并且由from指针、to指针、target 指针以及所捕获的异常类型构成，from 指针和 to 指针标示了该异常处理器所监控的范围。</p>
+<p>from 指针和 to 指针标示了该异常处理器所监控的范围，程序抛异常时，JVM会从上至下遍历异常表中的所有异常条目。当触发异常的字节码的索引值在某个异常表条目范围内，拟机会判断所抛出的异常和该条目想要捕获的异常是否匹配。</p>
+<p>如果匹配，虚拟机会将控制流转移至该条目 target 指针指向的字节码。如果遍历完所有异常表条目，JVM仍未匹配到异常处理器，那么它会弹出当前方法对应的 Java 栈帧，并且在调用者中重复上述操作。在最坏情况下，Java 虚拟机需要遍历当前线程 Java 栈上所有方法的异常表。</p>
+<p>先看一段代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">print</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">2</span>/<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    &#125; <span class="keyword">catch</span> (ArrayIndexOutOfBoundsException ex) &#123;</span><br><span class="line">        ex.printStackTrace();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (RuntimeException ex) &#123;</span><br><span class="line">        ex.printStackTrace();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception ex) &#123;</span><br><span class="line">        ex.printStackTrace();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Throwable ex)&#123;</span><br><span class="line">        ex.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>代码有几个catch块组成。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">print</span><span class="params">()</span></span>;</span><br><span class="line">   Code:</span><br><span class="line">      <span class="number">0</span>: iconst_2</span><br><span class="line">      <span class="number">1</span>: iconst_0</span><br><span class="line">      <span class="number">2</span>: idiv</span><br><span class="line">      <span class="number">3</span>: istore_1</span><br><span class="line">      <span class="number">4</span>: goto          <span class="number">36</span></span><br><span class="line">      <span class="number">7</span>: astore_1</span><br><span class="line">      <span class="number">8</span>: aload_1</span><br><span class="line">      <span class="number">9</span>: invokevirtual #<span class="number">3</span>                  <span class="comment">// Method java/lang/ArrayIndexOutOfBoundsException.printStackTrace:()V</span></span><br><span class="line">     <span class="number">12</span>: goto          <span class="number">36</span></span><br><span class="line">     <span class="number">15</span>: astore_1</span><br><span class="line">     <span class="number">16</span>: aload_1</span><br><span class="line">     <span class="number">17</span>: invokevirtual #<span class="number">5</span>                  <span class="comment">// Method java/lang/RuntimeException.printStackTrace:()V</span></span><br><span class="line">     <span class="number">20</span>: goto          <span class="number">36</span></span><br><span class="line">     <span class="number">23</span>: astore_1</span><br><span class="line">     <span class="number">24</span>: aload_1</span><br><span class="line">     <span class="number">25</span>: invokevirtual #<span class="number">7</span>                  <span class="comment">// Method java/lang/Exception.printStackTrace:()V</span></span><br><span class="line">     <span class="number">28</span>: goto          <span class="number">36</span></span><br><span class="line">     <span class="number">31</span>: astore_1</span><br><span class="line">     <span class="number">32</span>: aload_1</span><br><span class="line">     <span class="number">33</span>: invokevirtual #<span class="number">9</span>                  <span class="comment">// Method java/lang/Throwable.printStackTrace:()V</span></span><br><span class="line">     <span class="number">36</span>: <span class="keyword">return</span></span><br><span class="line">   Exception table:</span><br><span class="line">      from    to  target type</span><br><span class="line">          <span class="number">0</span>     <span class="number">4</span>     <span class="number">7</span>   Class java/lang/ArrayIndexOutOfBoundsException</span><br><span class="line">          <span class="number">0</span>     <span class="number">4</span>    <span class="number">15</span>   Class java/lang/RuntimeException</span><br><span class="line">          <span class="number">0</span>     <span class="number">4</span>    <span class="number">23</span>   Class java/lang/Exception</span><br><span class="line">          <span class="number">0</span>     <span class="number">4</span>    <span class="number">31</span>   Class java/lang/Throwable</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>其中 from=0,to=4表示try代码块。这几个异常都是同时捕获了相同的代码块。target就是异常代码的字节码索引。</p>
+<blockquote>
+<p>try 代码块后面可以跟着多个 catch 代码块，来捕获不同类型的异常。JVM会从上至下匹配异常处理器，前面的 catch 代码块所捕获的异常类型不能覆盖后边的，否则编译器会报错。也就是前面的异常是后面的异常的子类。</p>
+</blockquote>
+<h4 id="finally-关键字"><a href="#finally-关键字" class="headerlink" title="finally 关键字"></a>finally 关键字</h4><p>来看一段代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printFinal</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">2</span>/<span class="number">0</span>;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (ArrayIndexOutOfBoundsException ex) &#123;</span><br><span class="line">        ex.printStackTrace();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;hello world!!!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>字节码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printFinal</span><span class="params">()</span></span>;</span><br><span class="line">    Code:</span><br><span class="line">       <span class="number">0</span>: iconst_2</span><br><span class="line">       <span class="number">1</span>: iconst_0</span><br><span class="line">       <span class="number">2</span>: idiv</span><br><span class="line">       <span class="number">3</span>: istore_1</span><br><span class="line">       <span class="number">4</span>: getstatic     #<span class="number">10</span>                 <span class="comment">// Field java/lang/System.out:Ljava/io/PrintStream;</span></span><br><span class="line">       <span class="number">7</span>: ldc           #<span class="number">11</span>                 <span class="comment">// String hello world!!!</span></span><br><span class="line">       <span class="number">9</span>: invokevirtual #<span class="number">12</span>                 <span class="comment">// Method java/io/PrintStream.println:(Ljava/lang/String;)V</span></span><br><span class="line">      <span class="number">12</span>: goto          <span class="number">42</span></span><br><span class="line">      <span class="number">15</span>: astore_1</span><br><span class="line">      <span class="number">16</span>: aload_1</span><br><span class="line">      <span class="number">17</span>: invokevirtual #<span class="number">3</span>                  <span class="comment">// Method java/lang/ArrayIndexOutOfBoundsException.printStackTrace:()V</span></span><br><span class="line">      <span class="number">20</span>: getstatic     #<span class="number">10</span>                 <span class="comment">// Field java/lang/System.out:Ljava/io/PrintStream;</span></span><br><span class="line">      <span class="number">23</span>: ldc           #<span class="number">11</span>                 <span class="comment">// String hello world!!!</span></span><br><span class="line">      <span class="number">25</span>: invokevirtual #<span class="number">12</span>                 <span class="comment">// Method java/io/PrintStream.println:(Ljava/lang/String;)V</span></span><br><span class="line">      <span class="number">28</span>: goto          <span class="number">42</span></span><br><span class="line">      <span class="number">31</span>: astore_2</span><br><span class="line">      <span class="number">32</span>: getstatic     #<span class="number">10</span>                 <span class="comment">// Field java/lang/System.out:Ljava/io/PrintStream;</span></span><br><span class="line">      <span class="number">35</span>: ldc           #<span class="number">11</span>                 <span class="comment">// String hello world!!!</span></span><br><span class="line">      <span class="number">37</span>: invokevirtual #<span class="number">12</span>                 <span class="comment">// Method java/io/PrintStream.println:(Ljava/lang/String;)V</span></span><br><span class="line">      <span class="number">40</span>: aload_2</span><br><span class="line">      <span class="number">41</span>: athrow</span><br><span class="line">      <span class="number">42</span>: <span class="keyword">return</span></span><br><span class="line">    Exception table:</span><br><span class="line">       from    to  target type</span><br><span class="line">           <span class="number">0</span>     <span class="number">4</span>    <span class="number">15</span>   Class java/lang/ArrayIndexOutOfBoundsException</span><br><span class="line">           <span class="number">0</span>     <span class="number">4</span>    <span class="number">31</span>   any</span><br><span class="line">          <span class="number">15</span>    <span class="number">20</span>    <span class="number">31</span>   any</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>可以看出字节码索引7，23，35 都包含“hello world”。也就是在try块、catch块都有finally代码。Java编译器会生成一个或多个异常表条目，监控整个 try-catch 代码块，并且捕获所有种类的异常（any）。这些异常表条目的 target 指针将指向另一份复制的 finally 代码块。并且，在这个 finally 代码块的最后，Java 编译器会重新抛出所捕获的异常。</p>
+<h5 id="Suppressed-异常"><a href="#Suppressed-异常" class="headerlink" title="Suppressed 异常"></a>Suppressed 异常</h5><p>先看一段代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">printStackTrace</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">int</span> t = <span class="number">2</span> / <span class="number">0</span>;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (RuntimeException ex) &#123;</span><br><span class="line"></span><br><span class="line">        ex.printStackTrace();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;catch RuntimeException&quot;</span>);</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;finally RuntimeException&quot;</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>异常信息如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">java.lang.ArithmeticException: / by zero</span><br><span class="line">	at org.samz.study.basic.PrintException.printStackTrace(PrintException.java:<span class="number">113</span>)</span><br><span class="line">	at org.samz.study.basic.PrintException.main(PrintException.java:<span class="number">6</span>)</span><br><span class="line">Exception in thread <span class="string">&quot;main&quot;</span> java.lang.RuntimeException: <span class="keyword">finally</span> RuntimeException</span><br><span class="line">	at org.samz.study.basic.PrintException.printStackTrace(PrintException.java:<span class="number">121</span>)</span><br><span class="line">	at org.samz.study.basic.PrintException.main(PrintException.java:<span class="number">6</span>)</span><br></pre></td></tr></table></figure>
+
+<p>对应的字节码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">printStackTrace</span><span class="params">()</span></span>;</span><br><span class="line">   Code:</span><br><span class="line">      <span class="number">0</span>: iconst_2</span><br><span class="line">      <span class="number">1</span>: iconst_0</span><br><span class="line">      <span class="number">2</span>: idiv</span><br><span class="line">      <span class="number">3</span>: istore_0</span><br><span class="line">      <span class="number">4</span>: <span class="keyword">new</span>           #<span class="number">5</span>                  <span class="comment">// class java/lang/RuntimeException</span></span><br><span class="line">      <span class="number">7</span>: dup</span><br><span class="line">      <span class="number">8</span>: ldc           #<span class="number">14</span>                 <span class="comment">// String finally RuntimeException</span></span><br><span class="line">     <span class="number">10</span>: invokespecial #<span class="number">15</span>                 <span class="comment">// Method java/lang/RuntimeException.&quot;&lt;init&gt;&quot;:(Ljava/lang/String;)V</span></span><br><span class="line">     <span class="number">13</span>: athrow</span><br><span class="line">     <span class="number">14</span>: astore_0</span><br><span class="line">     <span class="number">15</span>: aload_0</span><br><span class="line">     <span class="number">16</span>: invokevirtual #<span class="number">6</span>                  <span class="comment">// Method java/lang/RuntimeException.printStackTrace:()V</span></span><br><span class="line">     <span class="number">19</span>: <span class="keyword">new</span>           #<span class="number">5</span>                  <span class="comment">// class java/lang/RuntimeException</span></span><br><span class="line">     <span class="number">22</span>: dup</span><br><span class="line">     <span class="number">23</span>: ldc           #<span class="number">16</span>                 <span class="comment">// String catch RuntimeException</span></span><br><span class="line">     <span class="number">25</span>: invokespecial #<span class="number">15</span>                 <span class="comment">// Method java/lang/RuntimeException.&quot;&lt;init&gt;&quot;:(Ljava/lang/String;)V</span></span><br><span class="line">     <span class="number">28</span>: athrow</span><br><span class="line">     <span class="number">29</span>: astore_1</span><br><span class="line">     <span class="number">30</span>: <span class="keyword">new</span>           #<span class="number">5</span>                  <span class="comment">// class java/lang/RuntimeException</span></span><br><span class="line">     <span class="number">33</span>: dup</span><br><span class="line">     <span class="number">34</span>: ldc           #<span class="number">14</span>                 <span class="comment">// String finally RuntimeException</span></span><br><span class="line">     <span class="number">36</span>: invokespecial #<span class="number">15</span>                 <span class="comment">// Method java/lang/RuntimeException.&quot;&lt;init&gt;&quot;:(Ljava/lang/String;)V</span></span><br><span class="line">     <span class="number">39</span>: athrow</span><br><span class="line">   Exception table:</span><br><span class="line">      from    to  target type</span><br><span class="line">          <span class="number">0</span>     <span class="number">4</span>    <span class="number">14</span>   Class java/lang/RuntimeException</span><br><span class="line">          <span class="number">0</span>     <span class="number">4</span>    <span class="number">29</span>   any</span><br><span class="line">         <span class="number">14</span>    <span class="number">30</span>    <span class="number">29</span>   any</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p>结果是抛出了“finally RuntimeException”，也就是catch块的异常吃掉了。对此JDK7 引入 Suppressed 异常来解决这个问题。 Suppressed 可以将一个异常附于另一个异常之上。因此，抛出的异常可以附带多个异常的信息。然而，Java 层面的 finally 代码块缺少指向所捕获异常的引用。</p>
+<p>再看下面的方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">printStackTrace2</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        RuntimeException tempEx = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">int</span> t = <span class="number">2</span> / <span class="number">0</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RuntimeException ex) &#123;</span><br><span class="line"></span><br><span class="line">            ex.printStackTrace();</span><br><span class="line">            tempEx = <span class="keyword">new</span> RuntimeException(<span class="string">&quot;catch RuntimeException&quot;</span>);</span><br><span class="line">            <span class="keyword">throw</span> tempEx;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line"></span><br><span class="line">            RuntimeException finallyEx = <span class="keyword">new</span> RuntimeException(<span class="string">&quot;finally RuntimeException&quot;</span>);</span><br><span class="line">            finallyEx.addSuppressed(tempEx);</span><br><span class="line">            <span class="keyword">throw</span> finallyEx;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>对应的异常</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">java.lang.ArithmeticException: / by zero</span><br><span class="line">	at org.samz.study.basic.PrintException.printStackTrace2(PrintException.java:<span class="number">130</span>)</span><br><span class="line">	at org.samz.study.basic.PrintException.main(PrintException.java:<span class="number">6</span>)</span><br><span class="line">Exception in thread <span class="string">&quot;main&quot;</span> java.lang.RuntimeException: <span class="keyword">finally</span> RuntimeException</span><br><span class="line">	at org.samz.study.basic.PrintException.printStackTrace2(PrintException.java:<span class="number">138</span>)</span><br><span class="line">	at org.samz.study.basic.PrintException.main(PrintException.java:<span class="number">6</span>)</span><br><span class="line">	Suppressed: java.lang.RuntimeException: <span class="keyword">catch</span> RuntimeException</span><br><span class="line">		at org.samz.study.basic.PrintException.printStackTrace2(PrintException.java:<span class="number">134</span>)</span><br><span class="line">		... <span class="number">1</span> more</span><br></pre></td></tr></table></figure>
+
+<p>打印出了catch模块和finally模块的异常。</p>
+<p>对应的字节码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">printStackTrace2</span><span class="params">()</span></span>;</span><br><span class="line">    Code:</span><br><span class="line">       <span class="number">0</span>: aconst_null</span><br><span class="line">       <span class="number">1</span>: astore_0</span><br><span class="line">       <span class="number">2</span>: iconst_2</span><br><span class="line">       <span class="number">3</span>: iconst_0</span><br><span class="line">       <span class="number">4</span>: idiv</span><br><span class="line">       <span class="number">5</span>: istore_1</span><br><span class="line">       <span class="number">6</span>: <span class="keyword">new</span>           #<span class="number">5</span>                  <span class="comment">// class java/lang/RuntimeException</span></span><br><span class="line">       <span class="number">9</span>: dup</span><br><span class="line">      <span class="number">10</span>: ldc           #<span class="number">14</span>                 <span class="comment">// String finally RuntimeException</span></span><br><span class="line">      <span class="number">12</span>: invokespecial #<span class="number">15</span>                 <span class="comment">// Method java/lang/RuntimeException.&quot;&lt;init&gt;&quot;:(Ljava/lang/String;)V</span></span><br><span class="line">      <span class="number">15</span>: astore_1</span><br><span class="line">      <span class="number">16</span>: aload_1</span><br><span class="line">      <span class="number">17</span>: aload_0</span><br><span class="line">      <span class="number">18</span>: invokevirtual #<span class="number">17</span>                 <span class="comment">// Method java/lang/RuntimeException.addSuppressed:(Ljava/lang/Throwable;)V</span></span><br><span class="line">      <span class="number">21</span>: aload_1</span><br><span class="line">      <span class="number">22</span>: athrow</span><br><span class="line">      <span class="number">23</span>: astore_1</span><br><span class="line">      <span class="number">24</span>: aload_1</span><br><span class="line">      <span class="number">25</span>: invokevirtual #<span class="number">6</span>                  <span class="comment">// Method java/lang/RuntimeException.printStackTrace:()V</span></span><br><span class="line">      <span class="number">28</span>: <span class="keyword">new</span>           #<span class="number">5</span>                  <span class="comment">// class java/lang/RuntimeException</span></span><br><span class="line">      <span class="number">31</span>: dup</span><br><span class="line">      <span class="number">32</span>: ldc           #<span class="number">16</span>                 <span class="comment">// String catch RuntimeException</span></span><br><span class="line">      <span class="number">34</span>: invokespecial #<span class="number">15</span>                 <span class="comment">// Method java/lang/RuntimeException.&quot;&lt;init&gt;&quot;:(Ljava/lang/String;)V</span></span><br><span class="line">      <span class="number">37</span>: astore_0</span><br><span class="line">      <span class="number">38</span>: aload_0</span><br><span class="line">      <span class="number">39</span>: athrow</span><br><span class="line">      <span class="number">40</span>: astore_2</span><br><span class="line">      <span class="number">41</span>: <span class="keyword">new</span>           #<span class="number">5</span>                  <span class="comment">// class java/lang/RuntimeException</span></span><br><span class="line">      <span class="number">44</span>: dup</span><br><span class="line">      <span class="number">45</span>: ldc           #<span class="number">14</span>                 <span class="comment">// String finally RuntimeException</span></span><br><span class="line">      <span class="number">47</span>: invokespecial #<span class="number">15</span>                 <span class="comment">// Method java/lang/RuntimeException.&quot;&lt;init&gt;&quot;:(Ljava/lang/String;)V</span></span><br><span class="line">      <span class="number">50</span>: astore_3</span><br><span class="line">      <span class="number">51</span>: aload_3</span><br><span class="line">      <span class="number">52</span>: aload_0</span><br><span class="line">      <span class="number">53</span>: invokevirtual #<span class="number">17</span>                 <span class="comment">// Method java/lang/RuntimeException.addSuppressed:(Ljava/lang/Throwable;)V</span></span><br><span class="line">      <span class="number">56</span>: aload_3</span><br><span class="line">      <span class="number">57</span>: athrow</span><br><span class="line">    Exception table:</span><br><span class="line">       from    to  target type</span><br><span class="line">           <span class="number">2</span>     <span class="number">6</span>    <span class="number">23</span>   Class java/lang/RuntimeException</span><br><span class="line">           <span class="number">2</span>     <span class="number">6</span>    <span class="number">40</span>   any</span><br><span class="line">          <span class="number">23</span>    <span class="number">41</span>    <span class="number">40</span>   any</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/03/15/string-count/" rel="prev" title="通过字节码来看string对象个数">
+      <i class="fa fa-chevron-left"></i> 通过字节码来看string对象个数
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/05/26/rocketmq-retry/" rel="next" title="RocketMQ消息重试">
+      RocketMQ消息重试 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E5%B8%B8%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">异常基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#finally-%E5%85%B3%E9%94%AE%E5%AD%97"><span class="nav-number">1.1.</span> <span class="nav-text">finally 关键字</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Suppressed-%E5%BC%82%E5%B8%B8"><span class="nav-number">1.1.1.</span> <span class="nav-text">Suppressed 异常</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Nginx是一款开源Web服务器和反向代理服务器。Nginx从诞生之初就以高性能、高并发、低资源占用为设计目标，通过独特的事件驱动架构在现代硬件上实现了对海量并发连接的高效支持。凭借出色的效率和丰富的功能（如负载均衡、缓存、访问控制等）。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nginx架构设计">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/06/03/nginx-architectural-design/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="Nginx是一款开源Web服务器和反向代理服务器。Nginx从诞生之初就以高性能、高并发、低资源占用为设计目标，通过独特的事件驱动架构在现代硬件上实现了对海量并发连接的高效支持。凭借出色的效率和丰富的功能（如负载均衡、缓存、访问控制等）。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-06-03T14:20:22.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.368Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="架构">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/06/03/nginx-architectural-design/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Nginx架构设计 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/06/03/nginx-architectural-design/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Nginx架构设计
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-06-03 22:20:22" itemprop="dateCreated datePublished" datetime="2025-06-03T22:20:22+08:00">2025-06-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A0%94%E7%A9%B6%E6%8A%A5%E5%91%8A/" itemprop="url" rel="index"><span itemprop="name">研究报告</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Nginx是一款开源Web服务器和反向代理服务器。Nginx从诞生之初就以高性能、高并发、低资源占用为设计目标，通过独特的事件驱动架构在现代硬件上实现了对海量并发连接的高效支持。凭借出色的效率和丰富的功能（如负载均衡、缓存、访问控制等）。</p>
+<span id="more"></span>
+
+<h2 id="第一章-Nginx在典型高并发业务场景中的架构应用"><a href="#第一章-Nginx在典型高并发业务场景中的架构应用" class="headerlink" title="第一章 Nginx在典型高并发业务场景中的架构应用"></a>第一章 Nginx在典型高并发业务场景中的架构应用</h2><h3 id="1-1-视频流媒体场景下的架构应用"><a href="#1-1-视频流媒体场景下的架构应用" class="headerlink" title="1.1 视频流媒体场景下的架构应用"></a>1.1 视频流媒体场景下的架构应用</h3><p>在视频流媒体业务中，如网络视频点播（VOD）或直播流媒体服务，往往面临海量用户同时观看视频的情况。这意味着服务器需要同时向大量客户端持续传输音视频数据，每个客户端的连接可能维持数分钟乃至数小时。传统的每连接一线程模型在这种场景下效率低下，因为大量线程会导致高内存占用和频繁的上下文切换。而Nginx采用的事件驱动+非阻塞I/O架构非常适合此类高并发长连接场景。</p>
+<p><strong>架构模式：</strong> 在视频流媒体系统中，Nginx通常充当流媒体边缘服务器或内容分发网络（CDN）节点。典型做法是将编码后的视频片段（如HLS的<code>.m3u8</code>索引和<code>.ts</code>媒体分片文件）存储在Nginx后端的存储上，由Nginx负责向终端用户分发。客户端请求视频时，Nginx作为反向代理从上游视频源获取内容或直接从本地缓存读取，然后将视频数据通过HTTP高效地传输给客户端。对于直播场景，也可以通过Nginx的RTMP模块接收推流并输出HLS/DASH等格式给客户端播放。</p>
+<p><strong>高并发支持：</strong> Nginx的单进程事件循环可以同时维护成千上万的客户端连接而无需为每个连接分配独立线程。当数万观众同时观看视频时，每个Nginx工作进程利用非阻塞网络I/O，不会因为单个慢速客户端的传输而阻塞整个进程。这样，Nginx能够以较小的资源开销同时将视频片段源源不断地送达所有连接用户。此外，Nginx的<code>sendfile</code>等优化机制允许直接将视频文件从磁盘发送到网络而不经用户态拷贝，极大提高了大文件传输的效率。这对于高清视频流的分发尤为重要。</p>
+<p><strong>性能与伸缩：</strong> 在视频场景下，吞吐量和并发连接数是关键指标。Nginx通过多进程充分利用多核CPU——通常配置为每核一个工作进程，每个进程都能处理大量连接。当负载进一步增加时，可以通过增加前端Nginx节点的数量形成集群，并配合上游源站或缓存层，构建可水平扩展的流媒体分发体系。Nginx也支持HTTP/2，使浏览器在一条TCP连接上并行请求多个视频分片，减少连接开销。综合来看，在视频流媒体架构中，Nginx凭借其事件驱动架构和高效IO机制，能够支撑大规模观众同时观看而保持流畅的播放体验。</p>
+<h3 id="1-2-API网关场景下的架构应用"><a href="#1-2-API网关场景下的架构应用" class="headerlink" title="1.2 API网关场景下的架构应用"></a>1.2 API网关场景下的架构应用</h3><p>随着微服务架构的盛行，许多大型互联网应用将后端功能拆分为众多独立服务，对外通过统一的API网关提供访问入口。API网关需要处理来自移动App、Web前端等大量客户端的并发API请求，并将它们路由到内部不同的服务集群。Nginx由于高性能和灵活的配置，被广泛用于搭建API网关。</p>
+<p><strong>架构角色：</strong> 在API网关场景中，Nginx通常作为流量入口部署在系统边缘。客户端的RESTful API请求首先到达Nginx，由其根据URL路径、主机名等进行转发路由。例如，<code>/api/user/*</code>的请求定向到用户服务集群，而<code>/api/order/*</code>则转发到订单服务。Nginx通过其<strong>反向代理</strong>和<strong>负载均衡</strong>功能，将外部请求分配到适当的后端服务实例上，从而实现服务的统一接入和流量分发。此外，Nginx还能对不同后端的响应进行汇聚和统一返回，使客户端只需面对网关这一入口。</p>
+<p><strong>高并发优势：</strong> API网关往往需要承受高QPS的小请求流量，例如大量并发的JSON数据查询。Nginx的事件驱动模型在此发挥关键作用——它可以同时维护大量与客户端和后端服务的连接，而无需为每个请求创建新线程，大大降低了网关的CPU开销。在一个API网关节点上，Nginx既处理前端客户端的并发连接，又管理着与后端多个微服务的连接池，通过非阻塞I/O在两端高效“搬运”请求和响应。当启用<strong>keep-alive连接</strong>时，Nginx会重用与客户端和上游服务的连接，避免频繁建立TCP连接，提高了调用效率并减轻后端负载压力。</p>
+<p><strong>功能扩展：</strong> 作为网关，Nginx常集成诸多策略以保证服务质量和安全。例如，可在Nginx中配置<strong>缓存</strong>某些GET接口的响应数据，在高并发访问相同资源时直接由网关返回缓存结果，减少后端压力；应用<strong>限流</strong>和<strong>访问控制</strong>策略（如每IP每秒请求数限制）来防止恶意调用；通过Nginx自带或扩展模块实现<strong>身份认证</strong>和<strong>权限校验</strong>（例如验证OAuth令牌），确保只有合法请求进入内部网络。这些逻辑可以通过Nginx的配置或借助OpenResty的Lua脚本插件来实现。</p>
+<p>总的来说，在API网关架构中，Nginx担当了“流量调度中心”的角色：它利用高并发处理能力接受海量外部请求，快速将其路由给后端服务，并通过丰富的功能模块确保流量被安全、高效地管理。这样的架构保证了即使在移动应用流量激增或大促场景下，后台众多微服务依然能够通过Nginx网关平稳地对外提供统一的高可用接口。</p>
+<h3 id="1-3-电商网站场景下的架构应用"><a href="#1-3-电商网站场景下的架构应用" class="headerlink" title="1.3 电商网站场景下的架构应用"></a>1.3 电商网站场景下的架构应用</h3><p>电商网站需要在高并发场景下为大量用户提供浏览商品、加入购物车、下单支付等服务。尤其在促销活动（如“秒杀”、黑色星期五大促）期间，请求量会在瞬间暴增，后端系统面临巨大的并发访问压力。Nginx在电商架构中扮演着关键的前端入口角色，通过合理设计架构，使网站在高流量冲击下依然保持稳定和快速响应。</p>
+<p><strong>架构部署：</strong> 通常电商网站会将Nginx部署为前端的反向代理和负载均衡器。外部用户的HTTP/HTTPS请求首先到达Nginx，由其根据URL和域名将请求分发到后端的Web应用服务器集群。例如，请求商品详情页面时，Nginx转发至后端应用（如Tomcat、Node.js实例等）获取动态内容，同时自己直接提供页面中引用的大量静态资源（图片、CSS、JavaScript等）。为提高静态内容的分发效率，Nginx可以直接从本地磁盘或缓存中提供图片等文件，并利用<strong>内容缓存</strong>机制将近期访问频繁的资源存储在内存/磁盘上，减少对后端应用和数据库的重复请求。</p>
+<p><strong>高并发支撑：</strong> 在流量高峰时，一个Nginx节点可能需要同时处理成千上万的并发请求。得益于Nginx的非阻塞IO和高效连接处理，每个工作进程都可以维护大量并发连接而保持低资源占用。比如，首页或秒杀页面可能在瞬间涌入海量访问，Nginx可以通过<strong>短期微缓存</strong>（例如将页面生成结果缓存几秒）来吸收瞬时的请求洪峰，让后端服务器不至于被同时到来的重复请求压垮。对于动态请求，Nginx的快速调度确保每个请求尽快转交后端处理，并在后端响应返回后立即将结果异步发送给客户端。在这个过程中，多个请求的网络传输可穿插进行，最大程度利用了带宽和CPU。</p>
+<p><strong>性能优化：</strong> Nginx在电商场景下还通过多种手段优化用户体验和后端压力。例如，开启<strong>gzip压缩</strong>以压缩HTML/JSON等文本响应，大幅减少页面大小和传输时间；启用<strong>HTTP/2</strong>，让浏览器能在单一连接上并行加载多个资源，加快页面渲染；利用Nginx的<strong>连接复用</strong>和<strong>Keep-Alive</strong>使同一用户的多次请求复用已有连接，降低TCP握手开销和后端Socket资源占用。此外，Nginx内置的<strong>健康检查和失败转移</strong>机制（专业版支持主动健康检查）可确保当某个应用实例故障时流量自动切换，保证电商网站在高并发下的稳定性和容错性。</p>
+<p>综合而言，在电商网站架构中，Nginx通过静态与动态内容分离、缓存和压缩等优化，以及高效的负载均衡，将后端应用从繁重的连接管理与数据传输中解放出来，让其专注于业务逻辑处理。这种架构极大提升了网站在高并发交易场景下的整体吞吐和响应速度，确保用户在高峰期仍能获得良好的购物体验。</p>
+<h2 id="第二章-支持大规模并发的技术机制"><a href="#第二章-支持大规模并发的技术机制" class="headerlink" title="第二章 支持大规模并发的技术机制"></a>第二章 支持大规模并发的技术机制</h2><h3 id="2-1-事件驱动架构"><a href="#2-1-事件驱动架构" class="headerlink" title="2.1 事件驱动架构"></a>2.1 事件驱动架构</h3><p>Nginx能够高效处理海量并发连接的根本原因在于其<strong>事件驱动架构</strong>。传统的服务器往往为每个连接分配一个线程/进程，线程阻塞等待IO完成，这在并发数很高时会导致大量系统开销。相反，Nginx采用了基于事件通知的<strong>Reactor模式</strong>：每个工作进程运行一个循环，不断监听所有连接的各种事件（如网络读写就绪、新连接到来等），一旦某连接上有事件发生（例如收到数据、可以发送数据），就触发相应的处理流程。在空闲时，进程不会闲坐浪费资源，而是由操作系统的事件通知机制唤醒，这使得CPU利用率极高。</p>
+<p><strong>实现原理：</strong> 在Nginx启动时，每个worker进程都会向操作系统注册网络socket的事件监听（不同系统使用不同机制，如Linux下的epoll）。当客户端建立连接或已有连接有数据可读写时，对应的事件会进入队列，唤醒Nginx的工作进程去处理。Nginx的架构将请求处理划分为一系列阶段（状态机），每当事件驱动状态迁移时执行相应模块逻辑。例如，HTTP请求从接受连接、读取请求头、发送响应，到最终关闭连接，每一步都有事件触发，Nginx调度不同模块依次处理请求的各个阶段。</p>
+<p>由于采用事件驱动，Nginx单个进程便可管理成千上万连接而不“堵塞”。即便某些连接处于等待外部资源（如后端服务响应）的状态，进程仍可继续处理其他有事件的连接，实现了请求处理的流水线化。通过这种架构，Nginx突破了传统同步模型在并发扩展性上的瓶颈，使服务器性能随硬件能力线性扩展。这样一来，无需为每个请求创建独立线程，避免了线程大量上下文切换的开销。</p>
+<h3 id="2-2-非阻塞IO"><a href="#2-2-非阻塞IO" class="headerlink" title="2.2 非阻塞IO"></a>2.2 非阻塞IO</h3><p>Nginx的事件驱动离不开底层高效的<strong>非阻塞IO</strong>支持。传统的<code>select()/poll()</code>模型在每次事件轮询时需要扫描大量文件描述符，复杂度为O(n)，连接数一大性能就急剧下降。而Nginx利用了操作系统提供的新一代IO多路复用机制，如Linux的<strong>epoll</strong>、FreeBSD的<strong>kqueue</strong>、Solaris的<strong>event ports</strong>等。这些机制允许一次监视海量连接，并在事件发生时仅返回就绪的描述符列表，性能复杂度接近O(1)。</p>
+<p><strong>工作方式：</strong> Nginx将每个客户端连接的socket都设置为非阻塞模式（non-blocking），并注册到epoll/kqueue等待事件。当某连接准备好读/写数据时，内核会通知Nginx相应事件，从而使该连接的处理继续推进。如果一个socket上暂时无数据可读写，Nginx不会阻塞等待，而是立即转去处理其他事务。通过非阻塞IO，Nginx的单个线程得以<strong>并发</strong>地处理大量连接：它仅在有事件时才对socket进行读写操作，每次读写也尽可能读取或发送尽量多的数据，然后立刻返回主循环服务其他连接。</p>
+<p><strong>效率优势：</strong> epoll等机制在大量闲置连接存在的情况下效率极高，因为内核无需每次扫描所有fd，而是采用事件通知推送模式。Nginx能借此同时维持几十万空闲或慢速连接而CPU开销很小，非常适合于“C10K问题”（同时1万+连接）乃至“C1000K问题”（百万连接级别）的场景。这种非阻塞事件驱动IO模型相比阻塞模型，大幅提升了并发伸缩性，使Nginx即使在处理海量长连接（如视频流、WebSocket）时仍能保持低延迟和高吞吐。</p>
+<h3 id="2-3-异步处理"><a href="#2-3-异步处理" class="headerlink" title="2.3 异步处理"></a>2.3 异步处理</h3><p>在Nginx中，“异步”理念贯穿始终，意味着任何可能耗时的操作都采用非阻塞的方式执行，从而避免工作进程被挂起。<strong>异步处理</strong>指的是Nginx不会为了等待某一事件完成而停下来，而是采用回调/通知机制，在后台继续其他任务，当事件完成时再回来继续处理。</p>
+<p><strong>请求转发异步化：</strong> 以Nginx代理后端服务为例，当收到一个客户端请求需要转发给上游应用服务器时，Nginx首先将请求报文发送给后端，然后不会傻等后端响应，而是立即继续处理当前进程上的其它连接或请求。一旦后端服务器有响应数据返回，这一IO事件会通知Nginx，再由对应连接的回调函数将后端数据读取并发送给客户端。同一时间，Nginx的单个进程可能正并行地处理成百上千个不同请求的不同阶段：某些正在等待后端、某些正在向客户端发送数据、另一些刚接受新连接，等等。这种异步多任务能力确保了慢响应的请求不会拖慢整个服务。</p>
+<p><strong>本地操作异步化：</strong> 除了网络IO，Nginx对于本地可能阻塞的操作也提供异步解决方案。例如，读取大文件或访问磁盘可能比较耗时，如果在事件循环中直接执行会阻塞其它连接的处理。为此，Nginx支持将这些操作委派给<strong>线程池</strong>后台执行（配置<code>aio threads</code>），完成后通过事件通知主循环继续处理。这使得像访问磁盘文件、DNS解析等也不会长时间卡住工作进程。此外，Nginx针对日志写入等操作也采取<strong>缓冲+异步刷新</strong>策略：工作进程先将日志写入内存缓冲，由专门机制定期或在缓冲满时异步地写入磁盘，从而把磁盘IO对请求处理路径的影响降到最低。</p>
+<p>通过全面的异步化设计，Nginx实现了“<strong>边等待、边工作</strong>”的并发模型：任何一个慢操作（无论是远程调用还是本地IO）发生时，进程都能去处理其他有需求的任务。相比同步阻塞模型，这极大提高了资源利用率和吞吐能力，使Nginx能够在复杂的实时环境中保持高性能。</p>
+<h3 id="2-4-连接管理策略"><a href="#2-4-连接管理策略" class="headerlink" title="2.4 连接管理策略"></a>2.4 连接管理策略</h3><p>在高并发环境下，如何管理大量连接本身是一大挑战。Nginx通过多种机制优化连接的处理和复用，从而提高并发效率：</p>
+<p><strong>长连接与复用：</strong> Nginx鼓励使用<strong>HTTP Keep-Alive</strong>（长连接）来复用连接。对于来自同一客户端的连续请求，Nginx会尽量复用已有TCP连接，而不每次握手新建，提高了请求处理速度。配置参数如<code>keepalive_timeout</code>控制空闲连接保持时长。较长的超时时间（如 65 秒）能减少频繁重建连接，但过长也可能积累过多闲置连接占用资源。<code>keepalive_requests</code>则决定单个长连接上可承载的最大请求数，默认100，可视需要提高以减少连接重建频率（特别是在使用压力测试工具时可增大该值）。需要注意的是，在超高并发且请求非常繁忙的情况下，适当缩短keepalive_timeout也许有助于尽快回收连接给其他客户端复用。</p>
+<p><strong>上游Keep-Alive：</strong> 对于反向代理到后端，上游连接的复用同样关键。Nginx支持为每个worker维护一组到后端服务器的空闲长连接（通过upstream里的<code>keepalive N</code>指令配置保持N个）。启用上游keepalive需确保与后端使用HTTP/1.1并去除<code>Connection: close</code>头（通过<code>proxy_http_version 1.1</code>和<code>proxy_set_header Connection &quot;&quot;</code>配置）。合理的keepalive上游连接数取决于后端并发需求和后端数量，每台后端可保留几十到上百个不等。这样，Nginx在处理大量后端请求时无需每次重建TCP连接，减少了后端延迟和CPU消耗。</p>
+<p><strong>Accept锁与负载分配：</strong> 在多进程的Nginx中，存在多个worker竞争接受新连接的问题。Nginx采用了<strong>接受互斥锁（accept_mutex）</strong>机制：同时只有一个worker在监听套接字上执行accept，以避免“惊群效应”（多个进程同时被唤醒去接受同一连接）的开销。这样新连接可以被有序地分配给各个worker处理。此外，也可以利用Linux的<strong>SO_REUSEPORT</strong>特性（通过<code>reuseport</code>选项），让每个worker各自监听同一端口，由内核实现更高效的负载均衡分发，这在多核系统下可进一步提高接受连接的并行度。</p>
+<p><strong>资源占用优化：</strong> Nginx为每个连接分配的数据结构和缓冲都经过精心设计，占用内存很小且分配释放高效。例如，每个HTTP连接都有独立的内存池用于分配请求相关的数据，在请求结束时一次性释放，减少内存碎片和泄漏风险。由于没有每连接对应的线程栈，Nginx保持十万级别的并发连接也不会像线程模型那样耗尽内存。此外，Nginx通过配置<code>worker_connections</code>限制每个worker可同时打开的连接数，并结合操作系统的<code>somaxconn</code>（监听队列长度）等参数，确保在过载时新的连接请求被合理排队或拒绝，从而避免因资源耗尽导致崩溃。</p>
+<p>综上，Nginx通过连接复用减少握手开销，利用互斥锁或端口重用技术高效地接受分配新连接，并在内部对每个连接的资源使用进行了优化。这些连接管理策略使Nginx能够稳定地处理海量并发连接，而不会因管理不善而出现性能急剧下降。</p>
+<h3 id="2-5-进程模型与多核利用"><a href="#2-5-进程模型与多核利用" class="headerlink" title="2.5 进程模型与多核利用"></a>2.5 进程模型与多核利用</h3><p>Nginx采用<strong>多进程、单线程</strong>的并发模型。启动后Nginx主进程（master）负责初始化配置和管理工作进程（worker），而实际处理请求的是若干个worker进程。默认建议worker进程数与CPU内核数相等（<code>worker_processes auto</code>），每个worker固定绑定在一个CPU核上运行。这种设计充分利用了多核硬件的并行能力，又避免了多线程模型中复杂的锁竞争。</p>
+<p><strong>Master-Worker架构：</strong> Master进程以超级用户权限启动，负责监听端口和加载配置，然后fork出多个worker子进程。之后，master主要监控worker状态并在需要时平滑重启或增减worker，而绝大部分请求处理、IO读写都在worker进程内完成。各worker之间基本相互独立，它们共享监听套接字（由master创建后传递）以及必要的少量共享内存（用于缓存元数据、状态统计等），但每个worker维护自己的连接和请求上下文。因为不同worker不操作同一块内存，不需要大范围锁同步，所以运行非常高效。</p>
+<p><strong>稳定性与升级：</strong> 多进程模型提升了稳定性：即使某个worker进程由于异常退出，master还能迅速拉起新worker继续服务，整体服务不会中断。此外，Nginx支持优雅重启和热升级，得益于master/worker结构：发送信号通知master后，它会启动新worker加载新配置/新程序版本，并指挥旧worker完成手头请求后再退出，实现无缝切换。这种灵活的进程管理机制在高并发场景下尤为实用，可以放心进行配置变更或软件升级，而无需完全停机。</p>
+<p><strong>对比线程模型：</strong> 与Apache等传统多线程服务器相比，Nginx的进程模型避免了在高并发访问下线程数量暴涨带来的内存耗尽和调度开销。虽然多进程意味着每个进程有独立内存空间，但Nginx通过共享内存高效复用公共数据（如缓存索引、限流计数器等），减少了重复开销。同时，多进程隔离也提升了安全性：一个worker崩溃通常不影响其他worker。综合来看，Nginx的进程/线程模型在性能、稳定性和可维护性之间取得了良好平衡，使其能够稳定支撑大型网站的并发流量。</p>
+<h3 id="2-6-内置负载均衡策略"><a href="#2-6-内置负载均衡策略" class="headerlink" title="2.6 内置负载均衡策略"></a>2.6 内置负载均衡策略</h3><p>除了单机高并发，Nginx也扮演着流量调度器的角色，在多服务器集群中实现<strong>负载均衡</strong>以扩展整体服务能力。Nginx通过<code>upstream</code>配置块定义一组后端服务器，并提供多种调度算法将请求按一定策略分配给这些上游节点：</p>
+<ul>
+<li><strong>轮询（Round Robin）：</strong> 默认策略，按顺序将连续的请求依次分配给不同后端，做到请求在服务器间平均分布。如果为服务器配置了权重（weight），则按权重比例进行加权轮询，一些性能更强的机器可分担更多请求。</li>
+<li><strong>最少连接（Least Connections）：</strong> 将新请求分配给当前活动连接数最少的后端。此策略适用于请求负载不均的场景，能让处理较慢请求的服务器减少新请求接入，从而更均衡地利用资源（使用该算法需在upstream配置中显式指定）。</li>
+<li><strong>IP哈希（IP Hash）：</strong> 基于客户端IP进行哈希计算，确定请求始终发送到同一后端服务器。这实现了一种<strong>会话粘滞</strong>（Session Sticky），适用于需要会话保持的应用（如用户登录态存储在单台后端）。使用时在upstream中配置<code>ip_hash</code>即可生效。</li>
+</ul>
+<p>Nginx开源版通过以上几种策略已能满足大多数负载均衡需求。此外还有一些扩展方案：例如Nginx Plus商业版提供<strong>最短响应时间</strong>等更智能的调度算法以及主动健康检查功能，但在开源版中只能通过被动检查（即检测后端错误/超时自动将其标记失效一段时间）。对于四层TCP/UDP流量，Nginx也可以利用<code>stream</code>模块进行类似的负载均衡。</p>
+<p><strong>工作机制：</strong> Nginx负载均衡发生在应用层，由Nginx接受客户端请求后，根据所选算法决定转发到哪台上游服务器。当某后端节点发生故障时，Nginx将自动停止将流量分给它（并在错误日志中记录），过一段时间后再尝试探测其恢复情况。所有这些过程对客户端是透明的。由于Nginx本身处理连接和转发的效率极高，引入负载均衡层不会造成显著开销，反而通过水平扩展后端显著提高了系统可承载的并发总量。</p>
+<p>总之，Nginx内置的负载均衡机制使其不仅能高效处理单节点上的大量并发，也能作为集群的流量调度中心，将并发请求分摊到多个后端，提升整个服务体系的伸缩性和可靠性。</p>
+<h2 id="第三章-高性能配置与调优方法"><a href="#第三章-高性能配置与调优方法" class="headerlink" title="第三章 高性能配置与调优方法"></a>第三章 高性能配置与调优方法</h2><h3 id="3-1-Linux内核参数优化"><a href="#3-1-Linux内核参数优化" class="headerlink" title="3.1 Linux内核参数优化"></a>3.1 Linux内核参数优化</h3><p>要发挥Nginx在高并发下的极致性能，除了自身架构外，还需要调整操作系统的某些内核参数来消除瓶颈。常见的Linux优化项包括：</p>
+<ul>
+<li><strong>连接接受队列长度（<code>net.core.somaxconn</code>）：</strong> 该参数决定了内核监听套接字的等待队列大小，即Nginx尚未来得及调用<code>accept()</code>时，内核最多能暂存多少个新进来的连接请求。默认值通常较小（128），在高并发场景下可能不够用，导致客户端连接被拒绝。调优时通常将其增大到几百甚至上千，并相应地在Nginx的<code>listen</code>指令中设置<code>backlog</code>参数匹配，以避免出现“accept队列已满”的错误。</li>
+<li><strong>网络设备输入队列（<code>net.core.netdev_max_backlog</code>）：</strong> 该参数表示内核在高速度网络接口上，数据包进入时允许积压的队列长度。如果流量非常大（如万兆网卡环境），适当增大此值可以防止因瞬时高流量导致的丢包。</li>
+<li><strong>文件描述符限制：</strong> 每个Nginx工作进程能打开的文件描述符数量决定可并发连接数上限（通常每连接占用1~2个FD）。需要确保Linux系统层面的限制足够高。包括<code>fs.file-max</code>（系统级最大文件句柄数）以及为运行Nginx的用户设置的<code>nofile</code> ulimit（单进程最大打开文件数）。调优时常将这些值调到几十万，以保证Nginx不会因为耗尽文件描述符而无法接收新连接。同时在Nginx配置中也要相应提高<code>worker_rlimit_nofile</code>以匹配系统设置。</li>
+<li><strong>本地端口范围（<code>net.ipv4.ip_local_port_range</code>）：</strong> 当Nginx作为客户端向上游发起大量后端连接时（例如反向代理很多后端服务器），会占用本地临时端口。默认系统可用端口范围可能不足（通常32768-61000）。将范围拓宽到例如1024-65000，能提供更多可用端口，避免出现端口耗尽无法建立新连接的情况。</li>
+</ul>
+<p>除了上述参数，针对高并发环境还可考虑启用<strong>TCP快速打开（TFO）</strong>来减少握手延迟、调整<strong>TCP内存和缓冲区</strong>大小以更好利用带宽等。但总体而言，每项内核参数优化都应结合实际负载测试进行验证，按需调整，从而为Nginx提供一个宽松高效的运行基础。</p>
+<h3 id="3-2-Nginx并发配置调优"><a href="#3-2-Nginx并发配置调优" class="headerlink" title="3.2 Nginx并发配置调优"></a>3.2 Nginx并发配置调优</h3><p>Nginx自身提供了许多配置参数来影响并发和性能。根据硬件和业务特点进行合理调整，能够充分释放Nginx的能力：</p>
+<ul>
+<li><strong>工作进程数（<code>worker_processes</code>）：</strong> 如前所述，一般设置为与CPU核心数相等以充分利用多核。可以使用<code>auto</code>让Nginx自动检测。如果服务器还需处理大量磁盘I/O任务（如繁重的日志或缓存写入），有时也可考虑适当增加worker进程数来减轻单进程阻塞风险。但总体上不宜超过CPU数太多，以免进程切换开销上升。</li>
+<li><strong>每进程并发连接数（<code>worker_connections</code>）：</strong> 决定每个worker能同时处理的连接数上限。默认512对于高并发远远不够，通常会据服务器性能调大到几千甚至数万。例如在内存充足的64位系统上，可轻松设置<code>worker_connections 10240</code>或更高。但需注意，该值乘以worker进程数即为理论最大并发连接数，需要和系统<code>nofile</code>限制相匹配。</li>
+<li><strong>接收新连接策略：</strong> Nginx在<code>events</code>块中有一些参数影响接受连接的行为。例如<code>multi_accept</code>决定单次唤醒时是否尽可能接受尽量多的新连接。默认关闭（每次只accept一个），在非常高的连接速率场景下可以考虑打开以加快接入速度。另一个是<code>accept_mutex</code>（前述用于防止惊群），一般保持开启即可；若在Linux上使用了<code>reuseport</code>均衡负载，亦可考虑关闭accept_mutex来降低锁开销。</li>
+<li><strong>CPU亲和与优先级：</strong> 为了减少CPU缓存失效和调度开销，可使用<code>worker_cpu_affinity</code>将特定worker绑定到指定CPU核心。此外通过<code>worker_priority</code>调节进程调度优先级，在极端负载下给予Nginx更高的调度权重。当然这两项属于微优化，需根据需求决定，盲目设置可能效果不明显或导致CPU资源分配不均。</li>
+</ul>
+<p>通过上述配置调优，可以使Nginx更好地匹配服务器硬件特性和业务需求。例如，在高内存高CPU核数的机器上适当提高连接上限和充分利用多核，在连接大量但每个请求很快的场景下启用multi_accept提高接受速率等等。调优时应结合压力测试监控QPS、延迟、系统负载等指标，逐项调整以找到最佳配置组合。</p>
+<h3 id="3-3-长连接与连接复用调优"><a href="#3-3-长连接与连接复用调优" class="headerlink" title="3.3 长连接与连接复用调优"></a>3.3 长连接与连接复用调优</h3><p>充分利用长连接可以显著提升高并发环境下的效率。调优要点包括：</p>
+<ul>
+<li><strong>客户端Keep-Alive：</strong> Nginx默认允许HTTP长连接，但可以通过调节<code>keepalive_timeout</code>（空闲连接超时时间）来平衡长连接的维持时间。较长的超时时间（如 65 秒）能减少频繁重建连接，但过长也可能积累过多闲置连接占用资源。<code>keepalive_requests</code>则决定单个长连接上可承载的最大请求数，默认100，可视需要提高以减少连接重建频率（特别是在使用压力测试工具时可增大该值）。需要注意的是，在超高并发且请求非常繁忙的情况下，适当缩短keepalive_timeout也许有助于尽快回收连接给其他客户端复用。</li>
+<li><strong>上游Keep-Alive：</strong> 对于反向代理到后端，上游连接的复用同样关键。Nginx支持为每个worker维护一组到后端服务器的空闲长连接（通过upstream里的<code>keepalive N</code>指令配置保持N个）。启用上游keepalive需确保与后端使用HTTP/1.1并去除<code>Connection: close</code>头（通过<code>proxy_http_version 1.1</code>和<code>proxy_set_header Connection &quot;&quot;</code>配置）。合理的keepalive上游连接数取决于后端并发需求和后端数量，每台后端可保留几十到上百个不等。这样，Nginx在处理大量后端请求时无需每次重建TCP连接，减少了后端延迟和CPU消耗。</li>
+<li><strong>HTTP/2与多路复用：</strong> 在前端，启用HTTP/2（通过<code>listen 443 ssl http2</code>）可以在单一TCP连接上并行发送多请求，多响应乱序返回，极大减少浏览器为加载网页而打开的并发连接数。这对包含众多资源的电商页面或需要同时发起多API请求的SPA应用尤为有益。HTTP/2还压缩了头部，进一步降低了每次请求的开销。不过HTTP/2的多路复用也会让单条连接承载更多流量，因此需确保<code>worker_connections</code>等限制足够高，以及调整适当的窗口和优先级配置以优化性能。</li>
+</ul>
+<p>通过对长连接策略的调优，Nginx可以实现更高效的连接复用：既避免了频繁握手和慢启动开销，又防止过多闲置连接浪费资源。在大多数场景下，合理地延长keepalive利用率并结合HTTP/2特性，能显著提升高并发服务的吞吐和响应速度。</p>
+<h3 id="3-4-缓存与静态内容优化"><a href="#3-4-缓存与静态内容优化" class="headerlink" title="3.4 缓存与静态内容优化"></a>3.4 缓存与静态内容优化</h3><p>合理利用缓存可以大幅提升Nginx的性能，降低后端压力。主要分为静态文件的高效服务和动态内容的代理缓存两方面：</p>
+<p><strong>静态文件优化：</strong> 针对图片、CSS/JS等静态资源，Nginx本身就是高性能的文件服务器。开启<code>sendfile on</code>可以利用操作系统的零拷贝机制直接在内核中将文件内容发送到网络，减少用户态内核态拷贝和上下文切换，显著提高传输效率。结合<code>tcp_nopush on</code>（在发送大型文件时尽量积累完整包再发送）和<code>tcp_nodelay on</code>（在需要及时发送小数据时不延迟）等TCP选项，可进一步优化传输性能。此外，启用<code>open_file_cache</code>及相关参数，可以缓存文件的打开句柄和元数据（如文件大小、修改时间），避免每次请求都访问磁盘进行<code>stat()</code>检查。当有大量重复访问的静态文件时，这种文件句柄缓存能够降低磁盘I/O并加快响应。对于超大的静态文件或磁盘较慢的情况，也可考虑使用<code>aio threads</code>将文件读操作异步化，防止阻塞worker进程。</p>
+<p><strong>代理缓存动态内容：</strong> 对于后端产生的动态页面或接口返回结果，使用Nginx的代理缓存（<code>proxy_cache</code>）可以显著减少重复请求对后端的冲击。通过配置<code>proxy_cache_path</code>指定缓存存储区域及内存索引（如<code>keys_zone=cache_zone</code>），Nginx会将后端响应缓存一段时间，下次有相同请求时直接从缓存返回而不访问后端。缓存过期时间可依据业务需求设置（例如某些API响应缓存几秒以吸收高频请求）。在电商秒杀等场景，可采用<strong>微缓存</strong>技巧：将热点页面缓存极短时间（如1~5秒），在瞬间高并发请求下可以大幅减少后端负载峰值，同时对用户而言几秒内的数据延迟通常是可接受的。</p>
+<p>调优缓存需要注意：给缓存索引分配足够的共享内存（通过<code>keys_zone</code>大小），并监控磁盘缓存命中率；对于更新频繁的数据，要平衡缓存时长以避免陈旧数据影响用户。此外，配合<code>proxy_cache_lock</code>等设置可以防止缓存失效瞬间大量并发回源（击穿）的问题。通过精心调整缓存策略，Nginx能够在保持内容新鲜度与减轻后端负载之间取得有效平衡，大幅提升高并发场景下整体系统的吞吐能力。</p>
+<h3 id="3-5-响应压缩与传输优化"><a href="#3-5-响应压缩与传输优化" class="headerlink" title="3.5 响应压缩与传输优化"></a>3.5 响应压缩与传输优化</h3><p>压缩响应内容是提高传输效率、减少带宽占用的重要手段。Nginx通过内置的<strong>gzip模块</strong>对文本类内容进行压缩，可以显著加快客户端的加载速度：</p>
+<ul>
+<li><strong>启用Gzip压缩：</strong> 在HTTP配置中开启<code>gzip on</code>后，Nginx会对符合条件的响应进行压缩。可以通过<code>gzip_types</code>指定需要压缩的MIME类型（如文本、JSON、JavaScript、CSS等），避免对已压缩格式（图片、PDF等）再压缩。<code>gzip_comp_level</code>参数控制压缩等级，值越高压缩率越大但CPU消耗也增多。通常将其设为4~6以取得较好压缩效果的同时兼顾性能。在高并发场景下，不宜使用最高等级压缩以免CPU成为瓶颈。</li>
+<li><strong>传输效率：</strong> 压缩后的响应体积通常减少几十甚至上百个百分点，这意味着同样带宽下可以服务更多并发用户。尤其对于移动网络用户，gzip压缩能明显降低页面加载时间。需要注意的是，当启用了<code>sendfile</code>和<code>gzip</code>同时作用于同一路径时，Nginx会自动禁用sendfile以确保数据经过用户态压缩过滤。这在CPU充裕时是合理取舍；若希望最大化利用sendfile传输预压缩内容，可考虑使用<code>gzip_static</code>模块预先存储压缩文件。</li>
+<li><strong>其他压缩技术：</strong> 除gzip外，Nginx还支持Brotli压缩（通过第三方模块或Nginx Plus），Brotli对文本有更高压缩比，但压缩耗时也稍多。根据需要也可以启用。HTTP/2本身也对头部进行了HPACK压缩，但对消息体仍应使用gzip/Brotli等进行压缩以获益。</li>
+</ul>
+<p>通过恰当的压缩配置，Nginx能有效减少单位响应的大小，提高网络传输的并发能力。在高流量情况下，压缩可以显著节省出口带宽，缓解网络瓶颈，从而进一步提升整体性能。重要的是监控CPU负载并选择合适的压缩等级，达到速度与资源占用的平衡。</p>
+<h3 id="3-6-其它优化建议"><a href="#3-6-其它优化建议" class="headerlink" title="3.6 其它优化建议"></a>3.6 其它优化建议</h3><p>除了以上主要方向，还有一些细节优化措施可以考虑：</p>
+<ul>
+<li><strong>日志记录优化：</strong> 记录访问日志会增加IO开销。在超高并发场景，可考虑适当关闭不必要的访问日志（<code>access_log off</code>）或启用<strong>日志缓冲</strong>（在<code>access_log</code>指令中使用<code>buffer</code>参数），让Nginx将多条日志攒批写入磁盘，减少频繁的同步IO。此外，避免开启Nginx的调试日志（debug级别），否则海量输出会严重拖慢性能。</li>
+<li><strong>减少阻塞调用：</strong> 某些配置指令如使用外部模块做阻塞式DNS查询、子请求访问后端获取鉴权信息等，可能导致worker等待外部结果，需谨慎使用。在可行情况下，尽量采用异步方式完成这些操作（例如事先在后端服务完成DNS解析，或使用内置非阻塞解析器）。</li>
+<li><strong>利用内存提升性能：</strong> 如果有充裕内存，可以调高Nginx的缓冲区大小，如<code>proxy_buffers</code>和<code>client_body_buffer_size</code>，以容纳更多请求/响应数据在内存中处理，减少磁盘暂存。同时，加大<code>ssl_session_cache</code>等缓存，以加快SSL握手。必要时甚至可以使用内存盘（tmpfs）存放临时文件和缓存，加快读取速度。</li>
+</ul>
+<p>任何调优措施都应结合实际测试验证效果。通过上述各种细节的改善，Nginx的性能和稳定性都能得到进一步提升，为大规模并发访问提供更充裕的余量。</p>
+<h2 id="第四章-安全机制"><a href="#第四章-安全机制" class="headerlink" title="第四章 安全机制"></a>第四章 安全机制</h2><h3 id="4-1-SSL-TLS终端支持"><a href="#4-1-SSL-TLS终端支持" class="headerlink" title="4.1 SSL/TLS终端支持"></a>4.1 SSL/TLS终端支持</h3><p>在互联网服务中，HTTPS已经成为标配，Nginx常被用于充当SSL/TLS终止（SSL offloading）的位置，即由Nginx负责与客户端建立加密连接，然后将解密后的请求转发给后端服务器。这种架构可以卸载后端的加解密负担，并集中管理证书和加密策略。Nginx基于OpenSSL库，实现了高性能的TLS握手与加密数据传输，并提供诸多选项以确保安全性和性能：</p>
+<ul>
+<li><strong>多域名证书支持：</strong> Nginx支持SNI（服务器名称指示），允许在同一IP:端口上配置多个域名证书，根据客户端请求的Host选择相应证书。这对API网关或CDN节点很实用，可用一台服务器服务多个域名的HTTPS流量。</li>
+<li><strong>会话复用与零停顿握手：</strong> 为提升HTTPS并发性能，Nginx可启用<strong>会话缓存</strong>（<code>ssl_session_cache</code>）和<strong>会话票据</strong>（Session Ticket）。会话缓存通过在服务端记录已建立连接的会话参数，使短时间内重连的客户端可以跳过完整握手流程（恢复会话），降低CPU消耗和握手延迟。Session Ticket则由服务端签发加密票据给客户端，后续连接时客户端直接携带票据恢复会话，这简化了服务端状态管理。配合适当的会话超时时间设置（如<code>ssl_session_timeout</code>），可以在安全与性能间取得平衡。</li>
+<li><strong>加密套件与HTTP/2：</strong> Nginx允许配置支持的TLS版本和加密算法套件列表，运营者应遵循最新安全最佳实践禁用不安全的协议（如SSLv3、TLS1.0）和弱算法（如RC4、MD5）。在开启HTTP/2时，Nginx通过ALPN协议协商来升级HTTPS连接，这要求OpenSSL版本较新并配置兼容的套件（如EC算法）。正确配置后，Nginx能够既保证强加密（如使用AES-GCM或ChaCha20等高强度套件），又利用HTTP/2提升性能。</li>
+</ul>
+<p>通过由Nginx来统一终止TLS，企业可以便捷地更新证书、调整加密策略，并借助Nginx的高并发能力处理大量HTTPS连接。硬件上可以利用CPU的AES-NI指令加速，软件上则通过上述会话优化和配置优化，在保障传输安全的同时，将对性能的影响降到最低。</p>
+<h3 id="4-2-Web应用防火墙（WAF）集成"><a href="#4-2-Web应用防火墙（WAF）集成" class="headerlink" title="4.2 Web应用防火墙（WAF）集成"></a>4.2 Web应用防火墙（WAF）集成</h3><p>为了抵御各种Web攻击，Nginx可以集成Web应用防火墙（WAF）模块，在请求到达后端应用之前进行恶意流量过滤。常见的WAF方案有：</p>
+<ul>
+<li><strong>ModSecurity：</strong> 一个开源WAF模块，提供强大的规则引擎和丰富的规则库（如OWASP ModSecurity核心规则集）。将ModSecurity编译为Nginx动态模块后，Nginx即可在处理请求时按规则对HTTP请求头、URL参数、请求体等进行检查，如拦截SQL注入、XSS跨站脚本、恶意机器人等攻击。ModSecurity功能灵活，规则可定制，甚至支持Lua脚本扩展。然而其检测过程较为耗资源，对性能有一定影响，适合在需要高安全性的场景下部署。</li>
+<li><strong>NAXSI：</strong> 一个轻量级的第三方WAF模块（Nginx Anti XSS &amp; SQL Injection），采用预定义白名单和最少规则的方式检测异常请求。NAXSI没有复杂的规则语言，配置较简单，性能开销也更低，能在提供基本Web攻击防护的同时尽量减小对吞吐率的影响。对于不需要复杂自定义规则的场景，NAXSI是一种高性能的选择。</li>
+</ul>
+<p>通过在Nginx中嵌入WAF模块，可以在应用层安全上建立第一道防线。当恶意请求被WAF识别拦截后，Nginx会直接返回错误或挑战响应，后端应用完全不会察觉这些攻击流量。这极大提升了整体架构的安全性。不过需要注意WAF规则的调优，避免误报误拦正常请求；同时要监控WAF的性能开销，合理规划部署（如仅在关键入口启用WAF）。总的来说，基于Nginx集成WAF能以较低成本实现企业级的Web安全防护。</p>
+<h3 id="4-3-限流策略"><a href="#4-3-限流策略" class="headerlink" title="4.3 限流策略"></a>4.3 限流策略</h3><p>Nginx内置了高效的限流模块，可用于<strong>速率限制</strong>和<strong>并发连接限制</strong>，以防止恶意流量或流量突发对服务造成冲击。主要机制包括：</p>
+<ul>
+<li><strong>请求速率限制（limit_req模块）：</strong> 采用令牌桶算法对指定键（通常是客户端IP或用户标识）进行每秒请求数限制。配置一个limit_req_zone（如以$binary_remote_addr为键，设置固定的每秒容量和允许的突发量burst），然后在需要限流的location应用limit_req指令关联该zone，即可对进入该location的请求频率进行控制。当请求超过设定速率时，Nginx会以返回503错误（或延迟处理）方式进行限制。比如，可以限制某API每个IP每秒不超过10请求，突发不超过20，超出则拒绝，防止单一IP过度频繁调用。</li>
+<li><strong>并发连接限制（limit_conn模块）：</strong> 限制指定键的同时活动连接数。通过定义limit_conn_zone（比如以每个IP为键）并在server或location中施加limit_conn，可以控制每个客户端的并发连接不超过设定值。此功能常用于保护后端资源，例如限制每个IP对某高成本接口的并发请求不超1，以避免单用户并发耗尽服务器资源。</li>
+</ul>
+<p>通过限流，Nginx能够在入口处过滤掉超出合理范围的过载请求，从而保护后端应用和数据库免于压垮。同时还可缓解简单的DOS攻击。不过在制定限流策略时需权衡用户体验，尽量选择合适的限流阈值和提示页面，避免误伤正常用户。结合业务特点正确配置限流，可以显著提升系统在恶意流量或高峰流量下的稳定性。</p>
+<h3 id="4-4-认证与访问控制设计"><a href="#4-4-认证与访问控制设计" class="headerlink" title="4.4 认证与访问控制设计"></a>4.4 认证与访问控制设计</h3><p>在网关层进行身份认证和访问控制，可以在未到达后端应用前拦截未授权请求。Nginx提供了多种机制实现认证：</p>
+<ul>
+<li><strong>基本HTTP认证：</strong> 通过<code>auth_basic</code>和<code>auth_basic_user_file</code>指令，可轻松为某些路径启用Basic Auth（基础验证），要求客户端提供用户名/密码。凭据存储在htpasswd文件中。对于内部管理接口或简易保护场景，这是开箱即用的方案。</li>
+<li><strong>基于证书的认证：</strong> Nginx支持双向TLS认证（客户端证书验证）。配置<code>ssl_verify_client on</code>后，要求客户端提供有效的SSL证书方可访问，Nginx会验证证书链和吊销情况。这种方式常用于高安全级别的API或内部服务调用，确保只有持有受信任证书的客户端才能连接。</li>
+<li><strong>令牌与单点登录：</strong> 对于采用OAuth2/JWT等令牌的现代认证机制，Nginx可通过脚本或子请求进行集成。一种方式是使用<code>auth_request</code>模块，将每个请求的认证检查委托给一个内部接口：例如，配置一个内部/location来验证JWT或Session，并返回200或401，再由Nginx决定是否继续proxy到后端。这样可以与内部的认证服务或OpenResty中的Lua代码配合，实现复杂的SSO登录态校验。Nginx Plus甚至提供了内置JWT验证模块，可直接解析并验证令牌有效性。</li>
+<li><strong>访问控制列表：</strong> Nginx还可基于简单的规则限制访问，如使用<code>allow</code>/<code>deny</code>按客户端IP白名单黑名单放行或拒绝请求，或通过<code>limit_except</code>限制某些HTTP方法的调用等。这些配置可以在不涉及用户身份的情况下，实现基本的访问策略控制。</li>
+</ul>
+<p>通过将认证和访问控制前移到Nginx层，整个系统的安全性和性能都受益：未通过认证的请求不会进入后端消耗资源，而Nginx对大量并发认证检查的处理也十分高效（尤其是在使用内存中的令牌校验、客户端证书等场景）。这种设计使Nginx不仅是流量转发者，还是守护应用安全的大门。</p>
+<h2 id="第五章-模块扩展能力及现代高性能网关对比"><a href="#第五章-模块扩展能力及现代高性能网关对比" class="headerlink" title="第五章 模块扩展能力及现代高性能网关对比"></a>第五章 模块扩展能力及现代高性能网关对比</h2><h3 id="5-1-Nginx的模块化扩展架构"><a href="#5-1-Nginx的模块化扩展架构" class="headerlink" title="5.1 Nginx的模块化扩展架构"></a>5.1 Nginx的模块化扩展架构</h3><p>Nginx从设计之初就采用模块化架构，大多数功能都是通过模块实现的。Nginx将请求处理流程划分为不同阶段（如rewrite、access、content生成、filter过滤等），每个阶段可以由相应类型的模块介入处理。这使得Nginx具有很强的可扩展性：开发者可以编写新的模块来添加功能，而无需修改Nginx核心。</p>
+<p><strong>模块类型：</strong> Nginx模块分为核心模块、事件模块、协议模块、处理器模块、过滤模块、上游模块等多种类别。例如，HTTP协议栈本身就是通过HTTP核心模块+一系列HTTP过滤器模块实现的，SSL支持是通过一个SSL模块实现的，而像负载均衡策略、访问控制、压缩、日志记录等也各自由对应的模块负责。第三方也开发了大量模块，如支持Lua脚本的模块、WAF模块、图片处理模块等，为Nginx增添了丰富的新功能。</p>
+<p><strong>编译与动态加载：</strong> 早期Nginx要求在编译时将所需模块编译进二进制，可插拔性有限。不过近年来Nginx已支持<strong>动态模块</strong>机制（1.9.11+），允许将模块编译为.so动态库并在配置文件中通过<code>load_module</code>指令加载。这极大地方便了模块的安装和管理——例如用户可以按需加载ModSecurity或HTTP/2等模块，而无需重新编译Nginx本体。需要注意的是，Nginx的模块与版本紧密相关，动态模块必须与所运行的Nginx版本编译选项匹配才能成功加载。</p>
+<p><strong>模块开发难易：</strong> 尽管Nginx模块机制强大，但编写C语言模块对开发者要求较高，需要了解Nginx的内部API、内存池用法和异步模型。与Apache提供直接的开发接口不同，Nginx追求极致性能，其模块API相对底层。这使得一般业务开发者直接扩展Nginx功能有一定门槛。不过，这一问题催生了如OpenResty等上层扩展方案，为Nginx提供了更友好的扩展途径。</p>
+<p>总的来说，模块化是Nginx成功的基石之一。官方与社区模块共同丰富了Nginx的功能，使其不仅仅是一个Web服务器，更成为一个灵活的应用交付平台。用户可以根据需要组合加载模块，实现从静态内容服务、反向代理到应用网关、安全防护等多种用途。</p>
+<h3 id="5-2-OpenResty：基于Nginx的动态扩展平台"><a href="#5-2-OpenResty：基于Nginx的动态扩展平台" class="headerlink" title="5.2 OpenResty：基于Nginx的动态扩展平台"></a>5.2 OpenResty：基于Nginx的动态扩展平台</h3><p>OpenResty是由国人开发（章亦春等）的一款基于Nginx的Web平台，它将Nginx与LuaJIT解释器以及众多精心编写的Lua模块相结合，使开发者能够以脚本方式扩展Nginx的功能，而无需自行编写C模块。简而言之，OpenResty将Nginx变成了一个高性能的Web应用服务器。</p>
+<p><strong>Lua脚本能力：</strong> OpenResty内置的ngx_lua模块允许在Nginx配置中直接嵌入Lua代码（通过诸如<code>content_by_lua_block</code>等指令）。这些Lua代码可以在请求处理的不同阶段运行，访问Nginx提供的API。例如，可以编写Lua脚本检查请求参数、调用后端服务获取数据、甚至直接生成HTTP响应。所有这一切都发生在Nginx的事件驱动模型内，Lua代码的执行是非阻塞的（通过协程让出CPU等待IO），因此能够保持与Nginx核心同样的高并发性能。</p>
+<p><strong>丰富的生态模块：</strong> OpenResty随附了大量实用的Lua模块库，涵盖各类常见需求：如redis、memcached客户端模块，可直接在Lua中读写缓存数据库；MySQL、PostgreSQL客户端模块，用于访问数据库；JSON解析、加解密、正则处理等工具模块，等等。这意味着开发者可以用Lua脚本在Nginx层完成复杂的业务逻辑处理，如API网关的请求验证和聚合、内容缓存策略、自定义的A/B测试流量分流等，而几乎不需要借助外部应用服务器。</p>
+<p><strong>性能与应用：</strong> 得益于LuaJIT的高效，OpenResty执行Lua脚本的速度非常快，通常每秒可处理数万请求同时执行轻量级脚本逻辑。同时，所有这些仍运行在Nginx单进程的事件循环中，没有操作系统线程切换开销。许多知名应用（如Kong API网关、淘宝的代理层Tengine扩展等）都利用OpenResty实现了高度定制的网关服务。OpenResty在国内互联网公司也广受青睐，用于搭建高性能的Web服务、实时接口和安全网关。</p>
+<p>OpenResty体现了一种权衡：通过牺牲少许C代码的极致性能，换来开发效率和灵活性的巨大提升。在绝大多数高并发场景下，Lua脚本的执行开销可以忽略不计，却能极大地拓展Nginx的能力。因此，OpenResty为需要定制化逻辑的场景提供了一个完美方案，让工程师以更敏捷的方式构建出功能强大的高性能服务器。</p>
+<h3 id="5-3-Envoy：现代服务网关架构"><a href="#5-3-Envoy：现代服务网关架构" class="headerlink" title="5.3 Envoy：现代服务网关架构"></a>5.3 Envoy：现代服务网关架构</h3><p>Envoy是近年来崛起的一款开源高性能代理，由Lyft公司主导开发，专为云原生和微服务环境设计。虽然Envoy与Nginx都定位于L4/L7代理，但其架构和特性有显著区别：</p>
+<p><strong>架构模型：</strong> Envoy采用<strong>多线程/单进程</strong>的事件驱动模型。与Nginx多进程模型不同，Envoy在一个进程内创建若干工作线程（通常与CPU核心数相等），每个线程运行自己的事件循环（基于libevent）。主线程用于协调和动态配置下发。多线程架构使Envoy的线程间可以共享内存状态（如统计数据、缓存），减少了进程隔离带来的开销，同时需要仔细处理并发同步。不过，总体性能上Envoy与Nginx旗鼓相当——它通过线程充分利用多核，官方和社区的基准测试表明，在HTTP吞吐和延迟上两者处于同一量级。</p>
+<p><strong>动态配置与可观测性：</strong> 相较于Nginx主要通过静态配置文件管理，Envoy天生支持动态配置和服务发现。Envoy提供一套xDS API，控制平面可以随时向Envoy下发新的路由、集群成员变更、限流策略等，无需重启或中断连接。这使Envoy非常适合于容器编排、服务网格环境下的弹性伸缩和配置更新。此外，Envoy内建了丰富的<strong>可观测性</strong>能力：包括详细的分布式指标（每个请求路径、每个上游集群的成功率、延迟等都有统计）、与分布式追踪集成（可自动注入追踪header）等。相比之下，Nginx需要借助额外工具（如Lua脚本、自定义日志分析）才能达到类似的可观测性水平。</p>
+<p><strong>高级L7功能：</strong> Envoy在L7层面提供了许多开箱即用的高级功能，如自动<strong>熔断/断路器</strong>（当后端异常时暂时熔断停止发送请求）、<strong>主动健康检查</strong>（定期探测后端健康状态）、<strong>流量镜像</strong>、<strong>故障注入</strong>、<strong>限流</strong>和<strong>请求分级</strong>等。这些功能可以细粒度配置，有助于构建健壮的微服务体系。而Nginx在开源版中对于这些高级流量治理功能支持相对有限（部分可通过Nginx Plus或Lua脚本实现，但复杂度较高）。</p>
+<p><strong>应用场景对比：</strong> Nginx凭借稳健的性能和成熟度，在传统Web服务、高并发静态内容分发、简单反向代理场景中依然表现卓越，配置简单且资源占用小。Envoy则更适合现代微服务架构，尤其是作为Service Mesh的Sidecar代理或API网关，当需要高度动态化配置、大量遥测指标以及与容器生态深度集成时，Envoy是优选方案。值得一提的是，一些项目（如Istio、Ambassador网关）正是因为这些原因选择了Envoy作为核心数据平面。</p>
+<p>总的来说，Envoy代表了新一代代理的设计思想，而Nginx则是久经考验的经典之作。在选择具体技术时，需要根据业务需求权衡：如果追求极简高效和成熟生态，Nginx仍是“默认安全”的选择；如果需要动态、自适应的流量管理和云原生环境的无缝对接，Envoy等现代网关可能更具优势。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过本次调研可以看到，Nginx之所以能够在高并发网络服务领域长期占据一席之地，既源于其出色的架构设计（事件驱动、异步非阻塞、多进程并发模型等），也得益于不断演进的配套优化手段和安全扩展能力。从典型业务场景的实践来看，无论是视频流媒体分发、API网关聚合，还是电商网站的流量洪峰，Nginx都能凭借高效的连接处理和丰富的功能模块，担当起稳定、高性能的“流量调度中心”角色。</p>
+<p>当然，随着云原生和微服务架构的发展，新一代的代理服务器（如Envoy）在动态性和可观测性方面展现了优势。然而，Nginx庞大的生态、经过充分验证的稳健性以及OpenResty等扩展平台的加持，使其在未来相当长时间内仍将是高性能网关和服务器领域的重要选择。对于架构师和工程师来说，深入理解Nginx的架构原理和调优技巧，并根据业务特点将其与新技术相结合，才能构建出既性能卓越又灵活可靠的网络服务平台。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/06/03/the-essence-of-architectural-design/" rel="prev" title="架构设计的本质：有限资源下的系统性取舍">
+      <i class="fa fa-chevron-left"></i> 架构设计的本质：有限资源下的系统性取舍
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/06/05/prometheus-architectural-design/" rel="next" title="Prometheus架构设计">
+      Prometheus架构设计 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E7%AB%A0-Nginx%E5%9C%A8%E5%85%B8%E5%9E%8B%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%9A%E5%8A%A1%E5%9C%BA%E6%99%AF%E4%B8%AD%E7%9A%84%E6%9E%B6%E6%9E%84%E5%BA%94%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">第一章 Nginx在典型高并发业务场景中的架构应用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-%E8%A7%86%E9%A2%91%E6%B5%81%E5%AA%92%E4%BD%93%E5%9C%BA%E6%99%AF%E4%B8%8B%E7%9A%84%E6%9E%B6%E6%9E%84%E5%BA%94%E7%94%A8"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 视频流媒体场景下的架构应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-API%E7%BD%91%E5%85%B3%E5%9C%BA%E6%99%AF%E4%B8%8B%E7%9A%84%E6%9E%B6%E6%9E%84%E5%BA%94%E7%94%A8"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 API网关场景下的架构应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-%E7%94%B5%E5%95%86%E7%BD%91%E7%AB%99%E5%9C%BA%E6%99%AF%E4%B8%8B%E7%9A%84%E6%9E%B6%E6%9E%84%E5%BA%94%E7%94%A8"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 电商网站场景下的架构应用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%94%AF%E6%8C%81%E5%A4%A7%E8%A7%84%E6%A8%A1%E5%B9%B6%E5%8F%91%E7%9A%84%E6%8A%80%E6%9C%AF%E6%9C%BA%E5%88%B6"><span class="nav-number">2.</span> <span class="nav-text">第二章 支持大规模并发的技术机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E4%BA%8B%E4%BB%B6%E9%A9%B1%E5%8A%A8%E6%9E%B6%E6%9E%84"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 事件驱动架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E9%9D%9E%E9%98%BB%E5%A1%9EIO"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 非阻塞IO</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-%E5%BC%82%E6%AD%A5%E5%A4%84%E7%90%86"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 异步处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-%E8%BF%9E%E6%8E%A5%E7%AE%A1%E7%90%86%E7%AD%96%E7%95%A5"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 连接管理策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-%E8%BF%9B%E7%A8%8B%E6%A8%A1%E5%9E%8B%E4%B8%8E%E5%A4%9A%E6%A0%B8%E5%88%A9%E7%94%A8"><span class="nav-number">2.5.</span> <span class="nav-text">2.5 进程模型与多核利用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-6-%E5%86%85%E7%BD%AE%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E7%AD%96%E7%95%A5"><span class="nav-number">2.6.</span> <span class="nav-text">2.6 内置负载均衡策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E7%AB%A0-%E9%AB%98%E6%80%A7%E8%83%BD%E9%85%8D%E7%BD%AE%E4%B8%8E%E8%B0%83%E4%BC%98%E6%96%B9%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">第三章 高性能配置与调优方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-Linux%E5%86%85%E6%A0%B8%E5%8F%82%E6%95%B0%E4%BC%98%E5%8C%96"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 Linux内核参数优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-Nginx%E5%B9%B6%E5%8F%91%E9%85%8D%E7%BD%AE%E8%B0%83%E4%BC%98"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 Nginx并发配置调优</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-%E9%95%BF%E8%BF%9E%E6%8E%A5%E4%B8%8E%E8%BF%9E%E6%8E%A5%E5%A4%8D%E7%94%A8%E8%B0%83%E4%BC%98"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 长连接与连接复用调优</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-%E7%BC%93%E5%AD%98%E4%B8%8E%E9%9D%99%E6%80%81%E5%86%85%E5%AE%B9%E4%BC%98%E5%8C%96"><span class="nav-number">3.4.</span> <span class="nav-text">3.4 缓存与静态内容优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-5-%E5%93%8D%E5%BA%94%E5%8E%8B%E7%BC%A9%E4%B8%8E%E4%BC%A0%E8%BE%93%E4%BC%98%E5%8C%96"><span class="nav-number">3.5.</span> <span class="nav-text">3.5 响应压缩与传输优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-6-%E5%85%B6%E5%AE%83%E4%BC%98%E5%8C%96%E5%BB%BA%E8%AE%AE"><span class="nav-number">3.6.</span> <span class="nav-text">3.6 其它优化建议</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E7%AB%A0-%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6"><span class="nav-number">4.</span> <span class="nav-text">第四章 安全机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-SSL-TLS%E7%BB%88%E7%AB%AF%E6%94%AF%E6%8C%81"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 SSL&#x2F;TLS终端支持</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-Web%E5%BA%94%E7%94%A8%E9%98%B2%E7%81%AB%E5%A2%99%EF%BC%88WAF%EF%BC%89%E9%9B%86%E6%88%90"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 Web应用防火墙（WAF）集成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-%E9%99%90%E6%B5%81%E7%AD%96%E7%95%A5"><span class="nav-number">4.3.</span> <span class="nav-text">4.3 限流策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4-%E8%AE%A4%E8%AF%81%E4%B8%8E%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6%E8%AE%BE%E8%AE%A1"><span class="nav-number">4.4.</span> <span class="nav-text">4.4 认证与访问控制设计</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%94%E7%AB%A0-%E6%A8%A1%E5%9D%97%E6%89%A9%E5%B1%95%E8%83%BD%E5%8A%9B%E5%8F%8A%E7%8E%B0%E4%BB%A3%E9%AB%98%E6%80%A7%E8%83%BD%E7%BD%91%E5%85%B3%E5%AF%B9%E6%AF%94"><span class="nav-number">5.</span> <span class="nav-text">第五章 模块扩展能力及现代高性能网关对比</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-Nginx%E7%9A%84%E6%A8%A1%E5%9D%97%E5%8C%96%E6%89%A9%E5%B1%95%E6%9E%B6%E6%9E%84"><span class="nav-number">5.1.</span> <span class="nav-text">5.1 Nginx的模块化扩展架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-OpenResty%EF%BC%9A%E5%9F%BA%E4%BA%8ENginx%E7%9A%84%E5%8A%A8%E6%80%81%E6%89%A9%E5%B1%95%E5%B9%B3%E5%8F%B0"><span class="nav-number">5.2.</span> <span class="nav-text">5.2 OpenResty：基于Nginx的动态扩展平台</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-Envoy%EF%BC%9A%E7%8E%B0%E4%BB%A3%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3%E6%9E%B6%E6%9E%84"><span class="nav-number">5.3.</span> <span class="nav-text">5.3 Envoy：现代服务网关架构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

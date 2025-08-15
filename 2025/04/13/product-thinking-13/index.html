@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在技术创业的早期阶段，团队常常被“做出来”这个目标所吸引，接着是“有用户了”，然后是“用户喜欢”。 于是大家陷入一种甜蜜又危险的状态：  产品跑起来了，用户在用了，但钱从哪儿来，还不知道。  你可能会说：“我们现在不急着变现。” 但问题不是“你要不要收钱”，而是：  你有没有构建一个可持续的价值交换机制。  也就是说：你有没有设计你的第一个“商业闭环”？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何设计你的第一个商业闭环">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/04/13/product-thinking-13/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="在技术创业的早期阶段，团队常常被“做出来”这个目标所吸引，接着是“有用户了”，然后是“用户喜欢”。 于是大家陷入一种甜蜜又危险的状态：  产品跑起来了，用户在用了，但钱从哪儿来，还不知道。  你可能会说：“我们现在不急着变现。” 但问题不是“你要不要收钱”，而是：  你有没有构建一个可持续的价值交换机制。  也就是说：你有没有设计你的第一个“商业闭环”？">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-04-13T06:38:47.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.372Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/04/13/product-thinking-13/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>如何设计你的第一个商业闭环 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/04/13/product-thinking-13/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          如何设计你的第一个商业闭环
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-04-13 14:38:47" itemprop="dateCreated datePublished" datetime="2025-04-13T14:38:47+08:00">2025-04-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%BA%A7%E5%93%81/" itemprop="url" rel="index"><span itemprop="name">产品</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在技术创业的早期阶段，团队常常被“做出来”这个目标所吸引，接着是“有用户了”，然后是“用户喜欢”。<br> 于是大家陷入一种甜蜜又危险的状态：</p>
+<blockquote>
+<p>产品跑起来了，用户在用了，但钱从哪儿来，还不知道。</p>
+</blockquote>
+<p>你可能会说：“我们现在不急着变现。”<br> 但问题不是“你要不要收钱”，而是：</p>
+<blockquote>
+<p><strong>你有没有构建一个可持续的价值交换机制。</strong></p>
+</blockquote>
+<p>也就是说：<strong>你有没有设计你的第一个“商业闭环”？</strong></p>
+<span id="more"></span>
+
+
+
+
+
+<h2 id="一、什么是商业闭环？"><a href="#一、什么是商业闭环？" class="headerlink" title="一、什么是商业闭环？"></a><strong>一、什么是商业闭环？</strong></h2><p>商业闭环，简单来说就是：</p>
+<blockquote>
+<p><strong>你提供一个有价值的服务，用户通过某种方式回馈价值（通常是付费），而这个回馈又能让你持续提供服务，并可能越做越好。</strong></p>
+</blockquote>
+<p>这个过程需要满足四个条件：</p>
+<ol>
+<li><strong>有明确的用户角色</strong></li>
+<li><strong>有稳定可重复的价值交付行为</strong></li>
+<li><strong>用户愿意为此支付“可量化的代价”</strong>（不一定是钱）</li>
+<li><strong>这套机制能自我循环，而不是靠外部输血</strong></li>
+</ol>
+<p>闭环的本质是<strong>供需之间的正反馈循环</strong>。没有闭环的产品，不是产品，是作品。</p>
+<hr>
+<h2 id="二、为什么必须要设计商业闭环？（这一节非常重要）"><a href="#二、为什么必须要设计商业闭环？（这一节非常重要）" class="headerlink" title="二、为什么必须要设计商业闭环？（这一节非常重要）"></a><strong>二、为什么必须要设计商业闭环？（这一节非常重要）</strong></h2><p>哪怕你现在不急着收钱，哪怕你还在测试产品、跑增长、打磨体验，<strong>你都必须设计商业闭环。</strong></p>
+<h3 id="理由一：没有闭环，早晚靠不住"><a href="#理由一：没有闭环，早晚靠不住" class="headerlink" title="理由一：没有闭环，早晚靠不住"></a>理由一：<strong>没有闭环，早晚靠不住</strong></h3><p>靠融资跑的产品，一旦外部断血，就无法运营；<br> 靠补贴驱动的增长，最终养出了“用完即走”的用户习惯。</p>
+<p><strong>闭环=产品的自我造血能力。</strong><br> 它能让你在没有投资人、没有补贴、没有外援的情况下，依然生存、甚至增长。</p>
+<hr>
+<h3 id="理由二：闭环让你看清用户的真实需求"><a href="#理由二：闭环让你看清用户的真实需求" class="headerlink" title="理由二：闭环让你看清用户的真实需求"></a>理由二：<strong>闭环让你看清用户的真实需求</strong></h3><p>用户说喜欢，不一定等于愿意付钱。<br> 只有当用户为产品付出“实际成本”（时间 / 金钱 / 注意力 / 数据 /关系）时，他才真正在乎。</p>
+<blockquote>
+<p><strong>愿不愿意花钱，是判断“伪需求”的终极过滤器。</strong></p>
+</blockquote>
+<p>你会发现，很多你以为“用户很喜欢”的功能，一旦加了价格，就没人用了。<br> 反过来，一些冷门工具，在关键时刻却能让人主动付费。</p>
+<p>设计闭环，是<strong>让你看清“谁是真的用户，谁只是路人”的方式。</strong></p>
+<hr>
+<h3 id="理由三：闭环是你选择“做什么-不做什么”的判断依据"><a href="#理由三：闭环是你选择“做什么-不做什么”的判断依据" class="headerlink" title="理由三：闭环是你选择“做什么 / 不做什么”的判断依据"></a>理由三：<strong>闭环是你选择“做什么 / 不做什么”的判断依据</strong></h3><p>当你不考虑商业时，什么用户你都想服务，什么功能都想加。</p>
+<p>但当你认真思考闭环，你会逼迫自己回答：</p>
+<ul>
+<li>谁是真正的付费用户？</li>
+<li>他们最看重什么？</li>
+<li>哪一部分功能是必须、哪一部分是冗余？</li>
+</ul>
+<p>这个过滤器，会帮你极大地聚焦资源和方向。</p>
+<hr>
+<h3 id="理由四：你越早设计闭环，未来越好融资-扩张-被收购"><a href="#理由四：你越早设计闭环，未来越好融资-扩张-被收购" class="headerlink" title="理由四：你越早设计闭环，未来越好融资 / 扩张 /被收购"></a>理由四：<strong>你越早设计闭环，未来越好融资 / 扩张 /被收购</strong></h3><ul>
+<li>投资人不是在找“增长的产品”，是在找“能赚钱的生意”；</li>
+<li>合作方不是在等“新功能”，而是在看你能不能一起创造收入；</li>
+<li>市场不缺热闹的项目，只缺“能跑通商业模式”的项目；</li>
+</ul>
+<p><strong>商业闭环，是你和所有外部资源说话的语言。</strong></p>
+<hr>
+<h2 id="三、设计第一个商业闭环的六个核心步骤"><a href="#三、设计第一个商业闭环的六个核心步骤" class="headerlink" title="三、设计第一个商业闭环的六个核心步骤"></a><strong>三、设计第一个商业闭环的六个核心步骤</strong></h2><hr>
+<h3 id="Step-1：确认“谁在为价值买单”？"><a href="#Step-1：确认“谁在为价值买单”？" class="headerlink" title="Step 1：确认“谁在为价值买单”？"></a><strong>Step 1：确认“谁在为价值买单”？</strong></h3><p>用户 ≠ 付费者。你得搞清楚：</p>
+<ul>
+<li>是谁从你的产品中获得<strong>直接收益</strong>？</li>
+<li>是谁有<strong>付费权力或意愿</strong>？</li>
+<li>谁是使用者，谁是决策者？</li>
+</ul>
+<h4 id="常见类型："><a href="#常见类型：" class="headerlink" title="常见类型："></a>常见类型：</h4><table>
+<thead>
+<tr>
+<th>角色</th>
+<th>付费方式</th>
+<th>典型产品</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>使用者自己</td>
+<td>自掏腰包</td>
+<td>AI写作、Notion、Midjourney</td>
+</tr>
+<tr>
+<td>公司/团队</td>
+<td>统一付费</td>
+<td>SaaS系统、协作工具</td>
+</tr>
+<tr>
+<td>第三方平台</td>
+<td>采买或按量结算</td>
+<td>数据平台、API工具</td>
+</tr>
+<tr>
+<td>广告主/转化平台</td>
+<td>用户注意力变现</td>
+<td>内容平台、搜索产品</td>
+</tr>
+</tbody></table>
+<p>先不要想着“怎么赚钱”，先想清楚：“钱从谁口袋里来”。</p>
+<hr>
+<h3 id="Step-2：定义你“提供的价值”是什么？"><a href="#Step-2：定义你“提供的价值”是什么？" class="headerlink" title="Step 2：定义你“提供的价值”是什么？"></a><strong>Step 2：定义你“提供的价值”是什么？</strong></h3><p>不是你做了什么，而是你<strong>解决了什么问题</strong>：</p>
+<ul>
+<li>你帮用户节省了多少时间？</li>
+<li>你帮企业降低了多少成本？</li>
+<li>你帮团队提升了多少协同效率？</li>
+<li>你帮内容创作者带来了多少流量 / 转化？</li>
+</ul>
+<p>一个好方法是用这个句式：</p>
+<blockquote>
+<p><strong>我们帮助[某类人]，在[某场景]下，用[你产品独有的方式]，实现[某个具体成果]。</strong></p>
+</blockquote>
+<p>例子：</p>
+<ul>
+<li>我们帮助自由设计师，在多项目并行的工作场景下，用AI智能排版快速出稿，实现接单效率提升2倍；</li>
+<li>我们帮助初创SaaS企业，使用自动化报表引擎，一周内替代掉1个数据分析岗位；</li>
+</ul>
+<p>这就是你的价值核心，也是定价逻辑的基础。</p>
+<hr>
+<h3 id="Step-3：明确“价值交换”的形式"><a href="#Step-3：明确“价值交换”的形式" class="headerlink" title="Step 3：明确“价值交换”的形式"></a><strong>Step 3：明确“价值交换”的形式</strong></h3><p>并不是所有闭环都要立刻收费。</p>
+<p>你可以用以下几种方式收取“用户代价”：</p>
+<table>
+<thead>
+<tr>
+<th>代价类型</th>
+<th>本质</th>
+<th>典型产品</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>付费（订阅/一次性）</td>
+<td>直接金钱回报</td>
+<td>Midjourney、ChatGPT Pro</td>
+</tr>
+<tr>
+<td>时间</td>
+<td>用户投入行为</td>
+<td>抖音（看视频）、知乎（写回答）</td>
+</tr>
+<tr>
+<td>数据</td>
+<td>用户提供结构化内容</td>
+<td>Notion、数据众包平台</td>
+</tr>
+<tr>
+<td>内容生产</td>
+<td>用户带动内容增长</td>
+<td>小红书、B站</td>
+</tr>
+<tr>
+<td>带新用户</td>
+<td>用户帮助你获客</td>
+<td>飞书协作邀请、Notion共享模板</td>
+</tr>
+</tbody></table>
+<p><strong>关键是要让用户“愿意付出”，并“换回实际价值”。</strong></p>
+<hr>
+<h3 id="Step-4：设计“价值输出→价值回流”的链条"><a href="#Step-4：设计“价值输出→价值回流”的链条" class="headerlink" title="Step 4：设计“价值输出→价值回流”的链条"></a><strong>Step 4：设计“价值输出→价值回流”的链条</strong></h3><p>好的闭环不是单向流动，而是双向反馈。</p>
+<p>举例：</p>
+<blockquote>
+<p>用户用AI生成内容 → 感受到效率提升 → 产生信任与习惯 → 愿意付费 → 你能继续提供服务 → 用户获得更强能力</p>
+</blockquote>
+<p>再比如：</p>
+<blockquote>
+<p>用户用你工具做协作 → 让团队更高效 → 团队愿意集体使用 → 数据积累更丰富 → 产品更有价值</p>
+</blockquote>
+<p>你要思考：<strong>用户每一次行为，是不是在为下次使用创造更好条件？</strong></p>
+<hr>
+<h3 id="Step-5：设定“闭环完成”的最小路径"><a href="#Step-5：设定“闭环完成”的最小路径" class="headerlink" title="Step 5：设定“闭环完成”的最小路径"></a><strong>Step 5：设定“闭环完成”的最小路径</strong></h3><p>千万别等产品做完再试变现。</p>
+<p>你需要设计一个最小商业路径：</p>
+<ul>
+<li>用户注册 → 完成关键任务 → 感受到价值 → 出现付费诱因 → 完成支付 / 分享 / 数据沉淀；</li>
+</ul>
+<p>这中间只要断了一环，你就无法闭环。</p>
+<p><strong>做得少没关系，重要的是先走通一条“能量回收”的完整路径。</strong></p>
+<hr>
+<h3 id="Step-6：用指标验证闭环是否健康"><a href="#Step-6：用指标验证闭环是否健康" class="headerlink" title="Step 6：用指标验证闭环是否健康"></a><strong>Step 6：用指标验证闭环是否健康</strong></h3><p>商业闭环是否真的成立，有四个关键指标：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>含义</th>
+<th>判断逻辑</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>成本获取用户（CAC）</td>
+<td>每获取一个用户的代价</td>
+<td>是不是越来越高？</td>
+</tr>
+<tr>
+<td>用户生命周期价值（LTV）</td>
+<td>一个用户在平台的总回报</td>
+<td>是否能覆盖CAC？是否正增长？</td>
+</tr>
+<tr>
+<td>付费转化率</td>
+<td>从免费到付费的路径通不通</td>
+<td>不同行为人群付费率有何差异？</td>
+</tr>
+<tr>
+<td>留存率</td>
+<td>用户是否持续使用</td>
+<td>是一次性体验，还是连续价值？</td>
+</tr>
+</tbody></table>
+<p>闭环的本质，不是“赚钱”，而是“赚得起”。</p>
+<hr>
+<h2 id="四种常见早期商业闭环模型（可直接套用）"><a href="#四种常见早期商业闭环模型（可直接套用）" class="headerlink" title="四种常见早期商业闭环模型（可直接套用）"></a><strong>四种常见早期商业闭环模型（可直接套用）</strong></h2><h3 id="1-限额体验-按量付费"><a href="#1-限额体验-按量付费" class="headerlink" title="1. 限额体验 + 按量付费"></a>1. <strong>限额体验 + 按量付费</strong></h3><ul>
+<li>免费体验部分功能或次数；</li>
+<li>超出部分需订阅 / 一次性付费；</li>
+<li>适合 AI 工具、API平台、内容生成类；</li>
+</ul>
+<h3 id="2-分层功能-场景升级"><a href="#2-分层功能-场景升级" class="headerlink" title="2. 分层功能 + 场景升级"></a>2. <strong>分层功能 + 场景升级</strong></h3><ul>
+<li>入门功能免费；</li>
+<li>进阶协作 / 数据导出 / 高级模板收费用；</li>
+<li>适合 SaaS / 协作工具；</li>
+</ul>
+<h3 id="3-沉淀价值-平台变现"><a href="#3-沉淀价值-平台变现" class="headerlink" title="3. 沉淀价值 + 平台变现"></a>3. <strong>沉淀价值 + 平台变现</strong></h3><ul>
+<li>用户在你这沉淀数据 / 内容 / 粉丝；</li>
+<li>平台帮他变现（如分成）；</li>
+<li>适合知识平台、创作者平台；</li>
+</ul>
+<h3 id="4-服务对接型闭环"><a href="#4-服务对接型闭环" class="headerlink" title="4. 服务对接型闭环"></a>4. <strong>服务对接型闭环</strong></h3><ul>
+<li>用户通过你完成某任务（如建站、报税）；</li>
+<li>你作为中介整合第三方服务商；</li>
+<li>适合B端解决方案、垂类平台；</li>
+</ul>
+<hr>
+<h2 id="写在最后：闭环不是赚钱，是自洽"><a href="#写在最后：闭环不是赚钱，是自洽" class="headerlink" title="写在最后：闭环不是赚钱，是自洽"></a>写在最后：闭环不是赚钱，是自洽</h2><p>闭环不是为了急着变现，而是为了让你的产品<strong>从“存在”变成“可持续”。</strong></p>
+<blockquote>
+<p>没有商业闭环的产品，都是“阶段性存活体”；<br> 有商业闭环的产品，才有资格成为“演化型生物”。</p>
+</blockquote>
+<p>哪怕你不打算马上收钱，也要现在开始思考：</p>
+<ul>
+<li>用户给你带来什么？</li>
+<li>你能不能承接住？</li>
+<li>你能不能在他行为的背后，形成下一次行为的动力？</li>
+</ul>
+<p>**这就是闭环的意义。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/04/13/product-thinking-14/" rel="prev" title="从技术到产品：工程师如何切换思维模型">
+      <i class="fa fa-chevron-left"></i> 从技术到产品：工程师如何切换思维模型
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/04/13/product-thinking-12/" rel="next" title="技术产品早期如何构建指标体系：别用感觉做产品，要用信号走路">
+      技术产品早期如何构建指标体系：别用感觉做产品，要用信号走路 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E4%BB%80%E4%B9%88%E6%98%AF%E5%95%86%E4%B8%9A%E9%97%AD%E7%8E%AF%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">一、什么是商业闭环？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88%E5%BF%85%E9%A1%BB%E8%A6%81%E8%AE%BE%E8%AE%A1%E5%95%86%E4%B8%9A%E9%97%AD%E7%8E%AF%EF%BC%9F%EF%BC%88%E8%BF%99%E4%B8%80%E8%8A%82%E9%9D%9E%E5%B8%B8%E9%87%8D%E8%A6%81%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">二、为什么必须要设计商业闭环？（这一节非常重要）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%90%86%E7%94%B1%E4%B8%80%EF%BC%9A%E6%B2%A1%E6%9C%89%E9%97%AD%E7%8E%AF%EF%BC%8C%E6%97%A9%E6%99%9A%E9%9D%A0%E4%B8%8D%E4%BD%8F"><span class="nav-number">2.1.</span> <span class="nav-text">理由一：没有闭环，早晚靠不住</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%90%86%E7%94%B1%E4%BA%8C%EF%BC%9A%E9%97%AD%E7%8E%AF%E8%AE%A9%E4%BD%A0%E7%9C%8B%E6%B8%85%E7%94%A8%E6%88%B7%E7%9A%84%E7%9C%9F%E5%AE%9E%E9%9C%80%E6%B1%82"><span class="nav-number">2.2.</span> <span class="nav-text">理由二：闭环让你看清用户的真实需求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%90%86%E7%94%B1%E4%B8%89%EF%BC%9A%E9%97%AD%E7%8E%AF%E6%98%AF%E4%BD%A0%E9%80%89%E6%8B%A9%E2%80%9C%E5%81%9A%E4%BB%80%E4%B9%88-%E4%B8%8D%E5%81%9A%E4%BB%80%E4%B9%88%E2%80%9D%E7%9A%84%E5%88%A4%E6%96%AD%E4%BE%9D%E6%8D%AE"><span class="nav-number">2.3.</span> <span class="nav-text">理由三：闭环是你选择“做什么 &#x2F; 不做什么”的判断依据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%90%86%E7%94%B1%E5%9B%9B%EF%BC%9A%E4%BD%A0%E8%B6%8A%E6%97%A9%E8%AE%BE%E8%AE%A1%E9%97%AD%E7%8E%AF%EF%BC%8C%E6%9C%AA%E6%9D%A5%E8%B6%8A%E5%A5%BD%E8%9E%8D%E8%B5%84-%E6%89%A9%E5%BC%A0-%E8%A2%AB%E6%94%B6%E8%B4%AD"><span class="nav-number">2.4.</span> <span class="nav-text">理由四：你越早设计闭环，未来越好融资 &#x2F; 扩张 &#x2F;被收购</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%95%86%E4%B8%9A%E9%97%AD%E7%8E%AF%E7%9A%84%E5%85%AD%E4%B8%AA%E6%A0%B8%E5%BF%83%E6%AD%A5%E9%AA%A4"><span class="nav-number">3.</span> <span class="nav-text">三、设计第一个商业闭环的六个核心步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-1%EF%BC%9A%E7%A1%AE%E8%AE%A4%E2%80%9C%E8%B0%81%E5%9C%A8%E4%B8%BA%E4%BB%B7%E5%80%BC%E4%B9%B0%E5%8D%95%E2%80%9D%EF%BC%9F"><span class="nav-number">3.1.</span> <span class="nav-text">Step 1：确认“谁在为价值买单”？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E7%B1%BB%E5%9E%8B%EF%BC%9A"><span class="nav-number">3.1.1.</span> <span class="nav-text">常见类型：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-2%EF%BC%9A%E5%AE%9A%E4%B9%89%E4%BD%A0%E2%80%9C%E6%8F%90%E4%BE%9B%E7%9A%84%E4%BB%B7%E5%80%BC%E2%80%9D%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">3.2.</span> <span class="nav-text">Step 2：定义你“提供的价值”是什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-3%EF%BC%9A%E6%98%8E%E7%A1%AE%E2%80%9C%E4%BB%B7%E5%80%BC%E4%BA%A4%E6%8D%A2%E2%80%9D%E7%9A%84%E5%BD%A2%E5%BC%8F"><span class="nav-number">3.3.</span> <span class="nav-text">Step 3：明确“价值交换”的形式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-4%EF%BC%9A%E8%AE%BE%E8%AE%A1%E2%80%9C%E4%BB%B7%E5%80%BC%E8%BE%93%E5%87%BA%E2%86%92%E4%BB%B7%E5%80%BC%E5%9B%9E%E6%B5%81%E2%80%9D%E7%9A%84%E9%93%BE%E6%9D%A1"><span class="nav-number">3.4.</span> <span class="nav-text">Step 4：设计“价值输出→价值回流”的链条</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-5%EF%BC%9A%E8%AE%BE%E5%AE%9A%E2%80%9C%E9%97%AD%E7%8E%AF%E5%AE%8C%E6%88%90%E2%80%9D%E7%9A%84%E6%9C%80%E5%B0%8F%E8%B7%AF%E5%BE%84"><span class="nav-number">3.5.</span> <span class="nav-text">Step 5：设定“闭环完成”的最小路径</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-6%EF%BC%9A%E7%94%A8%E6%8C%87%E6%A0%87%E9%AA%8C%E8%AF%81%E9%97%AD%E7%8E%AF%E6%98%AF%E5%90%A6%E5%81%A5%E5%BA%B7"><span class="nav-number">3.6.</span> <span class="nav-text">Step 6：用指标验证闭环是否健康</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E7%A7%8D%E5%B8%B8%E8%A7%81%E6%97%A9%E6%9C%9F%E5%95%86%E4%B8%9A%E9%97%AD%E7%8E%AF%E6%A8%A1%E5%9E%8B%EF%BC%88%E5%8F%AF%E7%9B%B4%E6%8E%A5%E5%A5%97%E7%94%A8%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">四种常见早期商业闭环模型（可直接套用）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E9%99%90%E9%A2%9D%E4%BD%93%E9%AA%8C-%E6%8C%89%E9%87%8F%E4%BB%98%E8%B4%B9"><span class="nav-number">4.1.</span> <span class="nav-text">1. 限额体验 + 按量付费</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%88%86%E5%B1%82%E5%8A%9F%E8%83%BD-%E5%9C%BA%E6%99%AF%E5%8D%87%E7%BA%A7"><span class="nav-number">4.2.</span> <span class="nav-text">2. 分层功能 + 场景升级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%B2%89%E6%B7%80%E4%BB%B7%E5%80%BC-%E5%B9%B3%E5%8F%B0%E5%8F%98%E7%8E%B0"><span class="nav-number">4.3.</span> <span class="nav-text">3. 沉淀价值 + 平台变现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%9C%8D%E5%8A%A1%E5%AF%B9%E6%8E%A5%E5%9E%8B%E9%97%AD%E7%8E%AF"><span class="nav-number">4.4.</span> <span class="nav-text">4. 服务对接型闭环</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E%EF%BC%9A%E9%97%AD%E7%8E%AF%E4%B8%8D%E6%98%AF%E8%B5%9A%E9%92%B1%EF%BC%8C%E6%98%AF%E8%87%AA%E6%B4%BD"><span class="nav-number">5.</span> <span class="nav-text">写在最后：闭环不是赚钱，是自洽</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

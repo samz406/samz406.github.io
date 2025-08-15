@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="架构设计从来不是技术的堆砌，而是在复杂现实中寻求”整体最优解”的博弈，每次面对架构选择时，我们真正在做的是什么？是在有限的资源约束下，为系统找到一条最合适的生存之道。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="架构设计的本质：有限资源下的系统性取舍">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/06/03/the-essence-of-architectural-design/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="架构设计从来不是技术的堆砌，而是在复杂现实中寻求”整体最优解”的博弈，每次面对架构选择时，我们真正在做的是什么？是在有限的资源约束下，为系统找到一条最合适的生存之道。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-06-03T02:31:30.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.377Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="架构">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/06/03/the-essence-of-architectural-design/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>架构设计的本质：有限资源下的系统性取舍 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/06/03/the-essence-of-architectural-design/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          架构设计的本质：有限资源下的系统性取舍
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-06-03 10:31:30" itemprop="dateCreated datePublished" datetime="2025-06-03T10:31:30+08:00">2025-06-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>架构设计从来不是技术的堆砌，而是在复杂现实中寻求”整体最优解”的博弈，每次面对架构选择时，我们真正在做的是什么？是在有限的资源约束下，为系统找到一条最合适的生存之道。</p>
+<span id="more"></span>
+
+<h2 id="一、重新认识架构设计：它是一个系统"><a href="#一、重新认识架构设计：它是一个系统" class="headerlink" title="一、重新认识架构设计：它是一个系统"></a>一、重新认识架构设计：它是一个系统</h2><p>很多人做架构时，习惯性地把注意力放在技术选型上——用Redis还是MongoDB？微服务还是单体？其实这样思考问题，就已经偏了。</p>
+<p>真正的架构设计，是要先把问题当作一个系统来思考。</p>
+<h3 id="先划清楚边界"><a href="#先划清楚边界" class="headerlink" title="先划清楚边界"></a>先划清楚边界</h3><p>任何系统都有边界。做架构的第一步，是搞清楚：</p>
+<ul>
+<li>这个系统到底要管什么？不管什么？</li>
+<li>跟外部系统怎么打交道？</li>
+<li>信息怎么流动？控制权怎么传递？</li>
+</ul>
+<p>我见过太多项目，就是因为边界不清楚，最后变成了一个”什么都想管，什么都管不好”的怪物。</p>
+<h3 id="目标冲突是常态"><a href="#目标冲突是常态" class="headerlink" title="目标冲突是常态"></a>目标冲突是常态</h3><p>做架构时，你会发现自己永远在面对冲突的目标：</p>
+<ul>
+<li>用户希望系统快，老板希望成本低</li>
+<li>产品希望功能多，运维希望系统稳定</li>
+<li>业务希望快速迭代，技术希望架构优雅</li>
+</ul>
+<p>这不是bug，这就是现实。<strong>架构师的价值，就是在这些冲突中找到平衡点</strong>。</p>
+<h3 id="约束比想象的多"><a href="#约束比想象的多" class="headerlink" title="约束比想象的多"></a>约束比想象的多</h3><p>技术约束只是冰山一角。真正限制架构设计的，往往是：</p>
+<ul>
+<li>团队只有5个人，你设计20个微服务？</li>
+<li>老系统用了5年，你说推倒重来？</li>
+<li>3个月后要上线，你说先重构半年？</li>
+</ul>
+<p>这些”软约束”，往往比硬件约束更致命。</p>
+<h3 id="反馈是系统的生命"><a href="#反馈是系统的生命" class="headerlink" title="反馈是系统的生命"></a>反馈是系统的生命</h3><p>好的架构设计，一定是有反馈机制的。你需要知道：</p>
+<ul>
+<li>这个设计到底有没有解决问题？</li>
+<li>新的问题在哪里冒出来？</li>
+<li>下一步应该往哪里优化？</li>
+</ul>
+<p>没有反馈的架构，就像开着眼睛开车，早晚要撞墙。</p>
+<h2 id="二、取舍的智慧：三个核心原则"><a href="#二、取舍的智慧：三个核心原则" class="headerlink" title="二、取舍的智慧：三个核心原则"></a>二、取舍的智慧：三个核心原则</h2><h3 id="1-放弃完美主义"><a href="#1-放弃完美主义" class="headerlink" title="1. 放弃完美主义"></a>1. 放弃完美主义</h3><p>我年轻的时候，总想设计一个”完美”的架构——高性能、高可用、易扩展、好维护。后来发现，<strong>完美的架构只存在于PPT里</strong>。</p>
+<p>现实中，每一个架构决策都是权衡的结果：</p>
+<ul>
+<li>为了性能，可能要牺牲一致性</li>
+<li>为了灵活性，可能要增加复杂度</li>
+<li>为了成本，可能要降低可用性</li>
+</ul>
+<p><strong>不要追求局部最优，要追求整体合理</strong>。</p>
+<h3 id="2-拥抱反馈循环"><a href="#2-拥抱反馈循环" class="headerlink" title="2. 拥抱反馈循环"></a>2. 拥抱反馈循环</h3><p>架构不是一次性设计，而是持续演进的过程。</p>
+<p>我现在做架构时，都会刻意留一些”调节旋钮”：</p>
+<ul>
+<li>监控指标，随时知道系统状态</li>
+<li>灰度机制，可以快速回滚</li>
+<li>配置中心，可以动态调整策略</li>
+</ul>
+<p><strong>让架构能够自我学习、自我调节，这才是成熟架构的标志</strong>。</p>
+<h3 id="3-接受动态平衡"><a href="#3-接受动态平衡" class="headerlink" title="3. 接受动态平衡"></a>3. 接受动态平衡</h3><p>系统是活的，业务在变，团队在变，技术也在变。</p>
+<p>今天的最优解，可能就是明天的技术债。这不是失败，这是系统演进的自然规律。</p>
+<p><strong>架构师要做的，不是设计一个一劳永逸的方案，而是设计一个能够持续适应变化的系统</strong>。</p>
+<h2 id="三、一个真实的故事"><a href="#三、一个真实的故事" class="headerlink" title="三、一个真实的故事"></a>三、一个真实的故事</h2><p>让我讲讲之前做的一个电商项目，从中你能看到架构是怎么一步步演进的。</p>
+<p><strong>初创期</strong>：5个人的团队，3个月要上线。我们选择了最简单的单体架构，MySQL + Redis + 单机部署。很多人说这不够”先进”，但它解决了最重要的问题：快速交付。</p>
+<p><strong>成长期</strong>：用户量上来了，数据库顶不住了。我们引入了读写分离、增加了缓存层。这时候系统复杂度上升了，但性能问题解决了，这个权衡是值得的。</p>
+<p><strong>快速增长期</strong>：业务复杂度暴增，单体架构成了瓶颈。我们开始拆分微服务，但只拆核心业务，边缘功能继续保持简单。这时候牺牲了一些数据一致性，但换来了开发效率。</p>
+<p><strong>稳定期</strong>：用户遍布全国，可用性要求越来越高。我们上了多活架构，系统复杂度又上了一个台阶，但可用性提升了两个9。</p>
+<p>每一步，都不是为了追求技术的先进性，而是为了解决当时最核心的问题。</p>
+<h2 id="四、架构师应该怎么成长"><a href="#四、架构师应该怎么成长" class="headerlink" title="四、架构师应该怎么成长"></a>四、架构师应该怎么成长</h2><h3 id="学会看全局"><a href="#学会看全局" class="headerlink" title="学会看全局"></a>学会看全局</h3><p>不要只盯着技术本身，要看业务流程、团队能力、组织结构。<strong>技术服务于业务，架构服务于组织</strong>。</p>
+<h3 id="接受不完美"><a href="#接受不完美" class="headerlink" title="接受不完美"></a>接受不完美</h3><p>世界上没有完美的架构，只有合适的架构。学会在约束条件下做出最好的选择，这是架构师最重要的能力。</p>
+<h3 id="保持敏感性"><a href="#保持敏感性" class="headerlink" title="保持敏感性"></a>保持敏感性</h3><p>对系统的变化保持敏感，对用户反馈保持敏感，对团队痛点保持敏感。<strong>好的架构师，都是出色的系统观察者</strong>。</p>
+<h3 id="培养决策力"><a href="#培养决策力" class="headerlink" title="培养决策力"></a>培养决策力</h3><p>架构师最终要为决策负责。在信息不完整的情况下做决策，在压力下做决策，在模糊中做决策——这些都是必修课。</p>
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>做了这么多年架构，我越来越觉得，<strong>架构设计其实是在教我们如何面对复杂性</strong>。</p>
+<p>技术在变，业务在变，团队在变，但是”在约束条件下做最优选择”这个本质，从来没有变过。</p>
+<p><strong>架构师的成长，不仅仅是技术能力的提升，更是系统思维能力的修炼</strong>。最终，我们要掌握的，是在复杂、动态、多约束的现实中，依然能保持清醒判断和果断决策的能力。</p>
+<p>这才是架构设计的真正本质：<strong>在有限的资源下，为复杂的系统找到一条最合适的演进之路</strong>。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/05/27/Distributed-tracing-design/" rel="prev" title="分布式链路追踪设计与实现">
+      <i class="fa fa-chevron-left"></i> 分布式链路追踪设计与实现
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/06/03/nginx-architectural-design/" rel="next" title="Nginx架构设计">
+      Nginx架构设计 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E9%87%8D%E6%96%B0%E8%AE%A4%E8%AF%86%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%EF%BC%9A%E5%AE%83%E6%98%AF%E4%B8%80%E4%B8%AA%E7%B3%BB%E7%BB%9F"><span class="nav-number">1.</span> <span class="nav-text">一、重新认识架构设计：它是一个系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%88%E5%88%92%E6%B8%85%E6%A5%9A%E8%BE%B9%E7%95%8C"><span class="nav-number">1.1.</span> <span class="nav-text">先划清楚边界</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87%E5%86%B2%E7%AA%81%E6%98%AF%E5%B8%B8%E6%80%81"><span class="nav-number">1.2.</span> <span class="nav-text">目标冲突是常态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%A6%E6%9D%9F%E6%AF%94%E6%83%B3%E8%B1%A1%E7%9A%84%E5%A4%9A"><span class="nav-number">1.3.</span> <span class="nav-text">约束比想象的多</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E9%A6%88%E6%98%AF%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%94%9F%E5%91%BD"><span class="nav-number">1.4.</span> <span class="nav-text">反馈是系统的生命</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%8F%96%E8%88%8D%E7%9A%84%E6%99%BA%E6%85%A7%EF%BC%9A%E4%B8%89%E4%B8%AA%E6%A0%B8%E5%BF%83%E5%8E%9F%E5%88%99"><span class="nav-number">2.</span> <span class="nav-text">二、取舍的智慧：三个核心原则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%94%BE%E5%BC%83%E5%AE%8C%E7%BE%8E%E4%B8%BB%E4%B9%89"><span class="nav-number">2.1.</span> <span class="nav-text">1. 放弃完美主义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%8B%A5%E6%8A%B1%E5%8F%8D%E9%A6%88%E5%BE%AA%E7%8E%AF"><span class="nav-number">2.2.</span> <span class="nav-text">2. 拥抱反馈循环</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%8E%A5%E5%8F%97%E5%8A%A8%E6%80%81%E5%B9%B3%E8%A1%A1"><span class="nav-number">2.3.</span> <span class="nav-text">3. 接受动态平衡</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E4%B8%80%E4%B8%AA%E7%9C%9F%E5%AE%9E%E7%9A%84%E6%95%85%E4%BA%8B"><span class="nav-number">3.</span> <span class="nav-text">三、一个真实的故事</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E6%9E%B6%E6%9E%84%E5%B8%88%E5%BA%94%E8%AF%A5%E6%80%8E%E4%B9%88%E6%88%90%E9%95%BF"><span class="nav-number">4.</span> <span class="nav-text">四、架构师应该怎么成长</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%A6%E4%BC%9A%E7%9C%8B%E5%85%A8%E5%B1%80"><span class="nav-number">4.1.</span> <span class="nav-text">学会看全局</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A5%E5%8F%97%E4%B8%8D%E5%AE%8C%E7%BE%8E"><span class="nav-number">4.2.</span> <span class="nav-text">接受不完美</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%9D%E6%8C%81%E6%95%8F%E6%84%9F%E6%80%A7"><span class="nav-number">4.3.</span> <span class="nav-text">保持敏感性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%B9%E5%85%BB%E5%86%B3%E7%AD%96%E5%8A%9B"><span class="nav-number">4.4.</span> <span class="nav-text">培养决策力</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="nav-number">5.</span> <span class="nav-text">写在最后</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

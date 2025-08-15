@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="软件的核心是为用户解决领域相关的问题。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DDD概览">
+<meta property="og:url" content="http://www.sanmuzi.com/2021/10/13/ddd-overview/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="软件的核心是为用户解决领域相关的问题。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-10-13T10:42:38.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.351Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="DDD">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2021/10/13/ddd-overview/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>DDD概览 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2021/10/13/ddd-overview/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          DDD概览
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-10-13 18:42:38" itemprop="dateCreated datePublished" datetime="2021-10-13T18:42:38+08:00">2021-10-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/DDD/" itemprop="url" rel="index"><span itemprop="name">DDD</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>软件的核心是为用户解决领域相关的问题。</p>
+<span id="more"></span>
+
+<p>应对复杂度，是构建软件过程中唯一不变的主题。就像每天吃什么，也是一个人一生离不开的主题。在构建软件场景中，软件复杂度就是“魔”，控制软件复杂度方法就是“道”。“道”听着虚无缥缈，但还是有一些设计法则。比如能够控制软件复杂度只能是设计方法。因为我们无法改变客观存在问题空间，却可以改变设计的质量。</p>
+<p>Eric Evans提出DDD就是应对软件核心复杂度。那DDD是怎么应对软件复杂度？领域驱动设计是一种思维方式，也是一组优先任务，它旨在加速那些必须处理复杂领域的软件项目的开发。影响软软件复杂度有3个要素：规模、结构与变化。DDD通过引入一套提炼为模式的设计元模型，对<strong>业务软件系统做到了对规模的控制、结构的清晰化以及对变化响应</strong>。</p>
+<h4 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h4><p><strong>DDD作为一个针对大型复杂业务系统领域建模方法体系。它改变了传统软件开发工程师针对数据库建模的方式。通过面向领域的思维方式，将要解决的业务概念和业务规则等内容提炼为领域知识，然后通过不同的建模范式将这些领域知识抽象为能够反映真实世界的模型。</strong></p>
+<p>领域驱动设计核心是模型驱动设计，而模型驱动设计核心是领域模型，领域模型必须在统一语言指导下获得。为整个业务系统建立的领域模型要么核心子领域，要么属于通用子领域。之所以分子领域，一方面可以将一个不易理解的庞大问题切割成团队可以掌控的多个小问题。另一方式更好实现资产（人员资产与财力资产）合理分配。</p>
+<ul>
+<li><p>客户/供应方</p>
+</li>
+<li><p>共享内核</p>
+</li>
+<li><p>遵奉者</p>
+</li>
+<li><p>分离方式</p>
+</li>
+<li><p>开放主机服务</p>
+</li>
+<li><p>发布语言</p>
+</li>
+<li><p>防腐层</p>
+</li>
+<li><p>大泥球</p>
+</li>
+</ul>
+<p>缺图</p>
+<p>模型驱动设计可以在限界上下文的边界内部进行，通过分层设计将领域独立出来，并在统一语言的指导下，通过与领域专家（最懂业务的）的协作方式获得领域模型。表示领域模型的设计要包括实体、值对象、领域服务和领域事件。领域逻辑都应该封装在这些对象中。聚合是一种边界，它可以封装一到多个实体与值对象，并维持该边界范围内业务完整性。聚合至少包含一个实体，且只有实体才能作为聚合根。工厂和资源库负责管理聚合的生命周期。前者负责聚合创建，用于封装复杂度或者可能变化的创建逻辑。后者负责从存放资源的位置（数据库、内存）获取、添加、删除和修改聚合。</p>
+<h4 id="问题空间和解空间"><a href="#问题空间和解空间" class="headerlink" title="问题空间和解空间"></a>问题空间和解空间</h4><p>​    人类通过在问题空间中寻找解决方案来解决问题，构建软件也是从真实世界的问题空间寻找解决方案，将其映射为理念世界的解空间来满足问题空间的需求。软件系统的构建也是对问题空间的求解，已获得构成解空间的设计方案。</p>
+<p>问题空间需要解空间应对，解空间也不可脱离问题空间单独存在。对于客户提出的需求，要分清楚什么是问题，什么是解决方案，真的需求才挖掘出来。在DD中，对于问题空间强调运用统一语言来描述需求问题，领域核心子领域、通用子领域与支撑子领域分解问题空间。</p>
+<h4 id="战术设计和战略设计"><a href="#战术设计和战略设计" class="headerlink" title="战术设计和战略设计"></a>战术设计和战略设计</h4><p>一个复杂的业务系统，面对太多的问题是无法一步求解，需要根据问题的层次进行分解。不同层次的求解目标并不相同。需要从宏观层次分析和探索问题空间，获得对等于软件架构的战略设计原则。为深入业务的细节，则需要冲微观层次展开建模活动，在战略设计原则指导下做出战术设计。</p>
+<p>战术设计阶段需要在限界上下文内部开展领域建模。战术设计阶段设计实体、值对象和聚合模式。从战略设计到战术设计是一个自顶向下的设计过程，是对设计决策的指导；将战术设计反馈给战略设计，则是自底向上演化过程。</p>
+<h4 id="控制软件复杂度"><a href="#控制软件复杂度" class="headerlink" title="控制软件复杂度"></a>控制软件复杂度</h4><h5 id="控制规模"><a href="#控制规模" class="headerlink" title="控制规模"></a>控制规模</h5><p>问题空间规模是客观存在的，你不能随便否定客户的希望，虽然不能改变系统规模，却可以通过“分而治之”的方法将一个规模庞大的系统持续分解为小的元素。直到每个细粒度的软件元素能够解决问题空啊金的一个问题为止。<strong>分而治之首先是自顶向下分解，然后又自底向上进行整合</strong>。可以通过限界上下文和上下文映射划分模块。</p>
+<h5 id="清晰结构"><a href="#清晰结构" class="headerlink" title="清晰结构"></a>清晰结构</h5><p>系统结构清晰（怎么判断是清晰？）是控制复杂度一种方式。可以通过分层架构将领域分离出来，在业务架构和技术实现之间泾渭分明。问题空间由客户需求组成，需求可以分为业务需求与质量需求。</p>
+<p>业务需求数量决定系统规模。业务需求带来的复杂度是需求复杂度。质量带来的复杂度是技术复杂度。技术复杂度与业务复杂度不是完全独立的。要避免业务逻辑的复杂度与技术复杂度混淆，就需要确定业务逻辑与技术实现的边界。DDD引入的分层架构，将业务逻辑封装到领域层，支持业务逻辑技术实现放到基础设施层，领域层之上的应用层有两个作用：一方面是业务逻辑的外观，另一方面是业务逻辑与技术实现之间黏合剂。领域驱动设计通过限界上下文隔离业务能力边界，通过分层架构隔离业务逻辑与技术实现，这样可以保证整个业务系统的架构具有清晰的结构。</p>
+<h4 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h4><p>以上是看《解析领域驱动设计》笔记。    </p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/DDD/" rel="tag"># DDD</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/10/13/mongodb-find/" rel="prev" title="mongodb查询">
+      <i class="fa fa-chevron-left"></i> mongodb查询
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/10/21/weixin-manual/" rel="next" title="微信公众号开发">
+      微信公众号开发 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E7%A9%BA%E9%97%B4%E5%92%8C%E8%A7%A3%E7%A9%BA%E9%97%B4"><span class="nav-number">2.</span> <span class="nav-text">问题空间和解空间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%88%98%E6%9C%AF%E8%AE%BE%E8%AE%A1%E5%92%8C%E6%88%98%E7%95%A5%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.</span> <span class="nav-text">战术设计和战略设计</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E8%BD%AF%E4%BB%B6%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="nav-number">4.</span> <span class="nav-text">控制软件复杂度</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E8%A7%84%E6%A8%A1"><span class="nav-number">4.1.</span> <span class="nav-text">控制规模</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B8%85%E6%99%B0%E7%BB%93%E6%9E%84"><span class="nav-number">4.2.</span> <span class="nav-text">清晰结构</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9A"><span class="nav-number">5.</span> <span class="nav-text">总结：</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

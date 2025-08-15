@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="杂性是软件系统的主要敌人">
+<meta property="og:type" content="article">
+<meta property="og:title" content="复杂性的定义">
+<meta property="og:url" content="http://www.sanmuzi.com/2022/07/20/Software-Design-Philosophy-Complexity/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="杂性是软件系统的主要敌人">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-07-20T04:46:56.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.342Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2022/07/20/Software-Design-Philosophy-Complexity/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>复杂性的定义 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2022/07/20/Software-Design-Philosophy-Complexity/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          复杂性的定义
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-07-20 12:46:56" itemprop="dateCreated datePublished" datetime="2022-07-20T12:46:56+08:00">2022-07-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>杂性是软件系统的主要敌人</p>
+<span id="more"></span>
+
+
+
+
+
+<p>复杂性是指任何使软件系统难以理解和修改的结构性因素。</p>
+<ul>
+<li>复杂性可能表现为：<ul>
+<li>理解代码的逻辑或行为困难。</li>
+<li>实现简单功能需要大量工作。</li>
+<li>修改一个地方导致其他地方出错。</li>
+</ul>
+</li>
+<li>一个系统的复杂性与其规模或功能无关，即使是小型系统也可能非常复杂。</li>
+</ul>
+<p>复杂性可以从<strong>开发成本</strong>的角度理解：在复杂系统中，哪怕是微小的改动也可能需要巨大代价；而在简单系统中，大改动所需的努力也较少。</p>
+<h3 id="复杂性的三大表现"><a href="#复杂性的三大表现" class="headerlink" title="复杂性的三大表现"></a><strong>复杂性的三大表现</strong></h3><p>复杂性主要通过以下方式显现：</p>
+<h4 id="（1）变化放大（Change-Amplification）"><a href="#（1）变化放大（Change-Amplification）" class="headerlink" title="（1）变化放大（Change Amplification）"></a>（1）<strong>变化放大（Change Amplification）</strong></h4><p>一个看似简单的改动会要求对多个地方进行修改。</p>
+<ul>
+<li>示例：在早期网站中，每个页面都直接硬编码了背景颜色。修改颜色需要手动更新所有页面，这种设计增加了修改代价。</li>
+<li>改进方式：集中式管理，例如通过共享变量统一颜色定义，从而减少需要修改的地方。</li>
+</ul>
+<h4 id="（2）认知负担（Cognitive-Load）"><a href="#（2）认知负担（Cognitive-Load）" class="headerlink" title="（2）认知负担（Cognitive Load）"></a>（2）<strong>认知负担（Cognitive Load）</strong></h4><p>开发者需要记住或学习大量信息才能完成任务。</p>
+<ul>
+<li>示例：一个函数分配了内存，并要求调用方释放。这种隐含责任增加了开发者的记忆负担，容易导致错误（如内存泄漏）。</li>
+<li>改进方式：将资源的分配和释放责任封装在函数内部，降低调用方的认知负担。</li>
+</ul>
+<h4 id="（3）未知的未知（Unknown-Unknowns）"><a href="#（3）未知的未知（Unknown-Unknowns）" class="headerlink" title="（3）未知的未知（Unknown Unknowns）"></a>（3）<strong>未知的未知（Unknown Unknowns）</strong></h4><p>开发者在完成任务时，不知道需要修改哪些地方，也不清楚可能涉及的依赖或隐含规则。</p>
+<ul>
+<li>示例：某些页面的颜色强调部分依赖于背景颜色，但开发者未被告知，导致修改背景颜色时忽略这些依赖，从而引发错误。</li>
+<li>特点：未知的未知是最危险的复杂性表现，因为开发者甚至意识不到问题的存在。</li>
+</ul>
+<h3 id="复杂性的两大成因"><a href="#复杂性的两大成因" class="headerlink" title="复杂性的两大成因"></a><strong>复杂性的两大成因</strong></h3><p>复杂性主要源于以下两种因素：</p>
+<h4 id="（1）依赖性（Dependencies）"><a href="#（1）依赖性（Dependencies）" class="headerlink" title="（1）依赖性（Dependencies）"></a>（1）<strong>依赖性（Dependencies）</strong></h4><ul>
+<li>定义：当代码无法独立存在，需与其他代码协作时，就会引入依赖。</li>
+<li>示例：<ul>
+<li>不同模块之间共享某个全局变量。</li>
+<li>函数签名的变更要求更新所有调用者。</li>
+</ul>
+</li>
+<li>影响：依赖性会导致变化放大和高认知负担，使系统更难维护。</li>
+<li>解决方式：通过模块化设计和接口隐藏，减少模块间的依赖性。</li>
+</ul>
+<h4 id="（2）晦涩性（Obscurity）"><a href="#（2）晦涩性（Obscurity）" class="headerlink" title="（2）晦涩性（Obscurity）"></a>（2）<strong>晦涩性（Obscurity）</strong></h4><ul>
+<li>定义：当系统中的关键信息无法直观获取时，会产生晦涩性。</li>
+<li>示例：<ul>
+<li>变量名过于模糊（如 <code>time</code>），开发者难以理解其用途。</li>
+<li>文档缺乏详细说明，开发者不得不阅读源码才能理解设计意图。</li>
+</ul>
+</li>
+<li>影响：晦涩性会导致未知的未知，增加开发难度。</li>
+<li>解决方式：通过清晰的命名、良好的文档和一致的设计，降低晦涩性。</li>
+</ul>
+<p>依赖性和晦涩性常常共同作用，导致复杂性的各种表现。例如，当多个模块依赖于未显式说明的信息时，晦涩性会加剧依赖的危害。</p>
+<h3 id="复杂性的增量累积"><a href="#复杂性的增量累积" class="headerlink" title="复杂性的增量累积"></a><strong>复杂性的增量累积</strong></h3><p>复杂性往往以微小的方式逐步累积，形成难以控制的局面。</p>
+<ul>
+<li><p>积累过程：</p>
+<ul>
+<li>每次改动引入少量依赖或晦涩性。</li>
+<li>当积累达到一定程度，系统变得难以维护，哪怕是小的改动也会触发连锁反应。</li>
+</ul>
+</li>
+<li><p>应对策略：</p>
+<ul>
+<li>采取“零容忍”态度，避免复杂性的每一次不必要增加。</li>
+<li>识别复杂性“红旗”（如重复代码、隐藏依赖），在每次改动中消除潜在问题。</li>
+</ul>
+</li>
+</ul>
+<h3 id="设计的核心目标"><a href="#设计的核心目标" class="headerlink" title="设计的核心目标"></a><strong>设计的核心目标</strong></h3><p>优秀的系统设计应：</p>
+<ul>
+<li><p><strong>减少依赖性</strong>：使模块之间尽可能独立，避免多处修改。</p>
+</li>
+<li><p><strong>降低晦涩性</strong>：通过清晰的接口和一致的设计，使系统更直观。</p>
+</li>
+<li><p>最小化复杂性的表现</p>
+<ul>
+<li>减少需要修改的代码量（对抗变化放大）。</li>
+<li>降低开发者的记忆负担（对抗认知负担）。</li>
+<li>消除隐含规则或未显式的依赖（对抗未知的未知）。</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/06/17/RocketMQ-batch-consumer/" rel="prev" title="RocketMQ批量消费消息">
+      <i class="fa fa-chevron-left"></i> RocketMQ批量消费消息
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/07/20/Software-Architecture-Patterns/" rel="next" title="软件架构模式">
+      软件架构模式 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%8D%E6%9D%82%E6%80%A7%E7%9A%84%E4%B8%89%E5%A4%A7%E8%A1%A8%E7%8E%B0"><span class="nav-number">1.</span> <span class="nav-text">复杂性的三大表现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%881%EF%BC%89%E5%8F%98%E5%8C%96%E6%94%BE%E5%A4%A7%EF%BC%88Change-Amplification%EF%BC%89"><span class="nav-number">1.1.</span> <span class="nav-text">（1）变化放大（Change Amplification）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%882%EF%BC%89%E8%AE%A4%E7%9F%A5%E8%B4%9F%E6%8B%85%EF%BC%88Cognitive-Load%EF%BC%89"><span class="nav-number">1.2.</span> <span class="nav-text">（2）认知负担（Cognitive Load）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%883%EF%BC%89%E6%9C%AA%E7%9F%A5%E7%9A%84%E6%9C%AA%E7%9F%A5%EF%BC%88Unknown-Unknowns%EF%BC%89"><span class="nav-number">1.3.</span> <span class="nav-text">（3）未知的未知（Unknown Unknowns）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%8D%E6%9D%82%E6%80%A7%E7%9A%84%E4%B8%A4%E5%A4%A7%E6%88%90%E5%9B%A0"><span class="nav-number">2.</span> <span class="nav-text">复杂性的两大成因</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%881%EF%BC%89%E4%BE%9D%E8%B5%96%E6%80%A7%EF%BC%88Dependencies%EF%BC%89"><span class="nav-number">2.1.</span> <span class="nav-text">（1）依赖性（Dependencies）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%882%EF%BC%89%E6%99%A6%E6%B6%A9%E6%80%A7%EF%BC%88Obscurity%EF%BC%89"><span class="nav-number">2.2.</span> <span class="nav-text">（2）晦涩性（Obscurity）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%8D%E6%9D%82%E6%80%A7%E7%9A%84%E5%A2%9E%E9%87%8F%E7%B4%AF%E7%A7%AF"><span class="nav-number">3.</span> <span class="nav-text">复杂性的增量累积</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E7%9A%84%E6%A0%B8%E5%BF%83%E7%9B%AE%E6%A0%87"><span class="nav-number">4.</span> <span class="nav-text">设计的核心目标</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

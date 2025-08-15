@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="计算机技术的发展史，也是一部持续追求高性能与高可用、不断探索分布式与集群架构的演进史。如今的 RPC（Remote Procedure Call）在分布式系统中已被广泛使用，但它绝不是空穴来风，而是经过了数十年的概念演化与技术迭代后，逐渐成为分布式通信的“主力军”。本章将更加系统地回溯 RPC 的起源与发展背景，为后续深入理解其核心原理和应用价值奠定基础。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RPC 的起源与发展背景">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/01/03/rpc-3/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="计算机技术的发展史，也是一部持续追求高性能与高可用、不断探索分布式与集群架构的演进史。如今的 RPC（Remote Procedure Call）在分布式系统中已被广泛使用，但它绝不是空穴来风，而是经过了数十年的概念演化与技术迭代后，逐渐成为分布式通信的“主力军”。本章将更加系统地回溯 RPC 的起源与发展背景，为后续深入理解其核心原理和应用价值奠定基础。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-01-03T07:28:16.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.376Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/01/03/rpc-3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>RPC 的起源与发展背景 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/01/03/rpc-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          RPC 的起源与发展背景
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-01-03 15:28:16" itemprop="dateCreated datePublished" datetime="2025-01-03T15:28:16+08:00">2025-01-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id><a href="#" class="headerlink" title></a></h1><p>计算机技术的发展史，也是一部持续追求高性能与高可用、不断探索分布式与集群架构的演进史。如今的 RPC（Remote Procedure Call）在分布式系统中已被广泛使用，但它绝不是空穴来风，而是经过了数十年的概念演化与技术迭代后，逐渐成为分布式通信的“主力军”。本章将更加系统地回溯 RPC 的起源与发展背景，为后续深入理解其核心原理和应用价值奠定基础。</p>
+<span id="more"></span>
+
+
+
+<h2 id="3-1-早期分布式计算形态"><a href="#3-1-早期分布式计算形态" class="headerlink" title="3.1 早期分布式计算形态"></a>3.1 早期分布式计算形态</h2><h3 id="3-1-1-单体应用的局限性"><a href="#3-1-1-单体应用的局限性" class="headerlink" title="3.1.1 单体应用的局限性"></a>3.1.1 单体应用的局限性</h3><p>在计算机发展的早期，应用程序往往运行在单台大型机或服务器上，所有的业务逻辑都被封装在同一个进程里。这种所谓“单体应用”模式在硬件性能和用户规模尚可的时代确实足以支撑大多数业务需求。然而，随着应用的复杂度和访问量不断提升，单体应用的扩容和维护成本也日渐攀升。</p>
+<ul>
+<li><strong>扩展瓶颈</strong>：一台机器的硬件资源有限，无法无限制地堆叠 CPU 和内存。</li>
+<li><strong>可维护性差</strong>：所有功能杂糅在同一进程内，任何改动都可能引发连锁反应。</li>
+<li><strong>高可用挑战</strong>：单点故障风险大，一旦服务器出现问题，整个系统都将瘫痪。</li>
+</ul>
+<p>这些问题迫使人们寻找更加灵活、高可用的系统架构。将应用程序拆分到多台服务器上并让它们彼此通信，成为不可阻挡的发展趋势。</p>
+<h3 id="3-1-2-远程调用需求的萌芽"><a href="#3-1-2-远程调用需求的萌芽" class="headerlink" title="3.1.2 远程调用需求的萌芽"></a>3.1.2 远程调用需求的萌芽</h3><p>随着分布式系统雏形的出现，软件开发者开始思考：<strong>如果我的应用被拆分到好几台机器上，彼此之间如何实现通信并协调工作？</strong> 在最初的阶段，开发者往往采用原始的 Socket 编程方式，直接在 TCP 或 UDP 之上自己封装消息格式与序列化协议。这种方式尽管可行，但对于大规模项目而言，非常繁琐且易出错，管理和维护成本也相当高。</p>
+<p>在此背景下，“如何让跨进程调用像本地函数调用一样简单”逐渐成为一个关键命题。从这个命题出发，早期的一些分布式对象模型（如 CORBA、DCOM 等）相继诞生，试图给出解决方案。这些模型先于“RPC”概念的正式普及而出现，从某种意义上来说，它们既是 RPC 的先驱，也为后来的 RPC 框架贡献了许多宝贵的经验与教训。</p>
+<hr>
+<h2 id="3-2-分布式对象模型的探索"><a href="#3-2-分布式对象模型的探索" class="headerlink" title="3.2 分布式对象模型的探索"></a>3.2 分布式对象模型的探索</h2><h3 id="3-2-1-CORBA-与分布式组件"><a href="#3-2-1-CORBA-与分布式组件" class="headerlink" title="3.2.1 CORBA 与分布式组件"></a>3.2.1 CORBA 与分布式组件</h3><p>CORBA（Common Object Request Broker Architecture，通用对象请求代理体系结构）由 OMG（Object Management Group）在 20 世纪 90 年代提出。它的核心理念是：在一个分布式系统中，不同主机上的组件可以被抽象为“对象”，而对象之间的交互则通过 ORB（Object Request Broker，对象请求代理）来进行分发和管理。</p>
+<ul>
+<li><strong>跨语言的目标</strong>：CORBA 设定了一种 IDL（Interface Definition Language），期望实现多种编程语言之间的无缝互操作。</li>
+<li><strong>对远程调用的包装</strong>：在 CORBA 体系下，远程对象调用被视为一次“本地方法调用”，ORB 在背后接管了所有网络通信、序列化和对象定位的细节。</li>
+<li><strong>技术难点</strong>：CORBA 尽管概念先进，但实现非常复杂，尤其在网络协议、数据格式的编解码、跨平台兼容上都面临不小的挑战。另外，由于引入了庞大的中间件，部署和运维也十分困难。</li>
+</ul>
+<h3 id="3-2-2-DCOM、EJB-等后续尝试"><a href="#3-2-2-DCOM、EJB-等后续尝试" class="headerlink" title="3.2.2 DCOM、EJB 等后续尝试"></a>3.2.2 DCOM、EJB 等后续尝试</h3><p>在 CORBA 之后，微软的 DCOM（Distributed Component Object Model）也尝试在 Windows 平台上推广分布式对象模型；而 Java EE 社区则提出了 EJB（Enterprise JavaBeans）以实现企业级的分布式组件。它们在一定程度上继承了 CORBA 的思路，即将远程对象调用抽象成“本地对象方法调用”。</p>
+<p>然而，这些分布式对象模型在大规模工业应用中都遇到类似的瓶颈：</p>
+<ol>
+<li><strong>繁复的协议栈</strong>：底层通信协议实现庞大、难以扩展。</li>
+<li><strong>跨平台互操作性仍然不够理想</strong>：COM、EJB 等都有高度绑定于特定生态的倾向。</li>
+<li><strong>部署与运维复杂</strong>：不仅需要对应用自身进行管理，还要维护一整套中间件设施。</li>
+</ol>
+<p>这些挑战使得分布式对象模型未能像预期那样成为分布式计算的“主流范式”，但它们无疑对后来的 RPC 思想产生了重要影响。人们开始意识到：<strong>与其让所有开发者都背负“对象-网络”的厚重模型，是否可以有更轻量、更通用的远程调用方式？</strong> 这便催生了更明确的 RPC 思路。</p>
+<hr>
+<h2 id="3-3-RPC-的正式崛起"><a href="#3-3-RPC-的正式崛起" class="headerlink" title="3.3 RPC 的正式崛起"></a>3.3 RPC 的正式崛起</h2><h3 id="3-3-1-轻量化远程调用的理念"><a href="#3-3-1-轻量化远程调用的理念" class="headerlink" title="3.3.1 轻量化远程调用的理念"></a>3.3.1 轻量化远程调用的理念</h3><p>在分布式对象模型遭遇瓶颈的时期，另一些技术人员则开始尝试“简化远程调用”，聚焦在“过程调用”而非“对象调用”上，将远程调用过程尽量与本地函数调用保持一致，而不再去模拟复杂的对象继承、对象引用语义。</p>
+<p>RPC（Remote Procedure Call）在概念上更贴近过程式编程：<strong>“我只是想调用远程一段代码（Procedure/Function），传参并返回结果，别的都不想管。”</strong> 这一理念大大降低了学习曲线和实现成本，为后续的广泛实践奠定了基础。</p>
+<h3 id="3-3-2-SOAP-与-SOA-时代"><a href="#3-3-2-SOAP-与-SOA-时代" class="headerlink" title="3.3.2 SOAP 与 SOA 时代"></a>3.3.2 SOAP 与 SOA 时代</h3><p>在 2000 年前后，企业级应用普遍关注“面向服务”概念（SOA, Service-Oriented Architecture），希望将不同业务功能以“服务”的形式进行封装和复用。SOAP（Simple Object Access Protocol）在这一浪潮中被广泛使用。</p>
+<ul>
+<li><strong>基于 XML 的消息格式</strong>：SOAP 借助 HTTP 或其他协议进行传输，以 XML 为主要消息体。</li>
+<li><strong>WSDL 定义</strong>：通过 WSDL（Web Services Description Language）来描述服务的接口与数据结构，具备较好的自描述性。</li>
+<li><strong>通信成本大</strong>：然而，XML 带来的冗余与解析开销，使 SOAP 在高并发、高性能场景下显得力不从心。</li>
+</ul>
+<p>尽管 SOAP 也可以归类为一种 RPC 形式，但它背后更偏重的是“Web Service”与“标准化协议”的思路。在互联网业务竞争加剧、请求量级快速攀升后，人们对更高效、更灵活的远程调用方式的需求愈发迫切。</p>
+<h3 id="3-3-3-高性能-RPC-框架的出现"><a href="#3-3-3-高性能-RPC-框架的出现" class="headerlink" title="3.3.3 高性能 RPC 框架的出现"></a>3.3.3 高性能 RPC 框架的出现</h3><p>大约在同一时期，一些面向高并发场景的互联网公司选择自研或者改进现有的 RPC 框架。例如：</p>
+<ul>
+<li><strong>Hessian</strong>：通过二进制序列化，提升跨语言调用的性能。</li>
+<li><strong>Thrift</strong>（由 Facebook 开发后捐赠给 Apache）：以二进制协议和 IDL 为核心，支持多种语言绑定，为分布式调用提供统一抽象。</li>
+<li><strong>Dubbo</strong>（由阿里巴巴开源）：具备服务注册、负载均衡、监控治理等一整套服务化能力，被广泛应用于 Java 生态。</li>
+<li><strong>gRPC</strong>（由 Google 推出）：借助 HTTP/2 和 Protocol Buffers，支持多种编程语言、提供丰富的流式调用模式。</li>
+</ul>
+<p>这些高性能 RPC 框架的共同特征是：<strong>通过更加紧凑的序列化方式和高效的传输层协议，显著提升调用速度；并在框架层面内置了服务治理、负载均衡、监控与熔断等功能，让开发者能够快速搭建大规模的分布式服务集群。</strong></p>
+<hr>
+<h2 id="3-4-微服务浪潮与-RPC-的再度腾飞"><a href="#3-4-微服务浪潮与-RPC-的再度腾飞" class="headerlink" title="3.4 微服务浪潮与 RPC 的再度腾飞"></a>3.4 微服务浪潮与 RPC 的再度腾飞</h2><h3 id="3-4-1-微服务解耦与通信"><a href="#3-4-1-微服务解耦与通信" class="headerlink" title="3.4.1 微服务解耦与通信"></a>3.4.1 微服务解耦与通信</h3><p>进入 2010 年代，微服务架构开始盛行，将大型单体应用拆分成一个个“小而专”的服务，独立开发、独立部署，并相互通过网络进行通信。相比 SOA 时代，微服务在拆分粒度、部署方式、团队组织结构等方面更为敏捷和灵活。然而，随着服务数量的爆炸式增长，服务之间的调用链也变得异常庞大，如何高效地管理和调度这些分布式服务，成为新的技术难点。</p>
+<p>正是在这种背景下，RPC 再次迎来黄金发展期：</p>
+<ul>
+<li><strong>低延迟</strong>：微服务之间频繁调用，如果每次都使用基于文本的 HTTP+JSON，可能会在高负载场景下出现性能瓶颈。二进制 RPC 可以显著降低数据传输量。</li>
+<li><strong>服务治理</strong>：微服务体系下的服务发现、路由、限流熔断等，在成熟的 RPC 框架中都有完善的内置支持。</li>
+<li><strong>跨语言支持</strong>：大型互联网公司中常常混合使用 Java、Go、Python、Node.js 等多种语言进行开发，RPC 框架往往能统一接口规范并自动生成多语言 Stub。</li>
+</ul>
+<h3 id="3-4-2-容器化与云原生生态"><a href="#3-4-2-容器化与云原生生态" class="headerlink" title="3.4.2 容器化与云原生生态"></a>3.4.2 容器化与云原生生态</h3><p>随着 Docker、Kubernetes 等容器化与编排技术的普及，“云原生”成为分布式系统的新发展方向。不同微服务可以被封装到独立容器中，通过编排工具实现灵活调度与自动伸缩。此时，RPC 扮演的角色依旧不可或缺，甚至在 Service Mesh 的场景中又被“下沉”到 Sidecar Proxy（例如 Envoy）来执行更复杂的流量管理、监控和安全策略。</p>
+<ul>
+<li><strong>云端大规模部署</strong>：在云环境中，微服务数量庞大且动态变化，RPC 框架需要与服务发现、负载均衡系统更紧密地结合。</li>
+<li><strong>混合云与多语言</strong>：企业往往在混合云环境中搭建分布式系统，各种语言的服务并存，对 RPC 的跨平台兼容和扩展性要求更高。</li>
+<li><strong>Serverless 与 FaaS</strong>：在无服务器（Serverless）模型下，函数调用也可以视作某种“远程过程调用”，只不过在底层通过云厂商的 API 网关或事件触发器来实现。RPC 的概念与实现也正在被进一步改造，适应新的执行形态。</li>
+</ul>
+<hr>
+<h2 id="3-5-未来展望"><a href="#3-5-未来展望" class="headerlink" title="3.5 未来展望"></a>3.5 未来展望</h2><p>从最初的分布式对象模型到如今成熟且多元的 RPC 生态，人们对分布式通信的认识与实践早已不可同日而语。展望未来，RPC 在以下几个方面可能会持续演进：</p>
+<ol>
+<li><strong>新一代网络协议</strong><ul>
+<li>HTTP/3/QUIC 等更高效的网络协议正在崛起，一些 RPC 框架也开始尝试在这些协议上构建新的调用模型，以进一步提升吞吐量和降低时延。</li>
+</ul>
+</li>
+<li><strong>服务治理与可观测性深度融合</strong><ul>
+<li>随着微服务的规模越发庞大，可观测性（Observability）需求与日俱增。RPC 框架将与日志、指标、分布式追踪深度集成，为运维与故障排查提供更全面的数据支持。</li>
+</ul>
+</li>
+<li><strong>安全与合规</strong><ul>
+<li>在金融、医疗、政府等对数据安全和合规性有严格要求的领域，RPC 通道加密、鉴权机制、合规审计等功能将更加完善。</li>
+</ul>
+</li>
+<li><strong>边缘计算与 5G</strong><ul>
+<li>物联网及边缘计算场景下，终端设备可能需要与边缘节点或云端进行实时通信。轻量化、高可用的 RPC 框架将为这一领域提供新的技术可能。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="3-6-本章小结"><a href="#3-6-本章小结" class="headerlink" title="3.6 本章小结"></a>3.6 本章小结</h2><p>RPC 的发展历程，映射出分布式系统从简单的 Socket 通信到追求高效远程调用，再到面向微服务和云原生生态的跨越式变革。从“面向对象分布式”时代的繁重模型到如今高度灵活、可扩展的 RPC 框架，每一次技术迭代都离不开对业务需求、网络环境与运维体系的深度思考。</p>
+<p>当下，RPC 已被广泛运用于企业级应用和互联网分布式系统之中，成为服务之间调用的“中坚力量”。然而，RPC 并不意味着一劳永逸，想要让 RPC 发挥最大价值，仍需结合具体业务场景、团队技术栈和基础设施做更全面的考量。</p>
+<p>在随后的章节中，我们将转向更实务化的内容，探讨 RPC 的核心原理及各模块的设计与实现。通过对网络协议、序列化机制以及服务治理等方方面面的剖析，帮助你在设计和使用 RPC 时更加得心应手，从而真正释放分布式系统的威力。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/01/03/rpc-4/" rel="prev" title="RPC 核心原理详解——整体通信模型">
+      <i class="fa fa-chevron-left"></i> RPC 核心原理详解——整体通信模型
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/01/04/distribution-system-10/" rel="next" title="第十章 安全性设计与实施">
+      第十章 安全性设计与实施 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text"></span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-%E6%97%A9%E6%9C%9F%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E5%BD%A2%E6%80%81"><span class="nav-number">1.1.</span> <span class="nav-text">3.1 早期分布式计算形态</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-1-%E5%8D%95%E4%BD%93%E5%BA%94%E7%94%A8%E7%9A%84%E5%B1%80%E9%99%90%E6%80%A7"><span class="nav-number">1.1.1.</span> <span class="nav-text">3.1.1 单体应用的局限性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-2-%E8%BF%9C%E7%A8%8B%E8%B0%83%E7%94%A8%E9%9C%80%E6%B1%82%E7%9A%84%E8%90%8C%E8%8A%BD"><span class="nav-number">1.1.2.</span> <span class="nav-text">3.1.2 远程调用需求的萌芽</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-%E5%88%86%E5%B8%83%E5%BC%8F%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%8E%A2%E7%B4%A2"><span class="nav-number">1.2.</span> <span class="nav-text">3.2 分布式对象模型的探索</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-1-CORBA-%E4%B8%8E%E5%88%86%E5%B8%83%E5%BC%8F%E7%BB%84%E4%BB%B6"><span class="nav-number">1.2.1.</span> <span class="nav-text">3.2.1 CORBA 与分布式组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-2-DCOM%E3%80%81EJB-%E7%AD%89%E5%90%8E%E7%BB%AD%E5%B0%9D%E8%AF%95"><span class="nav-number">1.2.2.</span> <span class="nav-text">3.2.2 DCOM、EJB 等后续尝试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-RPC-%E7%9A%84%E6%AD%A3%E5%BC%8F%E5%B4%9B%E8%B5%B7"><span class="nav-number">1.3.</span> <span class="nav-text">3.3 RPC 的正式崛起</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-1-%E8%BD%BB%E9%87%8F%E5%8C%96%E8%BF%9C%E7%A8%8B%E8%B0%83%E7%94%A8%E7%9A%84%E7%90%86%E5%BF%B5"><span class="nav-number">1.3.1.</span> <span class="nav-text">3.3.1 轻量化远程调用的理念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-2-SOAP-%E4%B8%8E-SOA-%E6%97%B6%E4%BB%A3"><span class="nav-number">1.3.2.</span> <span class="nav-text">3.3.2 SOAP 与 SOA 时代</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-3-%E9%AB%98%E6%80%A7%E8%83%BD-RPC-%E6%A1%86%E6%9E%B6%E7%9A%84%E5%87%BA%E7%8E%B0"><span class="nav-number">1.3.3.</span> <span class="nav-text">3.3.3 高性能 RPC 框架的出现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%B5%AA%E6%BD%AE%E4%B8%8E-RPC-%E7%9A%84%E5%86%8D%E5%BA%A6%E8%85%BE%E9%A3%9E"><span class="nav-number">1.4.</span> <span class="nav-text">3.4 微服务浪潮与 RPC 的再度腾飞</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-1-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%A7%A3%E8%80%A6%E4%B8%8E%E9%80%9A%E4%BF%A1"><span class="nav-number">1.4.1.</span> <span class="nav-text">3.4.1 微服务解耦与通信</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-2-%E5%AE%B9%E5%99%A8%E5%8C%96%E4%B8%8E%E4%BA%91%E5%8E%9F%E7%94%9F%E7%94%9F%E6%80%81"><span class="nav-number">1.4.2.</span> <span class="nav-text">3.4.2 容器化与云原生生态</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-5-%E6%9C%AA%E6%9D%A5%E5%B1%95%E6%9C%9B"><span class="nav-number">1.5.</span> <span class="nav-text">3.5 未来展望</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-6-%E6%9C%AC%E7%AB%A0%E5%B0%8F%E7%BB%93"><span class="nav-number">1.6.</span> <span class="nav-text">3.6 本章小结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

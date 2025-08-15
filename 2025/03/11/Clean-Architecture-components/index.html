@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在《整洁架构之道》的第四部分，Robert C. Martin（Uncle Bob）探讨了组件的设计原则。这部分内容不仅仅是关于如何组织代码，而是深入到软件架构的本质：如何合理划分系统边界，使其具有可维护性、可扩展性和可演化性。 许多开发者在初学编程时，会专注于类的设计，关注 SOLID 原则，认为只要类设计得好，代码就能保持清晰和可维护。然而，在实际的大规模软件开发中，类的设计往往并不是主要瓶颈">
+<meta property="og:type" content="article">
+<meta property="og:title" content="整洁架构之道之组件">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/03/11/Clean-Architecture-components/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="在《整洁架构之道》的第四部分，Robert C. Martin（Uncle Bob）探讨了组件的设计原则。这部分内容不仅仅是关于如何组织代码，而是深入到软件架构的本质：如何合理划分系统边界，使其具有可维护性、可扩展性和可演化性。 许多开发者在初学编程时，会专注于类的设计，关注 SOLID 原则，认为只要类设计得好，代码就能保持清晰和可维护。然而，在实际的大规模软件开发中，类的设计往往并不是主要瓶颈">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-03-11T15:00:56.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.331Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta property="article:tag" content="读书笔记">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/03/11/Clean-Architecture-components/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>整洁架构之道之组件 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/03/11/Clean-Architecture-components/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          整洁架构之道之组件
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-03-11 23:00:56" itemprop="dateCreated datePublished" datetime="2025-03-11T23:00:56+08:00">2025-03-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在《整洁架构之道》的第四部分，Robert C. Martin（Uncle Bob）探讨了组件的设计原则。这部分内容不仅仅是关于如何组织代码，而是深入到软件架构的本质：<strong>如何合理划分系统边界，使其具有可维护性、可扩展性和可演化性</strong>。</p>
+<p>许多开发者在初学编程时，会专注于<strong>类的设计</strong>，关注 SOLID 原则，认为只要类设计得好，代码就能保持清晰和可维护。然而，在实际的<strong>大规模软件开发</strong>中，<strong>类的设计往往并不是主要瓶颈，真正决定系统质量的是组件的组织方式</strong>。如果组件的划分和依赖关系不合理，即便类设计得再好，也无法拯救一个混乱的架构。</p>
+<span id="more"></span>
+
+
+
+<h3 id="为什么组件比类更重要？"><a href="#为什么组件比类更重要？" class="headerlink" title="为什么组件比类更重要？"></a><strong>为什么组件比类更重要？</strong></h3><p>一个系统的类可以设计得非常优雅，但如果这些类组织在一个<strong>庞大、耦合紧密的单体应用</strong>中，随着时间的推移，系统的复杂度会不断增长，开发效率也会不断下降。而一个<strong>架构良好的系统，能够保证即使规模增长，维护成本依然保持在可控范围内</strong>。这正是<strong>组件设计的核心目标</strong>。</p>
+<p><strong>架构并不是关于一开始如何设计系统，而是关于如何让系统在未来仍然可以轻松修改、扩展和演化。</strong></p>
+<hr>
+<h4 id="组件的本质：边界的定义"><a href="#组件的本质：边界的定义" class="headerlink" title="组件的本质：边界的定义"></a><strong>组件的本质：边界的定义</strong></h4><h5 id="什么是组件？"><a href="#什么是组件？" class="headerlink" title="什么是组件？"></a>什么是组件？</h5><p>组件是软件的最小部署单元。它不是类，而是可以独立发布、独立维护的代码集合。在不同的环境下，组件可以是：</p>
+<ul>
+<li><strong>单体应用中的模块</strong>（如 Java 的 <code>.jar</code>、.NET 的 <code>.dll</code>、Python 的 <code>package</code>）。</li>
+<li><strong>插件化架构中的独立插件</strong>（如 Chrome 扩展、Photoshop 插件）。</li>
+<li><strong>微服务架构中的独立服务</strong>（如一个独立的 REST API 或一个 Kubernetes Pod）。</li>
+</ul>
+<p> 很多开发者在划分组件时，会用“功能模块”作为划分依据，例如“订单模块”“用户模块”“支付模块”。但<strong>真正的组件边界，应该基于演化的需要，而不是功能的分类</strong>。一个合理的组件应该：</p>
+<ul>
+<li><strong>能够独立演化</strong>，不受其他组件的影响。</li>
+<li><strong>有明确的边界</strong>，保证外部只能通过特定接口访问。</li>
+<li><strong>遵循稳定性原则</strong>，核心组件应该保持稳定，变化快的部分应该隔离。</li>
+</ul>
+<p> 划分组件的关键在于识别<strong>变化的边界</strong>。真正的软件架构，并不是设计一套静态的规则，而是确保系统在未来可以不断调整，而不破坏已有的功能。组件的边界就是架构的支撑点，决定了系统的可变性。</p>
+<h4 id="组件的内聚性（Cohesion）：如何保持组件的纯粹"><a href="#组件的内聚性（Cohesion）：如何保持组件的纯粹" class="headerlink" title="组件的内聚性（Cohesion）：如何保持组件的纯粹"></a><strong>组件的内聚性（Cohesion）：如何保持组件的纯粹</strong></h4><p>组件的内聚性决定了一个组件内部的代码是否属于同一个演化方向。如果一个组件的代码经常因不同的原因发生变化，那这个组件的设计就是错误的。</p>
+<p>作者提出了<strong>三个关于组件内聚性的原则</strong>：</p>
+<h5 id="复用-发布等价原则（REP）"><a href="#复用-发布等价原则（REP）" class="headerlink" title="复用/发布等价原则（REP）"></a><strong>复用/发布等价原则（REP）</strong></h5><p>复用的边界应该等于发布的边界。如果某个组件是可复用的，那它应该可以<strong>独立发布</strong>，不需要修改其他组件。组件的维护成本与它的发布粒度直接相关，发布过于频繁会增加维护成本。<br>比如Spring 框架遵循 REP 原则，它的不同功能（如 Spring Boot、Spring Security、Spring Data）是<strong>独立发布的</strong>，开发者可以只使用某个特定模块，而不必加载整个框架。</p>
+<hr>
+<h5 id="共同闭包原则（CCP）"><a href="#共同闭包原则（CCP）" class="headerlink" title="共同闭包原则（CCP）"></a><strong>共同闭包原则（CCP）</strong></h5><p>组件内的所有类应该因为相同的原因而发生变化。一个组件的所有代码应该是紧密相关的，它们应该同时变化，或者不变。如果一个组件内的部分代码频繁变化，而其他部分却长期稳定，那么它可能需要拆分。</p>
+<p> 比如在电商系统中，订单管理和库存管理可能是两个不同的功能，但如果它们被放在同一个组件里，每次修改订单逻辑时都要重新部署库存模块，就会违反 CCP。</p>
+<h5 id="共同复用原则（CRP）"><a href="#共同复用原则（CRP）" class="headerlink" title="共同复用原则（CRP）"></a><strong>共同复用原则（CRP）</strong></h5><p>组件内部的所有类应该被一起复用。如果某个组件中的一部分代码经常被用到，而其他部分却很少被用到，那这个组件的划分就不合理。组件应该包含那些总是一起被使用的类，避免“过度拆分”导致的复杂度上升。</p>
+<p>比如 前端 UI 组件库（如 Ant Design、Material UI）中的组件通常是成组被复用的，比如 <code>Button</code> 和 <code>Icon</code> 常常一起使用，而 <code>Table</code> 组件通常与 <code>Pagination</code> 一起出现。</p>
+<h4 id="组件的耦合性（Coupling）：如何控制依赖"><a href="#组件的耦合性（Coupling）：如何控制依赖" class="headerlink" title="组件的耦合性（Coupling）：如何控制依赖"></a><strong>组件的耦合性（Coupling）：如何控制依赖</strong></h4><p>组件的耦合性决定了它与其他组件之间的依赖关系。<strong>组件之间的关系应该清晰、稳定、无循环。</strong></p>
+<h5 id="无环依赖原则（ADP）"><a href="#无环依赖原则（ADP）" class="headerlink" title="无环依赖原则（ADP）"></a><strong>无环依赖原则（ADP）</strong></h5><p>组件之间的依赖关系不应该形成循环。如果 A 依赖 B，B 依赖 C，而 C 又依赖 A，就会导致<strong>循环依赖</strong>，使得系统难以拆分和维护。</p>
+<p>比如许多微服务架构中的“依赖地狱”就是因为违反了 ADP。例如，前端 A 调用后端 B，B 又调用 C，而 C 又调用 A，最终形成死循环。</p>
+<p>如果是微服务的架构的，基本上会遇到这样的问题。</p>
+<h5 id="稳定依赖原则（SDP）"><a href="#稳定依赖原则（SDP）" class="headerlink" title="稳定依赖原则（SDP）"></a>稳定依赖原则（SDP）</h5><p>组件应该依赖比自己更稳定的组件。变化频繁的组件不应该被其他组件直接依赖，而应该依赖稳定的抽象层。</p>
+<p>比如 在分层架构中，业务逻辑层应该依赖于数据访问层的接口，而不是直接依赖具体数据库实现。这样即使数据库换成 NoSQL，也不会影响上层代码。</p>
+<h5 id="稳定抽象原则（SAP）"><a href="#稳定抽象原则（SAP）" class="headerlink" title="稳定抽象原则（SAP）"></a>稳定抽象原则（SAP）</h5><p>组件越稳定，就应该越抽象。稳定的组件应该尽量提供抽象接口，而不是暴露具体实现。</p>
+<h4 id="组件设计的最终目标"><a href="#组件设计的最终目标" class="headerlink" title="组件设计的最终目标"></a>组件设计的最终目标</h4><p>组件设计的核心目的是<strong>构建一个可以持续演化的架构</strong>。一个优秀的架构应该具备以下特点：</p>
+<ol>
+<li><strong>组件可以独立发布、独立复用，不会形成单体架构。</strong></li>
+<li><strong>组件之间的依赖是清晰的，没有循环依赖。</strong></li>
+<li><strong>核心组件是稳定的，变化快的部分被隔离。</strong></li>
+</ol>
+<p>在实际项目中，我们应该不断思考：</p>
+<ul>
+<li>这个组件是否可以独立升级，而不影响其他组件？</li>
+<li>组件之间的依赖关系是否清晰，是否有循环依赖？</li>
+<li>组件是否真正符合内聚性原则，或者应该被拆分？</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+              <a href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" rel="tag"># 读书笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/03/09/system-think-note/" rel="prev" title="11堂极简系统思维课笔记">
+      <i class="fa fa-chevron-left"></i> 11堂极简系统思维课笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/03/12/mcp/" rel="next" title="MCP介绍">
+      MCP介绍 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%BB%84%E4%BB%B6%E6%AF%94%E7%B1%BB%E6%9B%B4%E9%87%8D%E8%A6%81%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">为什么组件比类更重要？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6%E7%9A%84%E6%9C%AC%E8%B4%A8%EF%BC%9A%E8%BE%B9%E7%95%8C%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">1.1.</span> <span class="nav-text">组件的本质：边界的定义</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E7%BB%84%E4%BB%B6%EF%BC%9F"><span class="nav-number">1.1.1.</span> <span class="nav-text">什么是组件？</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6%E7%9A%84%E5%86%85%E8%81%9A%E6%80%A7%EF%BC%88Cohesion%EF%BC%89%EF%BC%9A%E5%A6%82%E4%BD%95%E4%BF%9D%E6%8C%81%E7%BB%84%E4%BB%B6%E7%9A%84%E7%BA%AF%E7%B2%B9"><span class="nav-number">1.2.</span> <span class="nav-text">组件的内聚性（Cohesion）：如何保持组件的纯粹</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A4%8D%E7%94%A8-%E5%8F%91%E5%B8%83%E7%AD%89%E4%BB%B7%E5%8E%9F%E5%88%99%EF%BC%88REP%EF%BC%89"><span class="nav-number">1.2.1.</span> <span class="nav-text">复用&#x2F;发布等价原则（REP）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B1%E5%90%8C%E9%97%AD%E5%8C%85%E5%8E%9F%E5%88%99%EF%BC%88CCP%EF%BC%89"><span class="nav-number">1.2.2.</span> <span class="nav-text">共同闭包原则（CCP）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B1%E5%90%8C%E5%A4%8D%E7%94%A8%E5%8E%9F%E5%88%99%EF%BC%88CRP%EF%BC%89"><span class="nav-number">1.2.3.</span> <span class="nav-text">共同复用原则（CRP）</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6%E7%9A%84%E8%80%A6%E5%90%88%E6%80%A7%EF%BC%88Coupling%EF%BC%89%EF%BC%9A%E5%A6%82%E4%BD%95%E6%8E%A7%E5%88%B6%E4%BE%9D%E8%B5%96"><span class="nav-number">1.3.</span> <span class="nav-text">组件的耦合性（Coupling）：如何控制依赖</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%97%A0%E7%8E%AF%E4%BE%9D%E8%B5%96%E5%8E%9F%E5%88%99%EF%BC%88ADP%EF%BC%89"><span class="nav-number">1.3.1.</span> <span class="nav-text">无环依赖原则（ADP）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%A8%B3%E5%AE%9A%E4%BE%9D%E8%B5%96%E5%8E%9F%E5%88%99%EF%BC%88SDP%EF%BC%89"><span class="nav-number">1.3.2.</span> <span class="nav-text">稳定依赖原则（SDP）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%A8%B3%E5%AE%9A%E6%8A%BD%E8%B1%A1%E5%8E%9F%E5%88%99%EF%BC%88SAP%EF%BC%89"><span class="nav-number">1.3.3.</span> <span class="nav-text">稳定抽象原则（SAP）</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6%E8%AE%BE%E8%AE%A1%E7%9A%84%E6%9C%80%E7%BB%88%E7%9B%AE%E6%A0%87"><span class="nav-number">1.4.</span> <span class="nav-text">组件设计的最终目标</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

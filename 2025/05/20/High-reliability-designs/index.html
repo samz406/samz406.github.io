@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="可靠性设计方法论">
+<meta property="og:type" content="article">
+<meta property="og:title" content="系统高可靠设计方法论">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/05/20/High-reliability-designs/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="可靠性设计方法论">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-05-20T11:35:00.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.337Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="架构">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/05/20/High-reliability-designs/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>系统高可靠设计方法论 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/05/20/High-reliability-designs/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          系统高可靠设计方法论
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-05-20 19:35:00" itemprop="dateCreated datePublished" datetime="2025-05-20T19:35:00+08:00">2025-05-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">架构设计</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>可靠性设计方法论</p>
+<span id="more"></span>
+
+
+<h2 id="1-可靠性定义与指标"><a href="#1-可靠性定义与指标" class="headerlink" title="1. 可靠性定义与指标"></a>1. 可靠性定义与指标</h2><ul>
+<li><p><strong>可靠性（Reliability）</strong>：系统在给定时间段内，连续无故障运行的能力。</p>
+</li>
+<li><p><strong>关键指标</strong>：</p>
+<ul>
+<li><strong>MTBF</strong>（Mean Time Between Failures）：平均故障间隔——衡量系统稳定性。</li>
+<li><strong>MTTR</strong>（Mean Time To Repair）：平均故障修复时间——衡量恢复效率。</li>
+<li><strong>FIT</strong>（Failure In Time）：百万小时故障数——硬件常用指标。</li>
+<li><strong>可用性（Availability）</strong>：通常与可靠性指标联动，A ≈ MTBF／(MTBF + MTTR)。</li>
+</ul>
+</li>
+</ul>
+<h2 id="2-核心设计原则"><a href="#2-核心设计原则" class="headerlink" title="2. 核心设计原则"></a>2. 核心设计原则</h2><ol>
+<li><p><strong>主动探测（Proactive Detection）</strong></p>
+<ul>
+<li><strong>心跳/健康检查</strong>：定期校验服务状态，尽早发现故障。</li>
+<li><strong>一致性验证</strong>：对关键数据周期性校验（校验和、CRC、对账）。</li>
+</ul>
+</li>
+<li><p><strong>快速隔离（Failure Containment）</strong></p>
+<ul>
+<li><strong>断路器（Circuit Breaker）</strong>：对下游异常快速短路，防止级联失效。</li>
+<li><strong>舱壁模式（Bulkhead）</strong>：资源按业务线、租户或功能划隔，局部故障不扩散。</li>
+</ul>
+</li>
+<li><p><strong>冗余与多样性（Redundancy &amp; Diversity）</strong></p>
+<ul>
+<li><strong>多副本</strong>：跨机房／可用区、多活或主备；</li>
+<li><strong>多实现</strong>：同一功能可选多种实现（比如读缓存和读数据库两条路径）。</li>
+</ul>
+</li>
+<li><p><strong>幂等与可重放（Idempotence &amp; Replay）</strong></p>
+<ul>
+<li>设计接口和消息，使得重复执行对业务状态无副作用；</li>
+<li>增量日志与补偿队列，遇故障可重放或补偿。</li>
+</ul>
+</li>
+<li><p><strong>自愈与自动修复（Self-Healing）</strong></p>
+<ul>
+<li><strong>自动故障转移</strong>：主备切换、流量重路由；</li>
+<li><strong>自动重启与回滚</strong>：Docker/K8s 探针挂掉自动重启；新版本健康度不达标自动回滚。</li>
+</ul>
+</li>
+<li><p><strong>可观测性（Observability）</strong></p>
+<ul>
+<li><strong>Metrics/Logs/Tracing</strong>：全面覆盖故障前兆；</li>
+<li><strong>行为审计</strong>：对配置变更、运维操作全链路记录。</li>
+</ul>
+</li>
+</ol>
+<h2 id="3-关键架构模式"><a href="#3-关键架构模式" class="headerlink" title="3. 关键架构模式"></a>3. 关键架构模式</h2><table>
+<thead>
+<tr>
+<th>模式类别</th>
+<th>模式名称</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>隔离与容错</strong></td>
+<td>舱壁（Bulkhead）</td>
+<td>按资源维度隔离，防止流量/故障“串联”蔓延</td>
+</tr>
+<tr>
+<td></td>
+<td>隔离级联（Bulkhead）</td>
+<td>进程、线程、连接池、消息队列各层级都可独立隔离</td>
+</tr>
+<tr>
+<td><strong>冗余复制</strong></td>
+<td>多活 + 主备</td>
+<td>主动-主动或主动-被动部署，故障秒级切换</td>
+</tr>
+<tr>
+<td></td>
+<td>地域冗余（Geo-Redundant）</td>
+<td>跨区域/跨云部署，防范数据中心级别故障</td>
+</tr>
+<tr>
+<td><strong>容错算法</strong></td>
+<td>熔断器（Circuit Breaker）</td>
+<td>下游稳定性低时快速失败与限流</td>
+</tr>
+<tr>
+<td></td>
+<td>重试机制（Retry）</td>
+<td>指定幂等或有补偿，带指数退避</td>
+</tr>
+<tr>
+<td><strong>数据一致性</strong></td>
+<td>补偿事务（Saga）</td>
+<td>拆分长事务为可补偿的本地事务链</td>
+</tr>
+<tr>
+<td></td>
+<td>分布式共识（Raft/Paxos）</td>
+<td>在多副本间达成强一致性，选主与日志复制</td>
+</tr>
+<tr>
+<td><strong>延迟容忍</strong></td>
+<td>Hedged Requests</td>
+<td>对高延迟调用同时发起多份请求，取最早返回</td>
+</tr>
+<tr>
+<td><strong>故障注入</strong></td>
+<td>混沌工程（Chaos）</td>
+<td>定期注入故障验证自愈与隔离效果</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="4-实现细节与流程"><a href="#4-实现细节与流程" class="headerlink" title="4. 实现细节与流程"></a>4. 实现细节与流程</h2><ol>
+<li><p><strong>健康检查策略</strong></p>
+<ul>
+<li><strong>多级探测</strong>：网络层（TCP/TCP半开）、应用层（HTTP 心跳、业务自检）</li>
+<li><strong>阈值与窗口</strong>：避免抖动，设置连续 N 次失败才下线</li>
+</ul>
+</li>
+<li><p><strong>自动故障转移</strong></p>
+<ul>
+<li><strong>数据层</strong>：主备切换脚本+监控驱动，RDS/Etcd/Zookeeper 等组件自带；</li>
+<li><strong>服务层</strong>：Kubernetes Liveness/Readiness 探针；云厂商 SLB 多活</li>
+</ul>
+</li>
+<li><p><strong>数据补偿与重放</strong></p>
+<ul>
+<li><strong>消息落盘</strong>：业务消息先写本地或分布式日志（Kafka），消费侧可重放；</li>
+<li><strong>补偿队列</strong>：定时扫描处理失败事务，结合幂等保证安全。</li>
+</ul>
+</li>
+<li><p><strong>演练与验证</strong></p>
+<ul>
+<li><strong>灾难演练</strong>：跨机房断链、节点随机宕机；</li>
+<li><strong>故障演习</strong>：定期 Chaos Monkey、网络抖动、延迟注入；</li>
+<li><strong>回滚演练</strong>：发布回滚流程自动化，验证新旧版本切换。</li>
+</ul>
+</li>
+<li><p><strong>运维流程</strong></p>
+<ul>
+<li><strong>Post-Mortem</strong>：每次超 MTTR 事件都要书面复盘，明确 Root Cause、改进措施和负责人；</li>
+<li><strong>容量管理</strong>：结合业务增长预测，留足冗余资源；</li>
+<li><strong>变更管理</strong>：蓝绿发布 / Canary 策略 + 自动化审核。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="5-持续保障与演进"><a href="#5-持续保障与演进" class="headerlink" title="5. 持续保障与演进"></a>5. 持续保障与演进</h2><ol>
+<li><p><strong>实时可视化大屏</strong></p>
+<ul>
+<li>MTBF/MTTR、故障次数、恢复时间分布；</li>
+<li>SLO 达标率、Error Budget 消耗。</li>
+</ul>
+</li>
+<li><p><strong>指标驱动改进</strong></p>
+<ul>
+<li>定期分析故障模式（网络、硬件、代码、运维）</li>
+<li>优先解决高频/高影响的失效场景</li>
+</ul>
+</li>
+<li><p><strong>组织与文化</strong></p>
+<ul>
+<li><strong>可靠性负责人（RTO/C）</strong>：专人负责可靠性 OKR</li>
+<li><strong>“拥抱故障”心态</strong>：故障即学习机会，复盘改进要公开透明</li>
+<li><strong>知识沉淀</strong>：可靠性实践、Runbook、应急演练文档定期更新</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>高可靠设计不仅是技术层的<strong>模式与冗余</strong>，更是流程与文化的<strong>自觉践行</strong>。通过<strong>主动探测、快速隔离、冗余多活、幂等补偿、自愈恢复</strong>等一系列手段，并结合<strong>演练与复盘、数据驱动改进、组织保障</strong>，才能构建并维持真正的高可靠系统。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/05/20/Design-of-k8s/" rel="prev" title="Kubernetes 系统架构与设计原理">
+      <i class="fa fa-chevron-left"></i> Kubernetes 系统架构与设计原理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/05/24/Product-design-principle/" rel="next" title="产品设计法则：让 AI 在场景中“无感”助力用户">
+      产品设计法则：让 AI 在场景中“无感”助力用户 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%8F%AF%E9%9D%A0%E6%80%A7%E5%AE%9A%E4%B9%89%E4%B8%8E%E6%8C%87%E6%A0%87"><span class="nav-number">1.</span> <span class="nav-text">1. 可靠性定义与指标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E6%A0%B8%E5%BF%83%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99"><span class="nav-number">2.</span> <span class="nav-text">2. 核心设计原则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%85%B3%E9%94%AE%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">3. 关键架构模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82%E4%B8%8E%E6%B5%81%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">4. 实现细节与流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E6%8C%81%E7%BB%AD%E4%BF%9D%E9%9A%9C%E4%B8%8E%E6%BC%94%E8%BF%9B"><span class="nav-number">5.</span> <span class="nav-text">5. 持续保障与演进</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">5.1.</span> <span class="nav-text">小结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

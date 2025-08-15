@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在很多技术团队中，总有两类被广泛存在却被低估的工作：一是重复琐碎的 daily 支持类工作，一是模糊抽象的复杂性问题。很多技术人误以为这两类工作缺乏挑战性，无法体现能力。殊不知，这正是锻炼认知层级与组织价值感知能力的最佳场域。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="技术人的思维跃迁：从应对琐碎到驾驭复杂">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/06/15/Leap-in-thinking/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="在很多技术团队中，总有两类被广泛存在却被低估的工作：一是重复琐碎的 daily 支持类工作，一是模糊抽象的复杂性问题。很多技术人误以为这两类工作缺乏挑战性，无法体现能力。殊不知，这正是锻炼认知层级与组织价值感知能力的最佳场域。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-06-15T15:14:16.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.338Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="架构">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/06/15/Leap-in-thinking/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>技术人的思维跃迁：从应对琐碎到驾驭复杂 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/06/15/Leap-in-thinking/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          技术人的思维跃迁：从应对琐碎到驾驭复杂
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-06-15 23:14:16" itemprop="dateCreated datePublished" datetime="2025-06-15T23:14:16+08:00">2025-06-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在很多技术团队中，总有两类被广泛存在却被低估的工作：一是<strong>重复琐碎的 daily 支持类工作</strong>，一是<strong>模糊抽象的复杂性问题</strong>。很多技术人误以为这两类工作缺乏挑战性，无法体现能力。殊不知，这正是<strong>锻炼认知层级与组织价值感知能力的最佳场域</strong>。</p>
+<span id="more"></span>
+
+<h2 id="一、重复琐碎类工作：从事务响应到系统提效"><a href="#一、重复琐碎类工作：从事务响应到系统提效" class="headerlink" title="一、重复琐碎类工作：从事务响应到系统提效"></a>一、重复琐碎类工作：从事务响应到系统提效</h2><p>这类工作往往被认为“没有技术含量”，比如：</p>
+<blockquote>
+<p>“有人来问你系统在联调环境报错的原因是什么。”</p>
+</blockquote>
+<p>但真正有成长的人，会通过这类工作训练出<strong>系统效率优化的视角</strong>，并逐步实现“个体价值的复利化”。</p>
+<h3 id="思维阶梯"><a href="#思维阶梯" class="headerlink" title="思维阶梯"></a>思维阶梯</h3><table>
+<thead>
+<tr>
+<th>层级</th>
+<th>做法</th>
+<th>思维模式</th>
+<th>本质</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>1级：应急响应</strong></td>
+<td>回答每一个问题，止于事件本身</td>
+<td>做事思维</td>
+<td>职责导向，线性操作</td>
+</tr>
+<tr>
+<td><strong>2级：知识沉淀</strong></td>
+<td>将问题转化为文档或FAQ，供团队查阅</td>
+<td>归纳思维</td>
+<td>内部提效，节省重复劳动</td>
+</tr>
+<tr>
+<td><strong>3级：工具自动化</strong></td>
+<td>抽象为可复用的脚本或服务，实现他人自助</td>
+<td>抽象+自动化</td>
+<td>系统性解耦与降本</td>
+</tr>
+<tr>
+<td><strong>4级：根因解决</strong></td>
+<td>找出反复出现问题背后的架构或业务缺陷，从源头优化</td>
+<td>本质洞察+业务建模</td>
+<td>提效背后，是架构与产品的合理性重构</td>
+</tr>
+</tbody></table>
+<h3 id="启示"><a href="#启示" class="headerlink" title="启示"></a>启示</h3><p>哪怕是“打杂”，你也可以：</p>
+<ul>
+<li>看见重复 → 提炼模式；</li>
+<li>看见高频 → 判断价值；</li>
+<li>看见效率瓶颈 → 设计机制或产品化方案。</li>
+</ul>
+<h2 id="二、抽象复杂类问题：从感知混乱到引领演化"><a href="#二、抽象复杂类问题：从感知混乱到引领演化" class="headerlink" title="二、抽象复杂类问题：从感知混乱到引领演化"></a>二、抽象复杂类问题：从感知混乱到引领演化</h2><p>抽象问题往往没有明确目标，也没有现成方案，如：</p>
+<blockquote>
+<p>“系统联调效率低，全是抱怨，但没人能说清到底哪出了问题。”</p>
+</blockquote>
+<p>这类问题恰恰是架构师或团队负责人<strong>思维成熟度的试金石</strong>。</p>
+<h3 id="思维阶梯-1"><a href="#思维阶梯-1" class="headerlink" title="思维阶梯"></a>思维阶梯</h3><table>
+<thead>
+<tr>
+<th>层级</th>
+<th>做法</th>
+<th>思维模式</th>
+<th>本质</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>1级：碎片处理</strong></td>
+<td>响应抱怨，一事一议地解决</td>
+<td>事务处理</td>
+<td>关注点局部，低效重复</td>
+</tr>
+<tr>
+<td><strong>2级：问题归类</strong></td>
+<td>建立问题清单，归类分工跟进</td>
+<td>项目管理</td>
+<td>可控性提升，但仍依赖人力堆叠</td>
+</tr>
+<tr>
+<td><strong>3级：系统抽象</strong></td>
+<td>从现象抽象本质，如联调慢是因为“接口耦合高+链路不可观测”</td>
+<td>结构思维+价值推演</td>
+<td>建立提效机制，结构性治理</td>
+</tr>
+<tr>
+<td><strong>4级：组织赋能</strong></td>
+<td>思考该问题对组织发展、年度目标的影响，将提效转为“组织能力建设”</td>
+<td>战略思维</td>
+<td>架构/流程改革成为组织能力的演化过程</td>
+</tr>
+</tbody></table>
+<h2 id="三、背后的思维跃迁地图"><a href="#三、背后的思维跃迁地图" class="headerlink" title="三、背后的思维跃迁地图"></a>三、背后的思维跃迁地图</h2><table>
+<thead>
+<tr>
+<th>类别</th>
+<th>一阶</th>
+<th>二阶</th>
+<th>三阶</th>
+<th>四阶</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>琐碎类问题</strong></td>
+<td>回应问题</td>
+<td>文档沉淀</td>
+<td>工具固化</td>
+<td>架构优化</td>
+</tr>
+<tr>
+<td><strong>复杂类问题</strong></td>
+<td>零散响应</td>
+<td>清单管理</td>
+<td>问题抽象</td>
+<td>组织战略联动</td>
+</tr>
+<tr>
+<td><strong>对应思维</strong></td>
+<td>执行 → 梳理 → 系统 → 战略</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>能力定位</strong></td>
+<td>初级开发者 → 技术骨干 → 架构师 → 技术领导者</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h2 id="四、训练建议：将“工作”变为“训练场”"><a href="#四、训练建议：将“工作”变为“训练场”" class="headerlink" title="四、训练建议：将“工作”变为“训练场”"></a>四、训练建议：将“工作”变为“训练场”</h2><ol>
+<li><p><strong>记录你做的每一次“重复处理”</strong>，总结是否能沉淀为机制；</p>
+</li>
+<li><p><strong>面对模糊任务时，先建一张问题地图</strong>，训练你的归类与抽象力；</p>
+</li>
+<li><p><strong>持续问三个问题</strong>：</p>
+<ul>
+<li>这个问题出现的根因是什么？</li>
+<li>有没有更通用的解决方式？</li>
+<li>有没有可能从根上不让它发生？</li>
+</ul>
+</li>
+</ol>
+<h2 id="五、结语：思维的价值，不在任务难度，而在你选择的处理方式"><a href="#五、结语：思维的价值，不在任务难度，而在你选择的处理方式" class="headerlink" title="五、结语：思维的价值，不在任务难度，而在你选择的处理方式"></a>五、结语：思维的价值，不在任务难度，而在你选择的处理方式</h2><p>真正拉开人与人差距的，从不是任务本身，而是<strong>面对同一任务时的视角与解法</strong>。一个优秀的技术人，永远不只是“写代码的人”，而是那个<strong>把问题处理成资产，把经验转化为机制，把混乱变成秩序</strong>的人。</p>
+<p><strong>重复的琐碎，是低成本训练思维的磨刀石；模糊的复杂，是系统认知升级的演练场。</strong></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/06/12/index-intro/" rel="prev" title="常见索引实现方案的全面分析">
+      <i class="fa fa-chevron-left"></i> 常见索引实现方案的全面分析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/06/17/web3-intro/" rel="next" title="web3发展报告">
+      web3发展报告 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E9%87%8D%E5%A4%8D%E7%90%90%E7%A2%8E%E7%B1%BB%E5%B7%A5%E4%BD%9C%EF%BC%9A%E4%BB%8E%E4%BA%8B%E5%8A%A1%E5%93%8D%E5%BA%94%E5%88%B0%E7%B3%BB%E7%BB%9F%E6%8F%90%E6%95%88"><span class="nav-number">1.</span> <span class="nav-text">一、重复琐碎类工作：从事务响应到系统提效</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%9D%E7%BB%B4%E9%98%B6%E6%A2%AF"><span class="nav-number">1.1.</span> <span class="nav-text">思维阶梯</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E7%A4%BA"><span class="nav-number">1.2.</span> <span class="nav-text">启示</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%8A%BD%E8%B1%A1%E5%A4%8D%E6%9D%82%E7%B1%BB%E9%97%AE%E9%A2%98%EF%BC%9A%E4%BB%8E%E6%84%9F%E7%9F%A5%E6%B7%B7%E4%B9%B1%E5%88%B0%E5%BC%95%E9%A2%86%E6%BC%94%E5%8C%96"><span class="nav-number">2.</span> <span class="nav-text">二、抽象复杂类问题：从感知混乱到引领演化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%9D%E7%BB%B4%E9%98%B6%E6%A2%AF-1"><span class="nav-number">2.1.</span> <span class="nav-text">思维阶梯</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E8%83%8C%E5%90%8E%E7%9A%84%E6%80%9D%E7%BB%B4%E8%B7%83%E8%BF%81%E5%9C%B0%E5%9B%BE"><span class="nav-number">3.</span> <span class="nav-text">三、背后的思维跃迁地图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E8%AE%AD%E7%BB%83%E5%BB%BA%E8%AE%AE%EF%BC%9A%E5%B0%86%E2%80%9C%E5%B7%A5%E4%BD%9C%E2%80%9D%E5%8F%98%E4%B8%BA%E2%80%9C%E8%AE%AD%E7%BB%83%E5%9C%BA%E2%80%9D"><span class="nav-number">4.</span> <span class="nav-text">四、训练建议：将“工作”变为“训练场”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E7%BB%93%E8%AF%AD%EF%BC%9A%E6%80%9D%E7%BB%B4%E7%9A%84%E4%BB%B7%E5%80%BC%EF%BC%8C%E4%B8%8D%E5%9C%A8%E4%BB%BB%E5%8A%A1%E9%9A%BE%E5%BA%A6%EF%BC%8C%E8%80%8C%E5%9C%A8%E4%BD%A0%E9%80%89%E6%8B%A9%E7%9A%84%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F"><span class="nav-number">5.</span> <span class="nav-text">五、结语：思维的价值，不在任务难度，而在你选择的处理方式</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

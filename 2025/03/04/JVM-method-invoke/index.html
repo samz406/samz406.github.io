@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="方法调用是程序运行中最常见、最核心的操作之一。无论是简单的main方法调用，还是复杂的框架内部反射调用，对JVM而言，都需要处理好不同类型的方法调用指令、维护好调用栈、处理动态链接等诸多细节，以保证程序的正常执行">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM方法调用">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/03/04/JVM-method-invoke/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="方法调用是程序运行中最常见、最核心的操作之一。无论是简单的main方法调用，还是复杂的框架内部反射调用，对JVM而言，都需要处理好不同类型的方法调用指令、维护好调用栈、处理动态链接等诸多细节，以保证程序的正常执行">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-03-04T12:33:26.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.338Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/03/04/JVM-method-invoke/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>JVM方法调用 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/03/04/JVM-method-invoke/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JVM方法调用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-03-04 20:33:26" itemprop="dateCreated datePublished" datetime="2025-03-04T20:33:26+08:00">2025-03-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>方法调用是程序运行中最常见、最核心的操作之一。无论是简单的<code>main</code>方法调用，还是复杂的框架内部反射调用，对JVM而言，都需要处理好不同类型的方法调用指令、维护好调用栈、处理动态链接等诸多细节，以保证程序的正常执行</p>
+<span id="more"></span>
+
+<p>JVM的核心目标之一就是实现“一次编写，到处运行（Write Once, Run Anywhere）”的理念。Java代码在编译阶段被编译器（如 <code>javac</code>）转为与平台无关的字节码（<code>*.class</code> 文件），随后由JVM在不同平台上加载和执行。JVM是一种基于栈的虚拟机，它使用栈帧（Stack Frame）、操作数栈（Operand Stack）和局部变量表（Local Variable Table）来执行字节码指令。</p>
+<h3 id="类加载：方法调用的前奏"><a href="#类加载：方法调用的前奏" class="headerlink" title="类加载：方法调用的前奏"></a>类加载：方法调用的前奏</h3><h5 id="类的生命周期"><a href="#类的生命周期" class="headerlink" title="类的生命周期"></a>类的生命周期</h5><p>JVM的方法调用始于类加载阶段。当一个类被加载时，JVM会经历加载、验证、准备、解析和初始化五个阶段。其中，解析阶段会将常量池中的符号引用转换为直接引用，为方法调用做好准备。</p>
+<h5 id="方法表"><a href="#方法表" class="headerlink" title="方法表"></a>方法表</h5><p>每个类在JVM中都有一个方法表。比如<code>Object</code>类的方法表包含<code>hashCode()</code>、<code>equals()</code>等方法的直接地址。子类会继承父类的方法表，并在需要时覆盖或扩展。</p>
+<h3 id="方法调用的解析与分派"><a href="#方法调用的解析与分派" class="headerlink" title="方法调用的解析与分派"></a>方法调用的解析与分派</h3><h5 id="静态绑定与动态绑定"><a href="#静态绑定与动态绑定" class="headerlink" title="静态绑定与动态绑定"></a>静态绑定与动态绑定</h5><p>JVM中有两种绑定方式：</p>
+<ul>
+<li><strong>静态绑定</strong> ：编译期确定（如<code>private</code>、<code>static</code>方法）</li>
+<li><strong>动态绑定</strong> ：运行期确定（如虚方法）</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public class Animal &#123;</span><br><span class="line">    public void eat() &#123; System.out.println(&quot;Animal eat&quot;); &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public class Cat extends Animal &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public void eat() &#123; System.out.println(&quot;Cat eat&quot;); &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当调用<code>animal.eat()</code>时，实际执行的方法取决于运行时对象的类型，这就是动态绑定。</p>
+<h5 id="分派机制"><a href="#分派机制" class="headerlink" title="分派机制"></a>分派机制</h5><h6 id="静态分派"><a href="#静态分派" class="headerlink" title="静态分派"></a>静态分派</h6><p>发生在编译期，根据静态类型确定方法版本。典型例子是方法重载：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public void test(Animal a) &#123; ... &#125;</span><br><span class="line">public void test(Cat c) &#123; ... &#125;</span><br><span class="line"></span><br><span class="line">Animal cat = new Cat();</span><br><span class="line">// 调用test(Animal)</span><br><span class="line">test(cat); </span><br></pre></td></tr></table></figure>
+
+<h6 id="动态分派"><a href="#动态分派" class="headerlink" title="动态分派"></a>动态分派</h6><p>发生在运行期，根据实际类型确定方法版本。典型例子是方法重写：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Animal  animal= new Cat();</span><br><span class="line">// 调用Cat.eat()</span><br><span class="line">animal.eat(); </span><br></pre></td></tr></table></figure>
+
+<h3 id="字节码指令"><a href="#字节码指令" class="headerlink" title="字节码指令"></a>字节码指令</h3><h4 id="JVM运行时数据区"><a href="#JVM运行时数据区" class="headerlink" title="JVM运行时数据区"></a>JVM运行时数据区</h4><p>JVM规范把运行时数据区分成以下几个主要部分：</p>
+<ol>
+<li>程序计数器（PC寄存器）：每个线程都有一个程序计数器，用于记录当前所执行字节码的行号指示器。如果正在执行的是本地方法（native），则PC寄存器值是未指定的。</li>
+<li>Java虚拟机栈：每个线程都会创建一个私有的栈，用于存放栈帧。每一次方法调用时都会在该栈中压入一个新的栈帧，方法执行结束（或抛出未处理异常）后栈帧弹出。</li>
+<li>本地方法栈：与Java虚拟机栈类似，只不过它为本地方法服务。它的具体结构和实现方式因不同JVM厂商而异。</li>
+<li>堆：Java中所有对象实例以及数组都要分配在堆上，几乎是整个JVM中占用内存最大的区域。它是所有线程共享的，可以被垃圾收集器统一管理。</li>
+<li>方法区：也是所有线程共享的一个区域，用来存储已被加载的类信息、常量、静态变量和JIT编译器生成的代码等数据。方法区在某些JVM实现中也被称为永久代（PermGen）或元空间（Metaspace）。</li>
+<li>运行时常量池：属于方法区的一部分，每个类或接口对应的常量池会存放它的字面量（如字符串常量）以及符号引用（如类、方法、字段的符号引用）等。这些符号引用在类加载的解析阶段会被解析为直接引用（如内存地址、偏移量等），也就是动态链接的一部分。</li>
+</ol>
+<p>以上这些区域对方法调用都有或多或少的影响，其中最重要的就是Java虚拟机栈和方法区中的运行时常量池，因为字节码执行依赖栈帧，而方法调用指令通常需要通过常量池索引来找到需要调用的方法符号引用，然后再解析成可以直接调用的内存地址或方法句柄（Method Handle）。</p>
+<h4 id="字节码执行基础"><a href="#字节码执行基础" class="headerlink" title="字节码执行基础"></a>字节码执行基础</h4><p>一段简单的示例，例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">InvokeTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        InvokeTest example = <span class="keyword">new</span> InvokeTest();</span><br><span class="line">        example.instanceMethod();</span><br><span class="line">        staticMethod();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">instanceMethod</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;调用实例方法&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">staticMethod</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;调用静态方法&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p>编译为字节码后，你可以使用 <code>javap -v InvokeTest</code> 命令查看具体的字节码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"> Code:</span><br><span class="line">       0: aload_0</span><br><span class="line">       1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       4: return</span><br><span class="line"></span><br><span class="line">  public static void main(java.lang.String[]);</span><br><span class="line">    Code:</span><br><span class="line">       0: new           #2                  // class com/InvokeTest</span><br><span class="line">       3: dup</span><br><span class="line">       4: invokespecial #3                  // Method &quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       7: astore_1</span><br><span class="line">       8: aload_1</span><br><span class="line">       9: invokevirtual #4                  // Method instanceMethod:()V</span><br><span class="line">      12: invokestatic  #5                  // Method staticMethod:()V</span><br><span class="line">      15: return</span><br><span class="line"></span><br><span class="line">  public void instanceMethod();</span><br><span class="line">    Code:</span><br><span class="line">       0: getstatic     #6                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       3: ldc           #7                  // String 调用实例方法</span><br><span class="line">       5: invokevirtual #8                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">       8: return</span><br><span class="line"></span><br><span class="line">  public static void staticMethod();</span><br><span class="line">    Code:</span><br><span class="line">       0: getstatic     #6                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       3: ldc           #9                  // String 调用静态方法</span><br><span class="line">       5: invokevirtual #8                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">       8: return</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p>JVM是基于栈的虚拟机。Java代码编译成字节码后，会产生一系列的指令集。例如访问字段的<code>getfield</code>、给字段赋值的<code>putfield</code>、调用方法的<code>invokevirtual</code>等指令。</p>
+<p>在执行某条字节码指令之前，JVM中的解释器（若处于解释执行模式）或者即时编译器（若有编译优化）都会取出当前线程的PC寄存器指示的字节码，然后根据指令含义，操作当前栈帧中的操作数栈或局部变量表，或跳转到新的字节码地址。对于方法调用相关的指令来说，其最典型的过程包括：</p>
+<ol>
+<li>读取指令操作码。</li>
+<li>读取操作数（常量池索引或其他附加数据）。</li>
+<li>根据常量池索引到方法符号引用，随后解析出具体要调用的方法。</li>
+<li>建立新的栈帧（或通过JIT编译器内联、优化）。</li>
+<li>跳转到被调用方法的起始字节码处执行。</li>
+<li>被调用方法执行完毕后，返回调用者栈帧，如果有返回值，将其压到调用者的操作数栈顶。</li>
+</ol>
+<h3 id="方法调用的五大指令"><a href="#方法调用的五大指令" class="headerlink" title="方法调用的五大指令"></a>方法调用的五大指令</h3><p>JVM规范中定义了五条与方法调用直接相关的字节码指令，每条指令负责一种特定场景的方法调用方式：</p>
+<h3 id><a href="#" class="headerlink" title></a></h3><table>
+<thead>
+<tr>
+<th>调用指令</th>
+<th>场景</th>
+<th>绑定方式</th>
+<th>是否需要实例引用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>invokestatic</code></td>
+<td>调用静态方法</td>
+<td>静态绑定</td>
+<td>不需要</td>
+</tr>
+<tr>
+<td><code>invokevirtual</code></td>
+<td>调用普通实例方法，多态分派</td>
+<td>动态绑定(多态)</td>
+<td>需要（this）</td>
+</tr>
+<tr>
+<td><code>invokespecial</code></td>
+<td>调用构造器、私有方法、父类方法等</td>
+<td>静态绑定</td>
+<td>需要</td>
+</tr>
+<tr>
+<td><code>invokeinterface</code></td>
+<td>调用接口方法</td>
+<td>动态绑定(多态)</td>
+<td>需要（this）</td>
+</tr>
+<tr>
+<td><code>invokedynamic</code></td>
+<td>动态语言支持、Lambda表达式等场景</td>
+<td>由Bootstrap指定</td>
+<td>视具体场景而定</td>
+</tr>
+</tbody></table>
+<h5 id="invokestatic"><a href="#invokestatic" class="headerlink" title="invokestatic"></a>invokestatic</h5><p><code>invokestatic</code>主要用于调用静态方法：</p>
+<ul>
+<li>在解析调用目标时，不需要绑定到特定对象实例上，而是直接根据类名和方法描述符来定位静态方法的入口。</li>
+<li>由于调用静态方法不需要实例，对应的字节码中也没有“this”引用要传递（相较于<code>invokevirtual</code>需要隐藏传入this参数），所以生成的栈帧也不会包含多余的实例引用参数。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">StaticTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        staticMethod();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">staticMethod</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;静态方法&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>编译后，在 <code>callStatic()</code> 方法内部会看到：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">public class org.example.zhiji.StaticTest &#123;</span><br><span class="line">  public org.example.zhiji.StaticTest();</span><br><span class="line">    Code:</span><br><span class="line">       0: aload_0</span><br><span class="line">       1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       4: return</span><br><span class="line"></span><br><span class="line">  public static void main(java.lang.String[]);</span><br><span class="line">    Code:</span><br><span class="line">       0: invokestatic  #2                  // Method staticMethod:()V</span><br><span class="line">       3: return</span><br><span class="line"></span><br><span class="line">  public static void staticMethod();</span><br><span class="line">    Code:</span><br><span class="line">       0: getstatic     #3                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       3: ldc           #4                  // String 静态方法</span><br><span class="line">       5: invokevirtual #5                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">       8: return</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>当执行到<code>invokestatic #2</code>时，JVM会从当前类（<code>StaticTest</code>）的运行时常量池中查找索引2对应的方法符号引用，例如<code>StaticTest.staticMethod:()V</code>。一旦解析完成，就可以跳转到<code>staticMethod()</code>的字节码开始执行。</p>
+<h5 id="invokevirtual"><a href="#invokevirtual" class="headerlink" title="invokevirtual"></a>invokevirtual</h5><p><code>invokevirtual</code>用于调用所有的“实例”方法，除了一些特殊情况（构造器、私有方法和父类方法等，它们使用<code>invokespecial</code>）。<code>invokevirtual</code>会根据对象的实际类型进行动态分派。也就是说，调用的具体方法实现取决于<strong>运行时</strong>对象的类型，而不是编译时引用类型。</p>
+<p>比较常见的案例就是多态：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Animal</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">makeSound</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Some generic sound&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dog</span> <span class="keyword">extends</span> <span class="title">Animal</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">makeSound</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Bark&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VirtualTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Animal a = <span class="keyword">new</span> Dog();</span><br><span class="line">      <span class="comment">// 调用Dog的makeSound()</span></span><br><span class="line">        a.makeSound(); </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>编译后，在<code>a.makeSound()</code>这里，就会产生 <code>invokevirtual #x &lt;Animal.makeSound&gt;</code>。在执行时，JVM先会在对象<code>a</code>的头部或方法表中查找其实际类型是<code>Dog</code>，然后选择<code>Dog</code>类所实现的<code>makeSound()</code>方法进行调用，这就体现了Java面向对象的动态分派过程，也是我们经常提到的后期绑定。</p>
+<h5 id="invokespecial"><a href="#invokespecial" class="headerlink" title="invokespecial"></a>invokespecial</h5><p><code>invokespecial</code>用于调用一些特殊场景的方法，包括：</p>
+<ul>
+<li>构造器（<code>&lt;init&gt;</code>方法）</li>
+<li>私有方法</li>
+<li>使用<code>super</code>关键字调用父类的方法</li>
+<li>在早期版本中，也用于调用父类的构造器等</li>
+</ul>
+<p>构造器调用:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public class SpecialTest &#123;</span><br><span class="line">    public SpecialTest() &#123;</span><br><span class="line">     //invokespecial调用父类构造器</span><br><span class="line">        super();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>编译后：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public class org.example.zhiji.SpecialTest &#123;</span><br><span class="line">  public org.example.zhiji.SpecialTest();</span><br><span class="line">    Code:</span><br><span class="line">       0: aload_0</span><br><span class="line">       1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       4: return</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这里<code>invokespecial #1</code>就是调用父类<code>Object</code>的构造器。之所以不能使用<code>invokevirtual</code>，是因为构造器并没有被设计成可被子类重写，而且其调用方式与普通实例方法也不同（构造器名称和字节码层面的签名是<code>&lt;init&gt;</code>，JVM会做特殊处理）。</p>
+<p>示例2：调用私有方法，这可能是最常用的调用方式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpecialTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">a</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">b</span><span class="params">()</span></span>&#123;</span><br><span class="line">        a();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public class org.example.zhiji.SpecialTest &#123;</span><br><span class="line">  public org.example.zhiji.SpecialTest();</span><br><span class="line">    Code:</span><br><span class="line">       0: aload_0</span><br><span class="line">       1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       4: return</span><br><span class="line"></span><br><span class="line">  public void b();</span><br><span class="line">    Code:</span><br><span class="line">       0: aload_0</span><br><span class="line">       1: invokespecial #2                  // Method a:()V</span><br><span class="line">       4: return</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>在<code>b()</code>方法中，<code>a()</code>的调用就会被编译成<code>invokespecial</code>，因为它是私有的，不能被子类重写或者通过多态机制调用。</p>
+<h5 id="invokeinterface"><a href="#invokeinterface" class="headerlink" title="invokeinterface"></a>invokeinterface</h5><p><code>invokeinterface</code>专门用来调用接口方法。与<code>invokevirtual</code>的区别在于，接口方法需要在运行时确定实现类。对于同一个接口方法，不同的实现类都会给出不同的具体实现。JVM在执行<code>invokeinterface</code>时，也需要先在运行时查找实际对象的类型，然后定位到真正的实现方法地址，再进行调用。</p>
+<p>例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">ITest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">doWork</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestImpl</span> <span class="keyword">implements</span> <span class="title">ITest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doWork</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;TestImpl clsss&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">InterfaceTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ITest test = <span class="keyword">new</span> TestImpl();</span><br><span class="line">        <span class="comment">// invokeinterface 调用的</span></span><br><span class="line">        test.doWork(); </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">public class org.example.zhiji.InterfaceTest &#123;</span><br><span class="line">  public org.example.zhiji.InterfaceTest();</span><br><span class="line">    Code:</span><br><span class="line">       0: aload_0</span><br><span class="line">       1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       4: return</span><br><span class="line"></span><br><span class="line">  public static void main(java.lang.String[]);</span><br><span class="line">    Code:</span><br><span class="line">       0: new           #2                  // class org/example/zhiji/TestImpl</span><br><span class="line">       3: dup</span><br><span class="line">       4: invokespecial #3                  // Method org/example/zhiji/TestImpl.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       7: astore_1</span><br><span class="line">       8: aload_1</span><br><span class="line">       9: invokeinterface #4,  1            // InterfaceMethod org/example/zhiji/ITest.doWork:()V</span><br><span class="line">      14: return</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<p>编译生成的字节码中，会看到<code>invokeinterface #4 ITest.doWork:()V</code>。这里与<code>invokevirtual</code>在实现上有一些类似之处，都需要动态绑定，但它需要先对接口查找具体实现类，然后再找到合适的方法入口。</p>
+<h5 id="invokedynamic"><a href="#invokedynamic" class="headerlink" title="invokedynamic"></a>invokedynamic</h5><p><code>invokedynamic</code>是Java 7开始引入的一条新指令，目的是为Java提供一种更灵活的动态调用机制。它并不是只用于调用“动态语言”方法，在Java 8中，<code>invokedynamic</code>也经常被用来实现Lambda表达式、方法引用等功能。与前面四条指令相比，<code>invokedynamic</code>最大的特点在于它不再把方法调用点的解析写死在虚拟机，而是通过“引导方法（Bootstrap Method）”来自定义调用点的解析逻辑。，<code>invokedynamic</code>指令会指向一个<code>CallSite</code>对象。在第一次执行时，JVM会调用对应的引导方法（Bootstrap Method）去确定这个<code>CallSite</code>到底指向哪个具体的方法句柄（Method Handle）。后续执行这个<code>invokedynamic</code>时，就会直接跳转到该句柄所关联的方法，省去了传统的解析过程。在动态语言支持、Lambda实现等场景中，<code>invokedynamic</code>极大地增强了JVM的可扩展性和灵活性。</p>
+<h3 id="方法调用的执行流程"><a href="#方法调用的执行流程" class="headerlink" title="方法调用的执行流程"></a>方法调用的执行流程</h3><p>在JVM中，每一次方法调用都会触发以下几个流程：</p>
+<ol>
+<li><strong>常量池解析</strong>：从当前执行字节码所在类的运行时常量池中，根据索引找到对应的方法符号引用（MethodRef 或 InterfaceMethodRef 等）。如果之前没有被解析过，则需要先进行解析（Resolution），将符号引用转换为直接引用（指向方法元数据的方法指针或方法句柄）。</li>
+<li><strong>检查访问权限</strong>：包括类是否可以访问、方法的修饰符（<code>public/private/protected</code>）是否允许，以及与接口方法对应的检查等。如果无法访问或方法不存在，则抛出<code>IllegalAccessError</code>、<code>NoSuchMethodError</code>等异常。</li>
+<li><strong>准备调用参数</strong>：如果是实例方法，需要先将对象引用<code>this</code>压入操作数栈顶，然后再按照方法签名依次压入其他参数。对于<code>invokespecial</code>调用的构造器，还需要在调用前先完成对象的初始化等。</li>
+<li><strong>创建新的栈帧</strong>：新的方法调用会创建一个新的栈帧，用于存放局部变量表和操作数栈等。参数会从调用者栈帧的操作数栈中弹出，然后存放到被调用方法的栈帧中相应的局部变量表位置（其中<code>this</code>通常放在<code>slot 0</code>的位置）。</li>
+<li><strong>执行方法</strong>：从被调用方法的第一条字节码开始，继续解释执行（或者由JIT编译器编译执行）。如果方法里再次调用别的方法，就会重复上述步骤。</li>
+<li><strong>返回结果</strong>：当被调用方法执行完成后，如果有返回值，会将返回值压回调用者栈帧的操作数栈顶；如果方法声明为<code>void</code>，则不会返回任何值，但仍然会从栈帧回到上一层调用者的执行位置。</li>
+</ol>
+<h3 id="类加载与链接过程"><a href="#类加载与链接过程" class="headerlink" title="类加载与链接过程"></a>类加载与链接过程</h3><p>注意一点，方法调用指令引用的方法在字节码文件中通常是一个符号引用。当JVM遇到这些指令时，会尝试去链接 d这个符号引用，找到真正的方法体所在的内存地址或方法句柄。</p>
+<p>JVM的类加载和链接过程分为以下几个阶段：</p>
+<ol>
+<li><strong>加载（Loading）</strong>：将字节码文件读入到内存，创建Class对象等。</li>
+<li><strong>验证（Verification）</strong>：确保字节码文件符合JVM规范，不存在非法代码。</li>
+<li><strong>准备（Preparation）</strong>：为类中的静态变量分配内存并设定默认初始值。</li>
+<li><strong>解析（Resolution）</strong>：将常量池中的符号引用解析为直接引用。比如：类、字段、方法等的符号引用需要解析为具体的对象或方法指针。如果解析失败，抛出错误。</li>
+<li><strong>初始化（Initialization）</strong>：执行类的<code>&lt;clinit&gt;</code>方法，为静态变量赋正确的初始值等操作。</li>
+</ol>
+<h3 id="方法调用的优化技术"><a href="#方法调用的优化技术" class="headerlink" title="方法调用的优化技术"></a>方法调用的优化技术</h3><p>为了提高方法调用的性能，JVM实现了多种优化技术：</p>
+<h5 id="内联缓存"><a href="#内联缓存" class="headerlink" title="内联缓存"></a>内联缓存</h5><p>内联缓存是一种在调用点缓存最近调用的方法版本的技术，基于程序运行中的”局部性原理”（即同一个调用点往往反复调用同一个类型的对象）。</p>
+<h5 id="方法内联"><a href="#方法内联" class="headerlink" title="方法内联"></a>方法内联</h5><p>方法内联是JIT（即时编译器）最重要的优化技术之一，它将被调用的方法体复制到调用点，消除了方法调用的开销。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 原始代码</span><br><span class="line">public int add(int x) &#123;</span><br><span class="line">    return x + x;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public int addAll(int a, int b) &#123;</span><br><span class="line">    return add(a) + add(b);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 内联后的等效代码</span><br><span class="line">public int addAll(int a, int b) &#123;</span><br><span class="line">    return a + a + b + b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="逃逸分析"><a href="#逃逸分析" class="headerlink" title="逃逸分析"></a>逃逸分析</h5><p>逃逸分析确定对象的作用域是否超出方法范围。如果对象不逃逸（仅在方法内使用），可以进行更多的优化：</p>
+<ul>
+<li><strong>栈上分配</strong>：将对象分配在栈上，而不是堆上，减少GC压力</li>
+<li><strong>标量替换</strong>：将对象拆分为基本类型变量</li>
+<li><strong>同步消除</strong>：如果对象不逃逸，可以消除同步锁</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/03/04/JVM-method-invokedynamic/" rel="prev" title="JVM的invokedynamic方法调用">
+      <i class="fa fa-chevron-left"></i> JVM的invokedynamic方法调用
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/03/05/huidurenzhi/" rel="next" title="灰度认知和黑白决策">
+      灰度认知和黑白决策 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%EF%BC%9A%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8%E7%9A%84%E5%89%8D%E5%A5%8F"><span class="nav-number">1.</span> <span class="nav-text">类加载：方法调用的前奏</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%B1%BB%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="nav-number">1.0.1.</span> <span class="nav-text">类的生命周期</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E8%A1%A8"><span class="nav-number">1.0.2.</span> <span class="nav-text">方法表</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8%E7%9A%84%E8%A7%A3%E6%9E%90%E4%B8%8E%E5%88%86%E6%B4%BE"><span class="nav-number">2.</span> <span class="nav-text">方法调用的解析与分派</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E7%BB%91%E5%AE%9A%E4%B8%8E%E5%8A%A8%E6%80%81%E7%BB%91%E5%AE%9A"><span class="nav-number">2.0.1.</span> <span class="nav-text">静态绑定与动态绑定</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%86%E6%B4%BE%E6%9C%BA%E5%88%B6"><span class="nav-number">2.0.2.</span> <span class="nav-text">分派机制</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%88%86%E6%B4%BE"><span class="nav-number">2.0.2.1.</span> <span class="nav-text">静态分派</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%88%86%E6%B4%BE"><span class="nav-number">2.0.2.2.</span> <span class="nav-text">动态分派</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E8%8A%82%E7%A0%81%E6%8C%87%E4%BB%A4"><span class="nav-number">3.</span> <span class="nav-text">字节码指令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA"><span class="nav-number">3.1.</span> <span class="nav-text">JVM运行时数据区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%9F%BA%E7%A1%80"><span class="nav-number">3.2.</span> <span class="nav-text">字节码执行基础</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8%E7%9A%84%E4%BA%94%E5%A4%A7%E6%8C%87%E4%BB%A4"><span class="nav-number">4.</span> <span class="nav-text">方法调用的五大指令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">5.</span> <span class="nav-text"></span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#invokestatic"><span class="nav-number">5.0.1.</span> <span class="nav-text">invokestatic</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#invokevirtual"><span class="nav-number">5.0.2.</span> <span class="nav-text">invokevirtual</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#invokespecial"><span class="nav-number">5.0.3.</span> <span class="nav-text">invokespecial</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#invokeinterface"><span class="nav-number">5.0.4.</span> <span class="nav-text">invokeinterface</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#invokedynamic"><span class="nav-number">5.0.5.</span> <span class="nav-text">invokedynamic</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8%E7%9A%84%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="nav-number">6.</span> <span class="nav-text">方法调用的执行流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%E4%B8%8E%E9%93%BE%E6%8E%A5%E8%BF%87%E7%A8%8B"><span class="nav-number">7.</span> <span class="nav-text">类加载与链接过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8%E7%9A%84%E4%BC%98%E5%8C%96%E6%8A%80%E6%9C%AF"><span class="nav-number">8.</span> <span class="nav-text">方法调用的优化技术</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%86%85%E8%81%94%E7%BC%93%E5%AD%98"><span class="nav-number">8.0.1.</span> <span class="nav-text">内联缓存</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E5%86%85%E8%81%94"><span class="nav-number">8.0.2.</span> <span class="nav-text">方法内联</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90"><span class="nav-number">8.0.3.</span> <span class="nav-text">逃逸分析</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

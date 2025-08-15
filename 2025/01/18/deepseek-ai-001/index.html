@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="最近在学习英语，我想英语文档中有单词提取出来。用的是deepseek(最近流行)，提升词如下，很简单 但印象深刻的是他把思考过程给打印出来了，看着是自己给自己对话。也侧面看出来了，  好，用户想从一个PDF文件中提取带有音标和例句的单词。首先，我需要确认文件内容中确实有这些信息。看起来在第2到第31页中，有很多单词及其音标和例句。我应该把这些单词整理出来，确保每个单词都包含音标和例句。 接下来">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用AI将需求转换成代码">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/01/18/deepseek-ai-001/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="最近在学习英语，我想英语文档中有单词提取出来。用的是deepseek(最近流行)，提升词如下，很简单 但印象深刻的是他把思考过程给打印出来了，看着是自己给自己对话。也侧面看出来了，  好，用户想从一个PDF文件中提取带有音标和例句的单词。首先，我需要确认文件内容中确实有这些信息。看起来在第2到第31页中，有很多单词及其音标和例句。我应该把这些单词整理出来，确保每个单词都包含音标和例句。 接下来">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://www.sanmuzi.com/2025/01/18/deepseek-ai-001/images/deepseek-001.png">
+<meta property="og:image" content="http://www.sanmuzi.com/2025/01/18/deepseek-ai-001/images/deepseek-002.png">
+<meta property="article:published_time" content="2025-01-18T14:02:56.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.352Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="AI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://www.sanmuzi.com/2025/01/18/deepseek-ai-001/images/deepseek-001.png">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/01/18/deepseek-ai-001/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>用AI将需求转换成代码 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/01/18/deepseek-ai-001/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          用AI将需求转换成代码
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-01-18 22:02:56" itemprop="dateCreated datePublished" datetime="2025-01-18T22:02:56+08:00">2025-01-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AI/" itemprop="url" rel="index"><span itemprop="name">AI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <span id="more"></span>
+
+<p>最近在学习英语，我想英语文档中有单词提取出来。用的是deepseek(最近流行)，提升词如下，很简单</p>
+<p>但印象深刻的是他把思考过程给打印出来了，看着是自己给自己对话。也侧面看出来了，</p>
+<blockquote>
+<p>好，用户想从一个PDF文件中提取带有音标和例句的单词。首先，我需要确认文件内容中确实有这些信息。看起来在第2到第31页中，有很多单词及其音标和例句。我应该把这些单词整理出来，确保每个单词都包含音标和例句。</p>
+<p>接下来，我得手动查找这些单词，可能它们不是按特定格式排列的，所以需要仔细阅读每一页的内容。找到一个单词后，复制它的音标和例句，然后整理成一个列表。</p>
+<p>可能有些单词的例句很长，我得决定是全部保留还是只保留关键部分。最好全部保留，保持完整性。</p>
+<p>还要注意不要遗漏任何有音标和例句的单词，确保提取全面。</p>
+<p>最后，按照用户的要求，把所有提取的单词及其音标和例句按顺序列出，方便他们学习和参考。</p>
+</blockquote>
+<p><img src="images/deepseek-001.png" alt="封面"></p>
+<p>结果如下：</p>
+<p><img src="images/deepseek-002.png" alt="封面"></p>
+<p>突然想到，可以把结果成python脚本。我可以本地运行。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pdfminer.high_level <span class="keyword">import</span> extract_text</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="comment"># Ensure correct encoding for output</span></span><br><span class="line">sys.stdout.reconfigure(encoding=<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Extract text from the PDF</span></span><br><span class="line">text = extract_text(<span class="string">&#x27;test.pdf&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Split the text into lines</span></span><br><span class="line">lines = text.splitlines()</span><br><span class="line"></span><br><span class="line"><span class="comment"># Initialize a list to store word entries</span></span><br><span class="line">entries = []</span><br><span class="line">i = <span class="number">0</span></span><br><span class="line"><span class="keyword">while</span> i &lt; <span class="built_in">len</span>(lines):</span><br><span class="line">    line = lines[i].strip()</span><br><span class="line">    <span class="keyword">if</span> <span class="string">&#x27;/&#x27;</span> <span class="keyword">in</span> line:</span><br><span class="line">        <span class="comment"># Split the line into parts separated by &#x27;/&#x27;</span></span><br><span class="line">        parts = line.split(<span class="string">&#x27;/&#x27;</span>)</span><br><span class="line">        <span class="comment"># The first part contains the word and possibly part of speech</span></span><br><span class="line">        word_part = parts[<span class="number">0</span>].strip()</span><br><span class="line">        <span class="comment"># Remove the part of speech if present</span></span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27; adj.&#x27;</span> <span class="keyword">in</span> word_part <span class="keyword">or</span> <span class="string">&#x27; v.&#x27;</span> <span class="keyword">in</span> word_part <span class="keyword">or</span> <span class="string">&#x27; n.&#x27;</span> <span class="keyword">in</span> word_part:</span><br><span class="line">            word = word_part.split(<span class="string">&#x27; adj.&#x27;</span>)[<span class="number">0</span>].split(<span class="string">&#x27; v.&#x27;</span>)[<span class="number">0</span>].split(<span class="string">&#x27; n.&#x27;</span>)[<span class="number">0</span>].strip()</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            word = word_part</span><br><span class="line">        <span class="comment"># The pronunciation is the first part within &#x27;/&#x27;</span></span><br><span class="line">        pinyin = <span class="string">&#x27;/&#x27;</span> + parts[<span class="number">1</span>].strip()</span><br><span class="line">        examples = []</span><br><span class="line">        i += <span class="number">1</span></span><br><span class="line">        <span class="keyword">while</span> i &lt; <span class="built_in">len</span>(lines) <span class="keyword">and</span> lines[i].startswith(<span class="string">&#x27;•&#x27;</span>):</span><br><span class="line">            example = lines[i].lstrip(<span class="string">&#x27;•&#x27;</span>).strip()</span><br><span class="line">            examples.append(example)</span><br><span class="line">            i += <span class="number">1</span></span><br><span class="line">        entries.append(&#123;<span class="string">&#x27;word&#x27;</span>: word, <span class="string">&#x27;pinyin&#x27;</span>: pinyin, <span class="string">&#x27;examples&#x27;</span>: examples&#125;)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        i += <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Print the extracted information in the specified format</span></span><br><span class="line"><span class="keyword">for</span> entry <span class="keyword">in</span> entries:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;entry[<span class="string">&#x27;word&#x27;</span>]&#125;</span> <span class="subst">&#123;entry[<span class="string">&#x27;pinyin&#x27;</span>]&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="keyword">for</span> example <span class="keyword">in</span> entry[<span class="string">&#x27;examples&#x27;</span>]:</span><br><span class="line">        <span class="built_in">print</span>(example)</span><br><span class="line">    <span class="built_in">print</span>()  <span class="comment"># Add a blank line between entries</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>获取了结果后，就突发奇想，这里有很多文件，不可能一个个上传，写prompt，然后在拷贝，然后在写了</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line">from pdfminer.<span class="function">high_level <span class="keyword">import</span> extract_text</span></span><br><span class="line"><span class="function"><span class="keyword">import</span> sys</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">def <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line"><span class="function">    # Ensure correct encoding <span class="keyword">for</span> output</span></span><br><span class="line"><span class="function">    sys.stdout.<span class="title">reconfigure</span><span class="params">(encoding=<span class="string">&#x27;utf-8&#x27;</span>)</span></span></span><br><span class="line"><span class="function">    # Path to the folder containing PDF files</span></span><br><span class="line"><span class="function">    folder_path </span>= <span class="string">&#x27;file&#x27;</span>  # 修改为实际的文件夹路径</span><br><span class="line">    # Iterate over all files in the folder</span><br><span class="line">    <span class="keyword">for</span> filename in os.listdir(folder_path):</span><br><span class="line">        <span class="keyword">if</span> filename.endswith(<span class="string">&#x27;.pdf&#x27;</span>):</span><br><span class="line">            file_path = os.path.join(folder_path, filename)</span><br><span class="line">            # Extract text from the PDF</span><br><span class="line">            text = extract_text(file_path)</span><br><span class="line">            # Split the text into lines</span><br><span class="line">            lines = text.splitlines()</span><br><span class="line">            # Initialize a list to store word entries</span><br><span class="line">            entries = []</span><br><span class="line">            i = <span class="number">0</span></span><br><span class="line">            <span class="keyword">while</span> i &lt; len(lines):</span><br><span class="line">                line = lines[i].strip()</span><br><span class="line">                <span class="keyword">if</span> <span class="string">&#x27;/&#x27;</span> in line:</span><br><span class="line">                    # Split the line into parts separated by <span class="string">&#x27;/&#x27;</span></span><br><span class="line">                    parts = line.split(<span class="string">&#x27;/&#x27;</span>)</span><br><span class="line">                    # The first part contains the word and possibly part of speech</span><br><span class="line">                    word_part = parts[<span class="number">0</span>].strip()</span><br><span class="line">                    # Remove the part of speech <span class="keyword">if</span> present</span><br><span class="line">                    <span class="keyword">if</span> <span class="string">&#x27; adj.&#x27;</span> in word_part or <span class="string">&#x27; v.&#x27;</span> in word_part or <span class="string">&#x27; n.&#x27;</span> in word_part:</span><br><span class="line">                        word = word_part.split(<span class="string">&#x27; adj.&#x27;</span>)[<span class="number">0</span>].split(<span class="string">&#x27; v.&#x27;</span>)[<span class="number">0</span>].split(<span class="string">&#x27; n.&#x27;</span>)[<span class="number">0</span>].strip()</span><br><span class="line">                    <span class="keyword">else</span>:</span><br><span class="line">                        word = word_part</span><br><span class="line">                    # The pronunciation is the first part within <span class="string">&#x27;/&#x27;</span></span><br><span class="line">                    pinyin = <span class="string">&#x27;/&#x27;</span> + parts[<span class="number">1</span>].strip() + <span class="string">&#x27;/&#x27;</span></span><br><span class="line">                    examples = []</span><br><span class="line">                    i += <span class="number">1</span></span><br><span class="line">                    <span class="keyword">while</span> i &lt; len(lines) and not lines[i].startswith(<span class="string">&#x27;•&#x27;</span>):</span><br><span class="line">                        example = lines[i]</span><br><span class="line">                        examples.append(example)</span><br><span class="line">                        i += <span class="number">1</span></span><br><span class="line">                    entries.append(&#123;<span class="string">&#x27;word&#x27;</span>: word, <span class="string">&#x27;pinyin&#x27;</span>: pinyin, <span class="string">&#x27;examples&#x27;</span>: examples&#125;)</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    i += <span class="number">1</span></span><br><span class="line">            # Create a markdown file with the first <span class="number">8</span> characters of the PDF filename</span><br><span class="line">            markdown_filename = filename[:<span class="number">8</span>] + <span class="string">&#x27;.md&#x27;</span></span><br><span class="line">            markdown_file_path = os.path.join(<span class="string">&#x27;./output&#x27;</span>, markdown_filename)</span><br><span class="line">            # 检查目录是否存在，如果不存在则创建</span><br><span class="line">            output_dir = os.path.dirname(markdown_file_path)</span><br><span class="line">            <span class="keyword">if</span> not os.path.exists(output_dir):</span><br><span class="line">                os.makedirs(output_dir)</span><br><span class="line"></span><br><span class="line">            <span class="function">with <span class="title">open</span><span class="params">(markdown_file_path, <span class="string">&#x27;w&#x27;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>)</span> as markdown_file:</span></span><br><span class="line"><span class="function">                <span class="keyword">for</span> entry in entries:</span></span><br><span class="line"><span class="function">                    markdown_file.<span class="title">write</span><span class="params">(f<span class="string">&quot;**&#123;entry[&#x27;word&#x27;]&#125;** &#123;entry[&#x27;pinyin&#x27;]&#125;\n&quot;</span>)</span></span></span><br><span class="line"><span class="function">                    <span class="keyword">for</span> example in entry[&#x27;examples&#x27;]:</span></span><br><span class="line"><span class="function">                        markdown_file.<span class="title">write</span><span class="params">(f<span class="string">&quot; &#123;example&#125;\n&quot;</span>)</span></span></span><br><span class="line"><span class="function">                    markdown_file.<span class="title">write</span><span class="params">(<span class="string">&quot;\n&quot;</span>)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="keyword">if</span> __name__ </span>== <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    main()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<p>ps:</p>
+<p>输出给自己调试了下</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/01/11/distribution-systeml-9/" rel="prev" title="第九章 分布式数据管理">
+      <i class="fa fa-chevron-left"></i> 第九章 分布式数据管理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/01/22/ai-practice-001/" rel="next" title="AI帮你写测试脚本和文档">
+      AI帮你写测试脚本和文档 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

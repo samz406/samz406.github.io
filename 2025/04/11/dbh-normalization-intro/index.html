@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="归一化（Normalization）听起来很专业，但其实就是一种让数据更加规整、更容易处理的方法。如果用一句话来大白话解释，那就是：“把杂乱无章的数据，统一到同一个尺度，让神经网络更容易理解它们。”">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大白话讲解归一化">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/04/11/dbh-normalization-intro/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="归一化（Normalization）听起来很专业，但其实就是一种让数据更加规整、更容易处理的方法。如果用一句话来大白话解释，那就是：“把杂乱无章的数据，统一到同一个尺度，让神经网络更容易理解它们。”">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-04-11T14:54:45.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.351Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="AI名词">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/04/11/dbh-normalization-intro/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>大白话讲解归一化 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/04/11/dbh-normalization-intro/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          大白话讲解归一化
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-04-11 22:54:45" itemprop="dateCreated datePublished" datetime="2025-04-11T22:54:45+08:00">2025-04-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AI/" itemprop="url" rel="index"><span itemprop="name">AI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>归一化（Normalization）听起来很专业，但其实就是一种让数据更加规整、更容易处理的方法。如果用一句话来大白话解释，那就是：“把杂乱无章的数据，统一到同一个尺度，让神经网络更容易理解它们。”</p>
+<span id="more"></span>
+
+
+
+<h3 id="归一化到底是什么？"><a href="#归一化到底是什么？" class="headerlink" title="归一化到底是什么？"></a>归一化到底是什么？</h3><p>简单来说，归一化的作用就像是整理房间。当你的房间乱七八糟，衣服、书本、电子设备随处乱放时，想要快速找到某个物品就很难。但如果你把所有物品都整齐地分类摆放，比如衣服叠在一起、书本整齐排列、电子设备专门放在固定的位置，那么找起来就轻松多了。</p>
+<p>数据的归一化也是类似的道理。它把原本可能跨度很大、差异明显的数据调整到一个较为一致的范围内，这样神经网络就能更好、更快地学习和识别数据中的模式。</p>
+<h3 id="为什么神经网络需要归一化？"><a href="#为什么神经网络需要归一化？" class="headerlink" title="为什么神经网络需要归一化？"></a>为什么神经网络需要归一化？</h3><p>想象一下你和朋友比赛跑步，但你穿的是拖鞋，而朋友穿的是专业跑鞋。这场比赛显然不公平。数据也有类似的情况，如果数据的尺度差距很大，网络在训练过程中就可能会产生偏差，学习速度变慢甚至无法学习。</p>
+<p>通过归一化，数据就像是每个选手都穿上了同样合适的跑鞋，比赛变得公平起来，神经网络的训练效果自然就好了。</p>
+<h3 id="Transformer中的归一化（Layer-Normalization）"><a href="#Transformer中的归一化（Layer-Normalization）" class="headerlink" title="Transformer中的归一化（Layer Normalization）"></a>Transformer中的归一化（Layer Normalization）</h3><p>Transformer模型广泛用于自然语言处理领域，比如著名的ChatGPT。在Transformer里使用的一种特殊归一化叫做Layer Normalization（层归一化）。它是怎么做的呢？</p>
+<p>简单说来，Layer Normalization是对每个样本中的特征数据单独进行处理。想象你参加了一次考试，这次考试每个人的满分可能不一样，比如你的试卷满分是100分，而你朋友的试卷满分是200分。为了公平起见，老师决定不看分数的绝对值，而是看你们各自分数占满分的比例。这样每个人的成绩就可以放在同一个标准上进行比较。</p>
+<p>Layer Normalization做的事情类似，就是针对每个数据样本单独计算均值和波动程度，再根据这个计算结果对数据进行调整，让每个数据样本都有相同的标准来衡量。这样，神经网络处理数据时就不再受数据尺度大小的影响，更容易快速而稳定地学习。</p>
+<h3 id="归一化常见使用场景"><a href="#归一化常见使用场景" class="headerlink" title="归一化常见使用场景"></a>归一化常见使用场景</h3><h5 id="1-图像处理"><a href="#1-图像处理" class="headerlink" title="1. 图像处理"></a>1. 图像处理</h5><p>在图像识别领域，数据归一化能够帮助网络快速学习图像特征，提升识别效率和准确性。</p>
+<h5 id="2-自然语言处理"><a href="#2-自然语言处理" class="headerlink" title="2. 自然语言处理"></a>2. 自然语言处理</h5><p>例如Transformer模型使用Layer Normalization提升模型对语言信息的理解能力，大大提高了翻译、文本生成和语义理解的效果。</p>
+<h5 id="3-语音识别"><a href="#3-语音识别" class="headerlink" title="3. 语音识别"></a>3. 语音识别</h5><p>声音信号的强度可能变化很大，归一化帮助模型更好地适应不同环境录制的语音，提升识别准确率。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>归一化的核心思想就是“整理数据”，让杂乱的数据变得整齐划一，更适合神经网络学习。这种方法虽然简单，但却是机器学习中不可或缺的重要步骤之一，极大提升了模型训练的效率和稳定性。下次听到“归一化”，你就可以轻松理解并自信地告诉别人它的原理啦！</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+              <a href="/tags/AI%E5%90%8D%E8%AF%8D/" rel="tag"># AI名词</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/04/11/dbh-rnn-cnn/" rel="prev" title="大白话解释RNN和CNN">
+      <i class="fa fa-chevron-left"></i> 大白话解释RNN和CNN
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/04/11/dbh-residual-connections-intro/" rel="next" title="大白话解释残差连接">
+      大白话解释残差连接 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BD%92%E4%B8%80%E5%8C%96%E5%88%B0%E5%BA%95%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">归一化到底是什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E9%9C%80%E8%A6%81%E5%BD%92%E4%B8%80%E5%8C%96%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">为什么神经网络需要归一化？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Transformer%E4%B8%AD%E7%9A%84%E5%BD%92%E4%B8%80%E5%8C%96%EF%BC%88Layer-Normalization%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">Transformer中的归一化（Layer Normalization）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BD%92%E4%B8%80%E5%8C%96%E5%B8%B8%E8%A7%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">4.</span> <span class="nav-text">归一化常见使用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86"><span class="nav-number">4.0.1.</span> <span class="nav-text">1. 图像处理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86"><span class="nav-number">4.0.2.</span> <span class="nav-text">2. 自然语言处理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-%E8%AF%AD%E9%9F%B3%E8%AF%86%E5%88%AB"><span class="nav-number">4.0.3.</span> <span class="nav-text">3. 语音识别</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

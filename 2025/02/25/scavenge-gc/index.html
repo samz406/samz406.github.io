@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Scavenge GC 是一种专门用于年轻代回收的优化算法，主要用于提高对象分配和回收的效率。本文将解析 Scavenge GC 的工作原理。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="解析 Scavenge GC 算法">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/02/25/scavenge-gc/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="Scavenge GC 是一种专门用于年轻代回收的优化算法，主要用于提高对象分配和回收的效率。本文将解析 Scavenge GC 的工作原理。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-02-25T13:56:47.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.376Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/02/25/scavenge-gc/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>解析 Scavenge GC 算法 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/02/25/scavenge-gc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          解析 Scavenge GC 算法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-02-25 21:56:47" itemprop="dateCreated datePublished" datetime="2025-02-25T21:56:47+08:00">2025-02-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p> Scavenge GC 是一种专门用于年轻代回收的优化算法，主要用于提高对象分配和回收的效率。本文将解析 Scavenge GC 的工作原理。</p>
+<span id="more"></span>
+
+<h3 id="Scavenge-GC原理"><a href="#Scavenge-GC原理" class="headerlink" title="Scavenge GC原理"></a>Scavenge GC原理</h3><p>Scavenge 算法（也被称为 “半空间复制）是基于<strong>复制思想</strong>的垃圾回收算法。其核心思想是将可用的堆内存空间等分为两个半区：From 空间和 To 空间。在任何时刻，程序只使用其中一个半区（From 空间）进行对象分配。当 From 空间被填满或接近某个阈值时，垃圾回收器会启动，将 From 空间中所有仍在使用（可达）的对象复制到 To 空间，然后清空整个 From 空间。复制完成后，两个空间的角色互换：原来的 To 空间变成新的 From 空间，原来的 From 空间变成新的 To 空间。</p>
+<p>算法的基本工作流程如下：</p>
+<ol>
+<li>初始状态下，所有对象都在 From 空间中分配</li>
+<li>当 From 空间被填满或达到阈值时，触发垃圾回收</li>
+<li>从根对象（GC Roots）开始，标记所有可达对象</li>
+<li>将所有可达对象复制到 To 空间，并更新引用关系</li>
+<li>复制完成后，From 空间中的所有对象被视为垃圾，整个 From 空间被清空</li>
+<li>From 空间和 To 空间互换角色，新的 From 空间（原来的 To 空间）继续用于对象分配</li>
+</ol>
+<h3 id="Scavenge-GC-的工作机制"><a href="#Scavenge-GC-的工作机制" class="headerlink" title="Scavenge GC 的工作机制"></a>Scavenge GC 的工作机制</h3><h4 id="年轻代的内存布局"><a href="#年轻代的内存布局" class="headerlink" title="年轻代的内存布局"></a>年轻代的内存布局</h4><p>在 JVM 中，年轻代（Young Generation）通常被划分为三个区域：</p>
+<ul>
+<li>Eden 区：存放新创建的对象。</li>
+<li>Survivor 区（From 和 To）：用于存放经过一次或多次 GC 仍存活的对象。</li>
+</ul>
+<p>默认情况下，年轻代的结构如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[   Eden   |   Survivor From   |   Survivor To   ]</span><br></pre></td></tr></table></figure>
+
+<p>其中，Eden 占用大部分空间，对象会在 Eden 分配，并在 GC 后复制到 Survivor。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">配置 Survivor 空间的大小是 JVM GC 中的重要参数，例如：-XX:SurvivorRatio=8，代表 Eden:S0:S1=8:1:1。</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="对象头部结构"><a href="#对象头部结构" class="headerlink" title="对象头部结构"></a>对象头部结构</h4><p>为了支持垃圾回收，对象通常包含一个特殊的头部结构，包含元数据如：</p>
+<ul>
+<li>对象类型信息</li>
+<li>对象大小</li>
+<li>标记位（用于标记-清除算法）</li>
+<li>转发指针（用于复制算法）</li>
+<li>年龄计数（用于分代垃圾回收）</li>
+<li>锁信息（在并发环境中）</li>
+<li>哈希码</li>
+</ul>
+<p>对于 Scavenge 算法，特别重要的是转发指针：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">struct ObjectHeader &#123;</span><br><span class="line">    bool isForwarded;       // 是否有转发指针</span><br><span class="line">    void* forwardingPtr;    // 转发指针指向对象在新空间的位置</span><br><span class="line">    // 其他元数据...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="内存分配策略"><a href="#内存分配策略" class="headerlink" title="内存分配策略"></a>内存分配策略</h4><p>在 Scavenge 算法中，内存分配非常高效，通常只需要一个指针增量操作：</p>
+<p>这种分配方式被称为”碰撞指针”（bump pointer）分配，因为我们只需要将当前分配指针向前”碰撞”（增加）相应的大小即可。</p>
+<h4 id="对象遍历过程详解"><a href="#对象遍历过程详解" class="headerlink" title="对象遍历过程详解"></a>对象遍历过程详解</h4><p>Scavenge 算法的核心是对象遍历过程，它决定了哪些对象是存活的，以及如何有效地复制这些对象。对象遍历通常分为以下几个关键步骤。</p>
+<h5 id="根集合识别"><a href="#根集合识别" class="headerlink" title="根集合识别"></a>根集合识别</h5><p>首先，垃圾回收器需要识别所有的根对象（GC Roots）。根对象是那些不需要通过其他对象引用就能够直接访问的对象，包括：</p>
+<ul>
+<li>全局变量和静态变量</li>
+<li>当前执行栈帧中的局部变量和参数</li>
+<li>JNI 引用（针对 Java 等语言）</li>
+<li>常量池中的引用</li>
+<li>已加载的类对象</li>
+<li>同步锁（monitor）持有的对</li>
+</ul>
+<h5 id="引用遍历算法"><a href="#引用遍历算法" class="headerlink" title="引用遍历算法"></a>引用遍历算法</h5><p>一旦确定了根集合，垃圾回收器需要从这些根开始遍历对象图以识别所有可达对象。有几种常见的遍历算法：</p>
+<h6 id="广度优先遍历（BFS）"><a href="#广度优先遍历（BFS）" class="headerlink" title="广度优先遍历（BFS）"></a>广度优先遍历（BFS）</h6><p>广度优先遍历使用队列数据结构，先处理当前对象的所有直接引用，然后再处理这些被引用对象的引用：广度优先遍历的优点是它能够更均匀地消耗内存，因为它会同时处理多个不同分支的对象。这有助于减少栈空间的使用，特别是在处理深度对象图时。</p>
+<h6 id="深度优先遍历（DFS）"><a href="#深度优先遍历（DFS）" class="headerlink" title="深度优先遍历（DFS）"></a>深度优先遍历（DFS）</h6><p>度优先遍历使用栈数据结构（通常是递归调用实现的隐式栈），优先处理对象引用链的深度。深度优先遍历的优点是可以更快地深入对象图，有可能在较早阶段发现大部分存活对象。然而，对于非常深的对象图，它可能导致堆栈溢出，因此在实际实现中通常需要进行特殊处理，如使用显式栈或混合策略。</p>
+<h5 id="对象复制过程"><a href="#对象复制过程" class="headerlink" title="对象复制过程"></a>对象复制过程</h5><p>在遍历过程中，垃圾回收器需要将 From 空间中的存活对象复制到 To 空间。这个过程涉及几个关键步骤：</p>
+<ul>
+<li><p>对象复制</p>
+</li>
+<li><p>转发指针机制</p>
+<p>转发指针是 Scavenge 算法中的关键机制，它有两个主要作用：避免重复复制同一个对象和允许更新已经处理过的对象的引用</p>
+<p>当对象被复制到 To 空间后，在原对象的位置留下一个转发指针，指向新位置。这样，如果后续遍历再次遇到这个对象，可以直接通过转发指针找到它在 To 空间中的新位置，而不需要再次复制。</p>
+</li>
+<li><p>引用更新<br>在复制过程中，需要确保所有引用都指向对象的新位置：</p>
+</li>
+</ul>
+<h3 id="Scavenge算法的优缺点"><a href="#Scavenge算法的优缺点" class="headerlink" title="Scavenge算法的优缺点"></a>Scavenge算法的优缺点</h3><h5 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h5><ol>
+<li>高效的内存分配：通过简单的指针增加操作实现对象分配，几乎是零开销。</li>
+<li>消除内存碎片：由于每次垃圾回收后，所有存活对象都被紧密排列在新空间中，完全避免了内存碎片问题。</li>
+<li>回收效率与存活对象成正比：回收时间与存活对象数量成正比，而不是与堆大小成正比，非常适合存活率低的场景。</li>
+<li>暂停时间可预测：复制式算法的暂停时间相对稳定，便于预测和控制。</li>
+</ol>
+<h5 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h5><ol>
+<li><strong>内存使用效率低</strong>：只能使用一半的可用内存，空间利用率最高只能达到50%。</li>
+<li>复制开销大：需要复制所有存活对象，当存活对象较多时，复制开销变大。</li>
+<li><strong>不适合长寿对象</strong>：对于大量长期存活的对象，频繁复制会导致性能下降。</li>
+<li>需要支持对象移动：要求运行时系统能够处理对象移动和引用更新。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/02/24/jms-class-format/" rel="prev" title="JVM虚拟机CLASS文件格式">
+      <i class="fa fa-chevron-left"></i> JVM虚拟机CLASS文件格式
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/02/27/mark-sweep-gc/" rel="next" title="Mark-Sweep GC 算法">
+      Mark-Sweep GC 算法 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Scavenge-GC%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">Scavenge GC原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Scavenge-GC-%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6"><span class="nav-number">2.</span> <span class="nav-text">Scavenge GC 的工作机制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%B4%E8%BD%BB%E4%BB%A3%E7%9A%84%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80"><span class="nav-number">2.1.</span> <span class="nav-text">年轻代的内存布局</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E5%A4%B4%E9%83%A8%E7%BB%93%E6%9E%84"><span class="nav-number">2.2.</span> <span class="nav-text">对象头部结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5"><span class="nav-number">2.3.</span> <span class="nav-text">内存分配策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E9%81%8D%E5%8E%86%E8%BF%87%E7%A8%8B%E8%AF%A6%E8%A7%A3"><span class="nav-number">2.4.</span> <span class="nav-text">对象遍历过程详解</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%A0%B9%E9%9B%86%E5%90%88%E8%AF%86%E5%88%AB"><span class="nav-number">2.4.1.</span> <span class="nav-text">根集合识别</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BC%95%E7%94%A8%E9%81%8D%E5%8E%86%E7%AE%97%E6%B3%95"><span class="nav-number">2.4.2.</span> <span class="nav-text">引用遍历算法</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%B9%BF%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86%EF%BC%88BFS%EF%BC%89"><span class="nav-number">2.4.2.1.</span> <span class="nav-text">广度优先遍历（BFS）</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86%EF%BC%88DFS%EF%BC%89"><span class="nav-number">2.4.2.2.</span> <span class="nav-text">深度优先遍历（DFS）</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E5%A4%8D%E5%88%B6%E8%BF%87%E7%A8%8B"><span class="nav-number">2.4.3.</span> <span class="nav-text">对象复制过程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Scavenge%E7%AE%97%E6%B3%95%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">3.</span> <span class="nav-text">Scavenge算法的优缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BC%98%E7%82%B9"><span class="nav-number">3.0.1.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9"><span class="nav-number">3.0.2.</span> <span class="nav-text">缺点</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

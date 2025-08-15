@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="索引本质上是一种数据结构，它以某种方式指向数据，以便在特定列上快速查找数据。想象一下，如果没有索引，MySQL会执行”全表扫描”，逐行检查每条记录是否满足条件，这在大型数据库中将极其低效。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mysql索引浅析">
+<meta property="og:url" content="http://www.sanmuzi.com/2021/06/18/mysql-index/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="索引本质上是一种数据结构，它以某种方式指向数据，以便在特定列上快速查找数据。想象一下，如果没有索引，MySQL会执行”全表扫描”，逐行检查每条记录是否满足条件，这在大型数据库中将极其低效。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-06-18T10:51:30.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.366Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta property="article:tag" content="MYSQL">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2021/06/18/mysql-index/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Mysql索引浅析 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2021/06/18/mysql-index/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Mysql索引浅析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-06-18 18:51:30" itemprop="dateCreated datePublished" datetime="2021-06-18T18:51:30+08:00">2021-06-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>索引本质上是一种数据结构，它以某种方式指向数据，以便在特定列上快速查找数据。想象一下，如果没有索引，MySQL会执行”全表扫描”，逐行检查每条记录是否满足条件，这在大型数据库中将极其低效。</p>
+<span id="more"></span>
+
+
+
+<p>MySQL主要使用B+树作为索引结构，其特点是：</p>
+<ul>
+<li>树的高度平衡，所有叶子节点位于同一层</li>
+<li>非叶子节点只存储键值信息</li>
+<li>所有叶子节点之间是一个双向链表</li>
+</ul>
+<p>这种结构使得查询、插入、删除操作的时间复杂度保持在对数级别(O(log n))。</p>
+<h3 id="MySQL索引类型"><a href="#MySQL索引类型" class="headerlink" title="MySQL索引类型"></a>MySQL索引类型</h3><h5 id="1-主键索引（PRIMARY-KEY）"><a href="#1-主键索引（PRIMARY-KEY）" class="headerlink" title="1. 主键索引（PRIMARY KEY）"></a>1. 主键索引（PRIMARY KEY）</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">user</span> (</span><br><span class="line">    id <span class="type">INT</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT,</span><br><span class="line">    name <span class="type">VARCHAR</span>(<span class="number">50</span>),</span><br><span class="line">    <span class="keyword">PRIMARY</span> KEY (id)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>主键索引是一种特殊的唯一索引，它不允许NULL值，且每个表只能有一个主键。InnoDB存储引擎中，表数据实际上是按主键顺序存储的，这被称为”聚簇索引”。</p>
+<h5 id="2-唯一索引（UNIQUE）"><a href="#2-唯一索引（UNIQUE）" class="headerlink" title="2. 唯一索引（UNIQUE）"></a>2. 唯一索引（UNIQUE）</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">user</span> (</span><br><span class="line">    id <span class="type">INT</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    email <span class="type">VARCHAR</span>(<span class="number">50</span>),</span><br><span class="line">    <span class="keyword">UNIQUE</span> KEY uk_email (email)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>唯一索引确保索引列的值是唯一的，但允许NULL值。</p>
+<h5 id="3-普通索引（INDEX）"><a href="#3-普通索引（INDEX）" class="headerlink" title="3. 普通索引（INDEX）"></a>3. 普通索引（INDEX）</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">user</span> (</span><br><span class="line">    id <span class="type">INT</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    age <span class="type">INT</span>,</span><br><span class="line">    INDEX idx_age (age)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>普通索引是最基本的索引类型，没有唯一性限制。</p>
+<h3 id="4-联合索引（Composite-Index）"><a href="#4-联合索引（Composite-Index）" class="headerlink" title="4. 联合索引（Composite Index）"></a>4. 联合索引（Composite Index）</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">order</span> (</span><br><span class="line">    id <span class="type">INT</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    user_id <span class="type">INT</span>,</span><br><span class="line">    order_date <span class="type">DATE</span>,</span><br><span class="line">    INDEX idx_uid_date (user_id, order_date)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>联合索引是在多个字段上创建的索引，遵循”最左前缀”原则。</p>
+<h5 id="5-全文索引（FULLTEXT）"><a href="#5-全文索引（FULLTEXT）" class="headerlink" title="5. 全文索引（FULLTEXT）"></a>5. 全文索引（FULLTEXT）</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> article (</span><br><span class="line">    id <span class="type">INT</span> <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    title <span class="type">VARCHAR</span>(<span class="number">200</span>),</span><br><span class="line">    content TEXT,</span><br><span class="line">    FULLTEXT KEY ft_content (content)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>全文索引用于全文搜索，在MyISAM和InnoDB（5.6以后版本）存储引擎中支持。</p>
+<h3 id="索引优化策略"><a href="#索引优化策略" class="headerlink" title="索引优化策略"></a>索引优化策略</h3><h5 id="避免过度索引"><a href="#避免过度索引" class="headerlink" title="避免过度索引"></a>避免过度索引</h5><p>每个索引都会占用磁盘空间，并且在插入、更新和删除操作时需要维护，过多的索引反而会降低性能。</p>
+<h5 id="索引列的选择性"><a href="#索引列的选择性" class="headerlink" title="索引列的选择性"></a>索引列的选择性</h5><p>选择性是指不重复的索引值与表记录总数的比值。选择性越高，索引的效率越高。例如，性别字段只有”男/女”两种值，选择性很低，不适合单独建立索引。</p>
+<h5 id="前缀索引"><a href="#前缀索引" class="headerlink" title="前缀索引"></a>前缀索引</h5><p>对于CHAR和VARCHAR类型的长字段，可以只索引开头的部分字符：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> INDEX idx_name <span class="keyword">ON</span> <span class="keyword">user</span>(name(<span class="number">10</span>));</span><br></pre></td></tr></table></figure>
+
+<h5 id="覆盖索引"><a href="#覆盖索引" class="headerlink" title="覆盖索引"></a>覆盖索引</h5><p>如果查询的列恰好是索引的一部分，那么MySQL可以直接从索引中获取数据，而无需回表查询，这称为”覆盖索引”。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 假设有索引idx_name_age(name, age)</span></span><br><span class="line"><span class="keyword">SELECT</span> name, age <span class="keyword">FROM</span> <span class="keyword">user</span> <span class="keyword">WHERE</span> name <span class="operator">=</span> <span class="string">&#x27;Tom&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h5 id="索引下推"><a href="#索引下推" class="headerlink" title="索引下推"></a>索引下推</h5><p>索引下推是MySQL 5.6版本引入的一项重要优化技术。这项技术的引入对MySQL查询性能产生了显著影响，尤其是对于使用非主键索引且查询条件部分命中索引的场景。在没有索引下推优化之前，MySQL查询数据的基本流程是：</p>
+<ol>
+<li>存储引擎根据索引来定位记录</li>
+<li>将这些记录返回给MySQL服务层</li>
+<li>MySQL服务层再根据WHERE条件进行过滤</li>
+</ol>
+<p>而启用索引下推后的流程是：</p>
+<ol>
+<li>存储引擎根据索引来定位记录</li>
+<li><strong>存储引擎会直接在索引中进行WHERE条件的部分判断</strong>（针对索引中包含的列）</li>
+<li>只有满足这部分条件的记录才会被回表查询</li>
+<li>回表获取的完整记录再返回给MySQL服务层</li>
+<li>MySQL服务层进行最终的WHERE条件过滤（如果有其他非索引列的条件）</li>
+</ol>
+<h6 id="索引下推的优势"><a href="#索引下推的优势" class="headerlink" title="索引下推的优势"></a>索引下推的优势</h6><ol>
+<li><strong>减少回表次数</strong>：回表操作（从索引查到主键值，再根据主键值到主键索引中查询记录）是比较耗时的，索引下推可以显著减少回表次数。</li>
+<li><strong>减少数据传输量</strong>：只有满足条件的记录才会被传输到MySQL服务层，减少了网络传输和内存消耗。</li>
+<li><strong>提高查询效率</strong>：尤其对于结果集需要进行大量过滤的查询非常有效。</li>
+</ol>
+<h3 id="常见索引失效场景"><a href="#常见索引失效场景" class="headerlink" title="常见索引失效场景"></a>常见索引失效场景</h3><ol>
+<li><p><strong>使用函数或运算</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 索引失效</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> <span class="keyword">user</span> <span class="keyword">WHERE</span> <span class="keyword">YEAR</span>(birth_date) <span class="operator">=</span> <span class="number">1990</span>;</span><br><span class="line"><span class="comment">-- 应改为</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> <span class="keyword">user</span> <span class="keyword">WHERE</span> birth_date <span class="keyword">BETWEEN</span> <span class="string">&#x27;1990-01-01&#x27;</span> <span class="keyword">AND</span> <span class="string">&#x27;1990-12-31&#x27;</span>;</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>使用!=或&lt;&gt;</strong> 可能导致索引失效，具体取决于MySQL优化器的判断。</p>
+</li>
+<li><p><strong>模糊查询以%开头</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 索引失效</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> <span class="keyword">user</span> <span class="keyword">WHERE</span> name <span class="keyword">LIKE</span> <span class="string">&#x27;%Tom%&#x27;</span>;</span><br><span class="line"><span class="comment">-- 可以使用</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> <span class="keyword">user</span> <span class="keyword">WHERE</span> name <span class="keyword">LIKE</span> <span class="string">&#x27;Tom%&#x27;</span>;</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>联合索引不满足最左前缀</strong> 对于联合索引(a,b,c)，只有当查询条件中包含a时，索引才会生效。</p>
+</li>
+<li><p><strong>数据类型隐式转换</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 如果phone是varchar类型，这里会导致索引失效</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> <span class="keyword">user</span> <span class="keyword">WHERE</span> phone <span class="operator">=</span> <span class="number">12345678</span>;</span><br></pre></td></tr></table></figure></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+              <a href="/tags/MYSQL/" rel="tag"># MYSQL</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/06/17/mysql-sql-run/" rel="prev" title="Mysql基础架构">
+      <i class="fa fa-chevron-left"></i> Mysql基础架构
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/06/18/mysql-transaction/" rel="next" title="mysql事务浅析">
+      mysql事务浅析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#MySQL%E7%B4%A2%E5%BC%95%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">MySQL索引类型</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-%E4%B8%BB%E9%94%AE%E7%B4%A2%E5%BC%95%EF%BC%88PRIMARY-KEY%EF%BC%89"><span class="nav-number">1.0.1.</span> <span class="nav-text">1. 主键索引（PRIMARY KEY）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-%E5%94%AF%E4%B8%80%E7%B4%A2%E5%BC%95%EF%BC%88UNIQUE%EF%BC%89"><span class="nav-number">1.0.2.</span> <span class="nav-text">2. 唯一索引（UNIQUE）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-%E6%99%AE%E9%80%9A%E7%B4%A2%E5%BC%95%EF%BC%88INDEX%EF%BC%89"><span class="nav-number">1.0.3.</span> <span class="nav-text">3. 普通索引（INDEX）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E8%81%94%E5%90%88%E7%B4%A2%E5%BC%95%EF%BC%88Composite-Index%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">4. 联合索引（Composite Index）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#5-%E5%85%A8%E6%96%87%E7%B4%A2%E5%BC%95%EF%BC%88FULLTEXT%EF%BC%89"><span class="nav-number">2.0.1.</span> <span class="nav-text">5. 全文索引（FULLTEXT）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5"><span class="nav-number">3.</span> <span class="nav-text">索引优化策略</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%81%BF%E5%85%8D%E8%BF%87%E5%BA%A6%E7%B4%A2%E5%BC%95"><span class="nav-number">3.0.1.</span> <span class="nav-text">避免过度索引</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E5%88%97%E7%9A%84%E9%80%89%E6%8B%A9%E6%80%A7"><span class="nav-number">3.0.2.</span> <span class="nav-text">索引列的选择性</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%89%8D%E7%BC%80%E7%B4%A2%E5%BC%95"><span class="nav-number">3.0.3.</span> <span class="nav-text">前缀索引</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A6%86%E7%9B%96%E7%B4%A2%E5%BC%95"><span class="nav-number">3.0.4.</span> <span class="nav-text">覆盖索引</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E4%B8%8B%E6%8E%A8"><span class="nav-number">3.0.5.</span> <span class="nav-text">索引下推</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E4%B8%8B%E6%8E%A8%E7%9A%84%E4%BC%98%E5%8A%BF"><span class="nav-number">3.0.5.1.</span> <span class="nav-text">索引下推的优势</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88%E5%9C%BA%E6%99%AF"><span class="nav-number">4.</span> <span class="nav-text">常见索引失效场景</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

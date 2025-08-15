@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="CAP 定理、BASE 理论与最终一致性介绍">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第二章 分布式系统设计核心概念">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/01/07/distribution-system-2/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="CAP 定理、BASE 理论与最终一致性介绍">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-01-07T01:00:01.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.353Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/01/07/distribution-system-2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>第二章 分布式系统设计核心概念 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/01/07/distribution-system-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          第二章 分布式系统设计核心概念
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-01-07 09:00:01" itemprop="dateCreated datePublished" datetime="2025-01-07T09:00:01+08:00">2025-01-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>CAP 定理、BASE 理论与最终一致性介绍</p>
+<span id="more"></span>
+
+<h2 id="2-2-CAP-定理"><a href="#2-2-CAP-定理" class="headerlink" title="2.2 CAP 定理"></a>2.2 CAP 定理</h2><h3 id="2-2-1-概念起源与基本内涵"><a href="#2-2-1-概念起源与基本内涵" class="headerlink" title="2.2.1 概念起源与基本内涵"></a>2.2.1 概念起源与基本内涵</h3><p>CAP 定理最初由 Eric Brewer 于 2000 年左右提出，并在 2002 年由 Seth Gilbert 和 Nancy Lynch 的论文形式正式证明。CAP 是三个单词的首字母缩写：</p>
+<ul>
+<li><strong>Consistency（一致性）</strong>：所有节点在同一时间看到的数据是相同的。对于分布式数据库而言，即所有对同一份数据的读取操作都能返回最新且相同的结果。</li>
+<li><strong>Availability（可用性）</strong>：系统在面对网络故障或部分节点故障时，仍然能够及时响应读写操作，并保证较高的服务可用率。</li>
+<li><strong>Partition Tolerance（分区容错性）</strong>：当网络中出现分区（Partition）或部分节点之间无法通信时，系统仍能继续提供一定程度的服务，或至少能保证核心功能不被完全破坏。</li>
+</ul>
+<p>CAP 定理的核心观点是：在一个存在网络分区（P）可能性的分布式系统中，不可能同时完全满足一致性（C）和可用性（A）。换言之，在分区不可避免的前提下，系统只能在 C 和 A 中选择侧重哪一个特性进行优化，这成为分布式系统设计时最重要的取舍考量之一。</p>
+<p>需要注意的是，“分区容错性”在实际分布式环境中几乎是不可回避的基本要求：不管是局域网还是跨数据中心的广域网，都无法保证网络始终不出现抖动、丢包或割裂。因而，“P” 几乎是必须要保留的特性。所以在考虑 CAP 时，往往是 “在 P 前提下，在 C 和 A 之间如何平衡”。</p>
+<h3 id="2-2-2-CA、CP-与-AP-系统"><a href="#2-2-2-CA、CP-与-AP-系统" class="headerlink" title="2.2.2 CA、CP 与 AP 系统"></a>2.2.2 CA、CP 与 AP 系统</h3><p>基于 CAP 定理，常见的三种系统类型如下：</p>
+<ol>
+<li><strong>CA 系统</strong>：强调一致性和可用性，牺牲分区容错性<ul>
+<li>理论上，如果网络从不分区（即通信永远可靠），就可以保证所有节点都保持严格一致，同时对外提供高可用服务；然而在实际生产环境中，这种情况几乎不可能完全避免网络分区。</li>
+<li>对于一些企业内部小规模集群（网络极为稳定）或者金融机构内部专网（网络质量极高）而言，可在一定程度上追求 “CA” 效果，但不能苛求其在所有情况下都完美成立。</li>
+</ul>
+</li>
+<li><strong>CP 系统</strong>：强调一致性和分区容错性，牺牲可用性<ul>
+<li>一旦网络出现分区，系统为了保证一致性，通常会拒绝部分读写请求（如导致写操作被阻塞或读到过时数据），从而减少服务的可用性。</li>
+<li>典型例子是分布式一致性协议如 Paxos、Raft 等，一旦节点无法和 Leader 通信，为了确保数据不出现冲突，会拒绝该节点的写操作，从而体现为可用性下降，但一致性能够得到保障。</li>
+</ul>
+</li>
+<li><strong>AP 系统</strong>：强调可用性和分区容错性，牺牲强一致性<ul>
+<li>在网络分区或部分节点故障时，各个孤立分区依然可以对外提供读写服务，但可能导致不同分区之间的数据短暂不一致，需要在网络恢复后进行数据同步或冲突解决。</li>
+<li>常见案例如许多 NoSQL 数据库（Cassandra、Riak 等），在节点出现网络隔离时依然允许本地的读写操作，保证高可用，同时通过异步副本同步机制最终达到数据一致。</li>
+</ul>
+</li>
+</ol>
+<h3 id="2-2-3-对实际系统的启示"><a href="#2-2-3-对实际系统的启示" class="headerlink" title="2.2.3 对实际系统的启示"></a>2.2.3 对实际系统的启示</h3><p>CAP 定理提醒我们，分布式系统不可能“三者皆优”。实际系统设计需要根据业务需求选取最合适的平衡点：</p>
+<ul>
+<li>如果是金融核心账务系统，不能容忍数据不一致，往往会优先保证 <strong>一致性（C）</strong>；一旦网络出现分区，可以暂时牺牲一部分可用性，例如短暂阻塞写操作或切换到只读模式。</li>
+<li>如果是社交应用、日志搜集或电商推荐等，对数据强一致性要求不高，但极度追求用户体验（希望读取或写入操作不要被拒绝），则倾向于 <strong>可用性（A）</strong>，在出现网络分区时依然允许访问，然后通过最终一致性等机制来同步数据。</li>
+<li>分区容错性（P）在大多数场景下都是刚需，没有人能够保证网络 100% 不出问题。</li>
+</ul>
+<p>一个系统的架构选择往往需要在不同模块中分别考虑 CAP。并非整个系统必须统一为 AP 或 CP 模型，而可以在不同子系统或不同功能上做不同的取舍。例如在电商平台中，“下单支付” 可以走 CP 风格，以保证支付数据绝对一致；而 “商品推荐” 可以走 AP 风格，不需强一致，但是要保证高可用、低延迟，为用户持续提供服务。</p>
+<hr>
+<h2 id="2-3-BASE-理论与最终一致性"><a href="#2-3-BASE-理论与最终一致性" class="headerlink" title="2.3 BASE 理论与最终一致性"></a>2.3 BASE 理论与最终一致性</h2><h3 id="2-3-1-ACID-与-BASE"><a href="#2-3-1-ACID-与-BASE" class="headerlink" title="2.3.1 ACID 与 BASE"></a>2.3.1 ACID 与 BASE</h3><p>在传统的集中式数据库中，通常遵循 ACID 特性（原子性、一致性、隔离性、持久性），确保事务（Transaction）在任何故障条件下依然保持数据完整和一致。然而，随着互联网应用对高并发与高可用的需求不断上涨，ACID 模型在分布式环境下往往带来极高的实现成本和性能开销。</p>
+<p>与 ACID 相对，来自 eBay 等互联网公司的工程实践催生了 <strong>BASE 理论</strong>，它是以下概念的缩写：</p>
+<ul>
+<li><strong>Basically Available（基本可用）</strong>：保证系统在大多数情况下可用，允许在极端情况下功能降级或性能降低，但不会让系统彻底不可用。</li>
+<li><strong>Soft-state（软状态）</strong>：系统允许不同节点间数据处于一个中间状态，这个状态不一定是强一致的。</li>
+<li><strong>Eventually Consistent（最终一致）</strong>：系统通过异步副本同步、冲突检测与合并等机制，保证在没有新的更新操作后，所有节点的数据终将趋于一致。</li>
+</ul>
+<p>BASE 理论核心强调“放宽强一致性”以获得系统的高可用与高性能，从而应对大规模、高并发的互联网应用场景。它与 CAP 定理在思想上不谋而合，很多 AP 型分布式系统都体现了 BASE 的设计哲学。</p>
+<h3 id="2-3-2-最终一致性机制"><a href="#2-3-2-最终一致性机制" class="headerlink" title="2.3.2 最终一致性机制"></a>2.3.2 最终一致性机制</h3><p>“最终一致性” 并不意味着系统可以一直处于不一致状态，而是说在网络没有持续故障、也没有新的更新操作发生的情况下，系统所有节点的数据会在一段时间之后到达一致。实现最终一致性通常需要以下几个关键步骤：</p>
+<ol>
+<li><strong>多副本存储与异步复制</strong><br> 每个数据对象都拥有多个副本，分布在不同的物理节点或数据中心。当客户端在某个节点上发起写请求时，该节点会先在本地进行更新并返回成功，然后再以异步方式将更新“传播”给其他节点。这种异步复制大大缩短了写操作的响应延时，但在复制完成之前，各副本间的数据是暂时不一致的。</li>
+<li><strong>冲突检测与合并</strong><br> 由于异步复制可能在不同节点产生写冲突，系统需要在检测到冲突后进行合并或以一定的策略决定“谁的写为准”。例如在分布式键值存储中，可基于版本向量（Vector Clock）检测出冲突，再由应用层合并；或者采用“最后写入者优先”(Last Write Wins) 这样的粗粒度策略。</li>
+<li><strong>修复（Healing）过程</strong><br> 一旦网络故障或节点离线恢复，之前未能完成的数据同步需要在系统重新联通后进行补偿或修复，确保数据最终一致。典型方式包括反熵（anti-entropy）协议、Merkle Tree 比对、Read Repair、Hinted Handoff 等。</li>
+</ol>
+<p>在实际应用中，最终一致性的实现复杂度与业务场景高度相关。很多场景可以容忍短暂的不一致，只要在一段时间内能够修复即可，例如计数统计、商品推荐、日志分析、点赞或评论系统等。但对于金融转账或库存扣减等需要更严格一致性的场景，就必须慎重评估或采用更强一致性策略。</p>
+<h2 id="2-4-一致性模型"><a href="#2-4-一致性模型" class="headerlink" title="2.4 一致性模型"></a>2.4 一致性模型</h2><h3 id="2-4-1-为什么需要不同的一致性模型"><a href="#2-4-1-为什么需要不同的一致性模型" class="headerlink" title="2.4.1 为什么需要不同的一致性模型"></a>2.4.1 为什么需要不同的一致性模型</h3><p>当我们说“保证数据一致性”时，不同的业务场景对“一致”的定义往往并不相同。有些场景希望所有读取操作都能立即看到最新的写入（强一致性），有些场景只要求一定时间后最终同步即可（最终一致性），还有一些场景对读写的时序有更细粒度的需求（单调读、单调写、一致读等）。</p>
+<p>因此，分布式系统中定义了各种一致性模型（Consistency Model），它们是对“读写可见性”与“事件顺序”的一种契约约束。根据强弱程度，可大致从“强一致性”到“弱一致性”划分一系列模型。</p>
+<h3 id="2-4-2-强一致性（Strong-Consistency）"><a href="#2-4-2-强一致性（Strong-Consistency）" class="headerlink" title="2.4.2 强一致性（Strong Consistency）"></a>2.4.2 强一致性（Strong Consistency）</h3><p><strong>强一致性（Strong Consistency）</strong> 又常被称为 “线性一致性（Linearizability）” 或 “原子一致性（Atomic Consistency）”。它的含义是：</p>
+<ul>
+<li>从全局视角看，一个写操作完成后，所有后续的读操作都应该读到这次写入更新的值。</li>
+<li>每次读取都能看到最近一次成功写入的数据，没有延迟或中间态。</li>
+</ul>
+<p>这是一种最严格、也是最昂贵的模型。要实现强一致性，通常需要分布式共识算法（如 Paxos、Raft、Zab 等）来确保数据副本在做更新前能达成一致意见。这样能有效防止脑裂或写冲突，但在发生网络抖动或分区时，会牺牲可用性，导致部分写操作需要阻塞等待或被拒绝。</p>
+<p><strong>适用场景</strong>：诸如银行核心账务、在线支付、交易撮合等对数据准确性要求极高的业务。</p>
+<h3 id="2-4-3-顺序一致性（Sequential-Consistency）"><a href="#2-4-3-顺序一致性（Sequential-Consistency）" class="headerlink" title="2.4.3 顺序一致性（Sequential Consistency）"></a>2.4.3 顺序一致性（Sequential Consistency）</h3><p><strong>顺序一致性（Sequential Consistency）</strong> 的要求比强一致性稍弱：只要求所有处理器（或线程、节点）看到的操作顺序是一致的，但不要求每次读一定能读到最新写入的值，只需保证操作的全局顺序对所有节点都相同。</p>
+<p>例如，如果有两个操作：A 写入 x=1，B 写入 x=2。顺序一致性模型只要求在所有节点眼中，这两个写操作的顺序要么全是先 A 后 B，要么全是先 B 后 A。但是，对于某次读操作是否一定能看到前一次写操作的结果，并没有强一致性那么严格的约束。</p>
+<p>顺序一致性仍然需要比较复杂的同步机制，但比强一致性稍微宽松一些。在工程实践中，强一致性和顺序一致性有时被混用或视为近似概念，但在学术定义上二者略有不同。</p>
+<h3 id="2-4-4-因果一致性（Causal-Consistency）"><a href="#2-4-4-因果一致性（Causal-Consistency）" class="headerlink" title="2.4.4 因果一致性（Causal Consistency）"></a>2.4.4 因果一致性（Causal Consistency）</h3><p><strong>因果一致性（Causal Consistency）</strong> 进一步放松对全局顺序的要求，只保证与“因果关系”相关的操作必须保持顺序，而在没有因果关联的操作之间则无严格顺序约束。</p>
+<p>举个例子：</p>
+<ul>
+<li>用户 1 写了一条帖子（操作 A），然后用户 2 读取并点赞（操作 B）。则操作 B 因果地依赖于操作 A，必须在所有节点的视图中保持「A 发生在 B 之前」的顺序。</li>
+<li>如果出现与 A、B 无关的操作 C（例如另一个用户的评论），则与 A、B 不存在因果关联，可以并行发生。</li>
+</ul>
+<p>因果一致性常用于社交网络、协作系统等场景，因为在这些场景中，与用户交互相关的依赖关系非常重要，用户期望先看到帖子才能点赞或评论（A→B→C 的顺序）。但对于彼此独立的讨论串或操作，系统不必强求它们的先后顺序。</p>
+<h3 id="2-4-5-单调一致性（Monotonic-Consistency）"><a href="#2-4-5-单调一致性（Monotonic-Consistency）" class="headerlink" title="2.4.5 单调一致性（Monotonic Consistency）"></a>2.4.5 单调一致性（Monotonic Consistency）</h3><p>单调一致性包含几种常见形态：</p>
+<ol>
+<li><strong>单调读一致性（Monotonic Read Consistency）</strong>：如果某个客户端已经读到了数据的一个较新版本，那么这个客户端在之后的读取中不应再看到更旧的数据版本。</li>
+<li><strong>单调写一致性（Monotonic Write Consistency）</strong>：如果某个客户端先后发起两次写操作，则后一次写操作应基于前一次写成功后的最新状态进行。</li>
+<li><strong>單調遲到讀一致性（Monotonic Prefix Reads）</strong>：读操作能够看到一个单调扩张的历史前缀，不会“回退”到之前版本。</li>
+</ol>
+<p>这些模型是为了避免客户端体验到“时空错乱”感：即我明明已经看到更新后的数据，怎么下一次读却又回到了旧版本？在一些读多写少的场景下，只要能够保证单调读，用户体验就会好很多。</p>
+<h3 id="2-4-6-弱一致性（Weak-Consistency）与最终一致性（Eventual-Consistency）"><a href="#2-4-6-弱一致性（Weak-Consistency）与最终一致性（Eventual-Consistency）" class="headerlink" title="2.4.6 弱一致性（Weak Consistency）与最终一致性（Eventual Consistency）"></a>2.4.6 弱一致性（Weak Consistency）与最终一致性（Eventual Consistency）</h3><p><strong>弱一致性（Weak Consistency）</strong> 对操作顺序和读取可见性没有强制要求，节点之间只要最终能同步即可，用户在短期内可能读到旧数据或冲突数据。很多高并发应用会在架构上实现弱一致性，以换取极致的吞吐能力和低延迟。</p>
+<p><strong>最终一致性（Eventual Consistency）</strong> 实际上是弱一致性的一种特化形式，即只要系统稳定下来（没有新写入，且网络正常），所有节点最终能达到一致状态。前文提到的 BASE 理论正是这种思路的典型代表。</p>
+<hr>
+<h2 id="2-5-在实践中选择一致性模型"><a href="#2-5-在实践中选择一致性模型" class="headerlink" title="2.5 在实践中选择一致性模型"></a>2.5 在实践中选择一致性模型</h2><h3 id="2-5-1-不同业务场景的策略"><a href="#2-5-1-不同业务场景的策略" class="headerlink" title="2.5.1 不同业务场景的策略"></a>2.5.1 不同业务场景的策略</h3><p>在工程实践中，如何为具体业务选择合适的一致性模型，是架构师的一项重要决策。通常可以从以下几个角度进行考量：</p>
+<ol>
+<li><strong>数据安全性与正确性要求</strong><ul>
+<li>如果是金融交易、订单支付、医疗系统等，对数据的准确性有极高要求，任何不一致都可能带来严重损失或法律责任，需要倾向更强的一致性模型。</li>
+<li>如果是社交点赞、评论计数、日志分析、商品推荐等，对短期内的数据不一致容忍度较高，则可以采用最终一致性等弱一致性模型，换取更高的可用性与扩展性。</li>
+</ul>
+</li>
+<li><strong>系统规模与访问模式</strong><ul>
+<li>当数据量、并发量极其庞大时，使用强一致性的方案往往导致性能瓶颈，并增加系统复杂度。</li>
+<li>读多写少的场景，可以通过多层缓存或副本策略，用弱一致性方法快速响应大部分读请求，然后在写通道做排队或合并，保证系统整体高效。</li>
+</ul>
+</li>
+<li><strong>用户体验与实时性</strong><ul>
+<li>对某些互联网产品而言，系统可用性与响应速度远比数据短时一致来得重要。用户不会容忍长时间卡顿或请求被拒绝，但通常可以接受一两秒内的延迟更新。</li>
+<li>对另一些场景（如在线协同编辑），用户期望看到实时同步，这时就需要更强的因果一致性或近似强一致性的模型，并可能结合 CRDT（Conflict-free Replicated Data Type） 等数据结构进行冲突合并。</li>
+</ul>
+</li>
+</ol>
+<h3 id="2-5-2-分层设计思想"><a href="#2-5-2-分层设计思想" class="headerlink" title="2.5.2 分层设计思想"></a>2.5.2 分层设计思想</h3><p>在实际系统中，并非所有数据都需要采用相同级别的一致性。通过“分层设计”或“分域策略”，可以对不同类型的数据或功能模块设置不同的一致性要求。例如：</p>
+<ul>
+<li><strong>核心交易域（Payment Domain）</strong>：采用强一致性（CP 模式），通过分布式事务或共识协议来确保每一次资金变动都安全可靠。</li>
+<li><strong>日志分析域（Log Analytics Domain）</strong>：采用最终一致性（AP 模式），支持高吞吐的写入与异步聚合，日志处理对一致性的实时性要求不高。</li>
+<li><strong>用户推荐域（Recommendation Domain）</strong>：可采用因果一致性或单调读一致性，以保证用户操作前后的一致体验，但对全局数据的强一致要求并不高。</li>
+</ul>
+<p>如此一来，系统既能在关键核心处保持严格一致，也能在非关键场景保持高可用与伸缩性。</p>
+<h3 id="2-5-3-工程上的配合点"><a href="#2-5-3-工程上的配合点" class="headerlink" title="2.5.3 工程上的配合点"></a>2.5.3 工程上的配合点</h3><ol>
+<li><strong>缓存与失效策略</strong><ul>
+<li>如果系统采用弱一致性或最终一致性，需要设计合理的缓存失效与更新策略，避免缓存和数据库之间的数据长期不一致。</li>
+<li>读写分离时需要确保一致性需求较高的场景绕过缓存直接访问主库，或采用合适的延迟淘汰策略。</li>
+</ul>
+</li>
+<li><strong>版本控制与冲突合并</strong><ul>
+<li>在弱一致性系统中，很可能出现写冲突，版本控制（Version Vector 或 Lamport Timestamp）+ 冲突合并（Conflict Resolution）是常见做法。</li>
+<li>对于应用层而言，需要设计好“冲突合并逻辑”，例如同一个用户的多次修改以最后写为准，或多用户编辑时进行智能合并。</li>
+</ul>
+</li>
+<li><strong>网络隔离与异地多活</strong><ul>
+<li>在多数据中心部署时，网络延迟与分区概率更高，一致性模型的选择尤为关键。常见的异地多活架构往往采用 AP 模式，允许不同区域本地写，异步复制到其他区域，最终同步。</li>
+<li>如果是金融核心系统跨城市做双活，则往往使用 CP 模式，每次写操作都要协调所有活跃数据中心达成一致，但代价是跨城延迟，影响系统响应时间。</li>
+</ul>
+</li>
+</ol>
+<h3 id="参考文献与延伸阅读"><a href="#参考文献与延伸阅读" class="headerlink" title="参考文献与延伸阅读"></a>参考文献与延伸阅读</h3><ol>
+<li><strong>Eric A. Brewer</strong>: “Towards robust distributed systems (abstract).” In <em>PODC ‘00: Proceedings of the nineteenth annual ACM symposium on Principles of distributed computing</em>, 2000.</li>
+<li><strong>Seth Gilbert, Nancy Lynch</strong>: “Brewer’s conjecture and the feasibility of consistent, available, partition-tolerant web services.” <em>SIGACT News</em> 33 (2): 51–59, 2002.</li>
+<li><strong>Werner Vogels</strong>: “Eventually Consistent.” <em>Communications of the ACM</em> 52 (1): 40–44, 2009. (Amazon CTO 对最终一致性的解读)</li>
+<li><strong>Peter Bailis, Kyle Kingsbury</strong>:  分布式系统中一致性模型的研究与相关论文，详见相关数据库会议（SIGMOD、VLDB 等）</li>
+<li><strong>Martin Kleppmann</strong>: <em>Designing Data-Intensive Applications</em>, 2017. （涵盖分布式系统一致性理论与实践的优秀著作）</li>
+<li><strong>Tanenbaum, Steen</strong>: <em>Distributed Systems: Principles and Paradigms</em>, 2nd Edition. （分布式系统经典著作之一）</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/01/07/distribution-system-6/" rel="prev" title="第六章 分布式计算与框架">
+      <i class="fa fa-chevron-left"></i> 第六章 分布式计算与框架
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/01/08/distribution-system-5/" rel="next" title="第五章 分布式存储">
+      第五章 分布式存储 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-CAP-%E5%AE%9A%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">2.2 CAP 定理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-1-%E6%A6%82%E5%BF%B5%E8%B5%B7%E6%BA%90%E4%B8%8E%E5%9F%BA%E6%9C%AC%E5%86%85%E6%B6%B5"><span class="nav-number">1.1.</span> <span class="nav-text">2.2.1 概念起源与基本内涵</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-2-CA%E3%80%81CP-%E4%B8%8E-AP-%E7%B3%BB%E7%BB%9F"><span class="nav-number">1.2.</span> <span class="nav-text">2.2.2 CA、CP 与 AP 系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-3-%E5%AF%B9%E5%AE%9E%E9%99%85%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%90%AF%E7%A4%BA"><span class="nav-number">1.3.</span> <span class="nav-text">2.2.3 对实际系统的启示</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-BASE-%E7%90%86%E8%AE%BA%E4%B8%8E%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-number">2.</span> <span class="nav-text">2.3 BASE 理论与最终一致性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-1-ACID-%E4%B8%8E-BASE"><span class="nav-number">2.1.</span> <span class="nav-text">2.3.1 ACID 与 BASE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-2-%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E6%9C%BA%E5%88%B6"><span class="nav-number">2.2.</span> <span class="nav-text">2.3.2 最终一致性机制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-%E4%B8%80%E8%87%B4%E6%80%A7%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">2.4 一致性模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-1-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E4%B8%8D%E5%90%8C%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.1.</span> <span class="nav-text">2.4.1 为什么需要不同的一致性模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-2-%E5%BC%BA%E4%B8%80%E8%87%B4%E6%80%A7%EF%BC%88Strong-Consistency%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">2.4.2 强一致性（Strong Consistency）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-3-%E9%A1%BA%E5%BA%8F%E4%B8%80%E8%87%B4%E6%80%A7%EF%BC%88Sequential-Consistency%EF%BC%89"><span class="nav-number">3.3.</span> <span class="nav-text">2.4.3 顺序一致性（Sequential Consistency）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-4-%E5%9B%A0%E6%9E%9C%E4%B8%80%E8%87%B4%E6%80%A7%EF%BC%88Causal-Consistency%EF%BC%89"><span class="nav-number">3.4.</span> <span class="nav-text">2.4.4 因果一致性（Causal Consistency）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-5-%E5%8D%95%E8%B0%83%E4%B8%80%E8%87%B4%E6%80%A7%EF%BC%88Monotonic-Consistency%EF%BC%89"><span class="nav-number">3.5.</span> <span class="nav-text">2.4.5 单调一致性（Monotonic Consistency）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-6-%E5%BC%B1%E4%B8%80%E8%87%B4%E6%80%A7%EF%BC%88Weak-Consistency%EF%BC%89%E4%B8%8E%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%EF%BC%88Eventual-Consistency%EF%BC%89"><span class="nav-number">3.6.</span> <span class="nav-text">2.4.6 弱一致性（Weak Consistency）与最终一致性（Eventual Consistency）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-5-%E5%9C%A8%E5%AE%9E%E8%B7%B5%E4%B8%AD%E9%80%89%E6%8B%A9%E4%B8%80%E8%87%B4%E6%80%A7%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.</span> <span class="nav-text">2.5 在实践中选择一致性模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-1-%E4%B8%8D%E5%90%8C%E4%B8%9A%E5%8A%A1%E5%9C%BA%E6%99%AF%E7%9A%84%E7%AD%96%E7%95%A5"><span class="nav-number">4.1.</span> <span class="nav-text">2.5.1 不同业务场景的策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-2-%E5%88%86%E5%B1%82%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3"><span class="nav-number">4.2.</span> <span class="nav-text">2.5.2 分层设计思想</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-3-%E5%B7%A5%E7%A8%8B%E4%B8%8A%E7%9A%84%E9%85%8D%E5%90%88%E7%82%B9"><span class="nav-number">4.3.</span> <span class="nav-text">2.5.3 工程上的配合点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE%E4%B8%8E%E5%BB%B6%E4%BC%B8%E9%98%85%E8%AF%BB"><span class="nav-number">4.4.</span> <span class="nav-text">参考文献与延伸阅读</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

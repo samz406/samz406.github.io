@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在数据库系统中，索引（Index）是提升数据检索性能的关键数据结构。索引通过为表中的数据建立高效的查找路径，大幅减少每次查询需要扫描的数据量，从而显著提高查询速度。常见的索引结构包括树形索引（如 B+ 树）、日志结构合并树（LSM-Tree）、哈希索引、跳表、Trie 树（前缀树）、位图索引、倒排索引等。不同索引在结构和操作机制上各有特点，适用的场景和性能表现也不尽相同。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="常见索引实现方案的全面分析">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/06/12/the-three-pillars-of-architectural-design/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="在数据库系统中，索引（Index）是提升数据检索性能的关键数据结构。索引通过为表中的数据建立高效的查找路径，大幅减少每次查询需要扫描的数据量，从而显著提高查询速度。常见的索引结构包括树形索引（如 B+ 树）、日志结构合并树（LSM-Tree）、哈希索引、跳表、Trie 树（前缀树）、位图索引、倒排索引等。不同索引在结构和操作机制上各有特点，适用的场景和性能表现也不尽相同。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-06-12T14:11:12.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.377Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="架构、数据库">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/06/12/the-three-pillars-of-architectural-design/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>常见索引实现方案的全面分析 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/06/12/the-three-pillars-of-architectural-design/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          常见索引实现方案的全面分析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-06-12 22:11:12" itemprop="dateCreated datePublished" datetime="2025-06-12T22:11:12+08:00">2025-06-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A0%94%E7%A9%B6%E6%8A%A5%E5%91%8A/" itemprop="url" rel="index"><span itemprop="name">研究报告</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在数据库系统中，索引（Index）是提升数据检索性能的关键数据结构。索引通过为表中的数据建立高效的查找路径，大幅减少每次查询需要扫描的数据量，从而显著提高查询速度。常见的索引结构包括树形索引（如 B+ 树）、日志结构合并树（LSM-Tree）、哈希索引、跳表、Trie 树（前缀树）、位图索引、倒排索引等。不同索引在结构和操作机制上各有特点，适用的场景和性能表现也不尽相同。</p>
+<span id="more"></span>
+
+<h2 id="B-树索引"><a href="#B-树索引" class="headerlink" title="B+树索引"></a>B+树索引</h2><h3 id="结构与特点"><a href="#结构与特点" class="headerlink" title="结构与特点"></a>结构与特点</h3><p><strong>B+树（B+ Tree）</strong>是一种多叉平衡查找树，其每个节点可以拥有大量子节点（即高扇出数）。与传统的二叉搜索树不同，B+树的节点扇出往往可以达到数十甚至上百，这使得树的高度大大降低。B+树包含根节点、内部节点和叶子节点三类，其中<strong>所有实际数据记录都存储在叶子节点</strong>，内部节点仅存储键值用于索引。叶子节点按照键值大小顺序<strong>通过指针彼此相连</strong>，形成有序链表，这一结构使得 B+树特别适合区间遍历和范围查询。这种设计与经典 B-树的区别在于：B-树允许内部节点存储数据，而 B+树将所有数据集中于叶节点。虽然这意味着 B+树在查找单条记录时需要访问到叶子节点（时间复杂度 O(log n)），但它带来的好处是叶子节点天然按序排列，支持顺序访问，从而避免了不必要的全表扫描。</p>
+<p>B+树的<strong>平衡</strong>性质确保了所有叶子节点在同一深度，任何键值的查找路径长度相同，因此查询性能稳定、一致。同时，由于节点扇出很大，一次 I/O 即可读取多个键指针组合，树的高度很低，从根节点到叶子的路径通常只需很少的磁盘页访问。这在磁盘等块存储介质上尤为重要，因为减少随机 I/O 次数对性能提升非常显著。综上，B+树通过<strong>高扇出、数据集中存储于叶节点、叶节点有序链表</strong>等结构特点，实现了对磁盘访问的优化和对范围查询的良好支持，使其成为关系型数据库中最常用的索引结构。</p>
+<h3 id="插入与查询机制"><a href="#插入与查询机制" class="headerlink" title="插入与查询机制"></a>插入与查询机制</h3><p><strong>查询（Search）：</strong>B+树的查询从根节点开始，逐层向下搜索。在每个内部节点，通过比较待查键值与节点中存储的键范围，定位应该沿哪个指针分支进入下一层节点。由于内部节点只存储键而不存数据，节点中键的数量为 m 阶 B+树的阶数减一（若节点最多有 m 个子节点，则存储 m-1 个键）。当逐层抵达叶子节点后，在叶节点的有序键数组中找到目标键，并返回对应的数据记录。如果进行<strong>范围查询</strong>（例如查找键值在 10 到 25 之间的所有记录），B+树在找到范围下限（如10）所在的叶子节点后，不需要回溯树结构，而是可以直接利用叶节点链表顺序遍历后续叶节点，直到键值超过上限（如25）为止。由于叶节点链表按键有序连接，范围扫描非常高效——这一点是 B+树相比其他结构（如哈希索引）的显著优势。</p>
+<p><strong>插入（Insertion）：</strong>B+树的插入需要在保持树平衡的同时，将新键值放入适当的叶节点。插入过程首先和查询一样，通过比较键值沿树下降，找到新纪录应插入的叶子节点。如果该叶节点尚有空间容纳新键，则直接插入并结束。若叶节点已满（达到节点可容纳的最大键数），则需要进行<strong>结点分裂（Split）</strong>：一般将叶节点的键一分为二，分裂成两个叶节点，并将其中较大的部分移入新节点。随后，将新节点的首键（或中间键）上移到父节点，作为划分两个子节点的边界键。若父节点也已满，则可能发生递归分裂，沿着插入路径向上传播。最终，若根节点也发生了分裂，则产生一个新的根节点，树高增加1。通过这种<strong>局部分裂</strong>和节点调整，B+树保证插入后仍维持平衡性质。值得注意的是，在 B+树中，分裂过程中上移到父节点的键并没有对应的数据记录（因为数据留在叶子节点），仅作为索引用的分隔值。整个插入操作的时间复杂度为 O(log n)，其中 n 为树中键的数量。在最坏情况下，每次插入可能触发一次节点分裂和父节点更新，但由于 B+树高度很低，这样的开销依然是对数级别的。</p>
+<p>**删除（Deletion）**的过程与插入相反，当删除某记录导致叶节点中键数少于最小值时，可能需要和相邻节点合并或从相邻节点借位，以保持节点利用率和树的平衡。由于篇幅所限本文不再展开，但总体复杂度也是 O(log n)。</p>
+<h3 id="适用场景与局限"><a href="#适用场景与局限" class="headerlink" title="适用场景与局限"></a>适用场景与局限</h3><p>B+树凭借其<strong>高效的点查和范围扫描性能</strong>，非常适合传统关系型数据库中的**在线事务处理（OLTP）**场景。例如，当通过主键或唯一键查询单行记录时，B+树可以在 O(log n) 时间内定位数据；同时，对于范围查询或排序查询（如<code>WHERE age BETWEEN 20 AND 30</code>或带<code>ORDER BY</code>的查询），B+树叶节点的链式结构使得无需额外排序，顺序读取叶节点即可获取有序结果集。相较之下，如果采用哈希索引结构，单值查询可达平均 O(1) 时间，但一旦遇到范围条件或需要有序遍历，哈希索引无法直接支持，只能退化为全表扫描，每条记录逐一比较，性能将大幅下降。正因如此，关系数据库普遍选择 B+树作为默认索引，以兼顾点查询和范围查询的需求，而不采用单纯以哈希表为基础的索引。</p>
+<p>B+树也有其局限性。首先，在极端写入密集型的场景下，随机插入和更新可能导致频繁的节点分裂和磁盘随机写操作。当数据规模庞大且写入模式为随机时，B+树索引的写放大（write amplification）问题会比较明显。然而，通过数据库缓存（Buffer Pool）将近期页缓存在内存，以及顺序分配主键来尽量顺序插入，可以部分缓解随机写成本。其次，B+树在支持非常高并发事务时，需要精细的锁（latch）控制。例如多版本并发控制（MVCC）数据库中，经常结合<strong>意向锁</strong>和<strong>锁结合(latch crabbing)<strong>技术确保并发插入、查询的正确性。这增加了实现复杂度。另外，B+树索引占用的存储空间通常与数据量线性相关（空间复杂度 O(n)），当索引键较大时（比如字符串），索引大小也会显著增加。数据库系统通常会对索引页内的键进行</strong>前缀压缩</strong>等优化，以降低空间占用和提高页利用率。</p>
+<h3 id="优化方法"><a href="#优化方法" class="headerlink" title="优化方法"></a>优化方法</h3><p>多年来，针对 B+树索引的各种优化方法在数据库系统中被广泛采用：</p>
+<ul>
+<li><p><strong>聚簇索引（Clustered Index）设计：</strong>聚簇索引是指数据记录按主键顺序存储，B+树的叶节点直接存放完整的数据行。这种设计使得主键索引本身就是数据的存储组织形式。在 MySQL InnoDB 引擎中，主键索引即为聚簇索引：叶节点包含整行数据，一旦根据主键定位叶子，就直接得到了行记录。聚簇索引的优势是按主键顺序存取特别高效，范围查询不需要二次定位。但代价是每张表只能有一个聚簇索引，且插入可能为了维持顺序而移动数据页。相对的，像 MyISAM 等存储引擎则使用<strong>非聚簇索引</strong>（叶节点存储指向数据记录的文件偏移地址）。非聚簇索引插入维护成本较低，但每次索引定位后还需一次额外I/O根据地址取数。</p>
+</li>
+<li><p><strong>节点填充因子与页分裂优化：</strong>数据库通常会设定 B+树节点的填充因子（如 %，称为页利用率）。插入新键时，如果目标叶子接近满载但尚未超限，数据库可能采取<strong>前瞻式分裂</strong>或<strong>延迟合并</strong>策略，避免频繁的分裂-合并抖动。另外，一些实现采用<strong>B*树</strong>（B 星树）变种，通过保证节点至少 2/3 满来提高空间利用率，从而降低树高和I/O次数。</p>
+</li>
+<li><p><strong>并发控制优化：</strong>传统 B+树在并发环境下需要对节点加锁。一些现代实现提供<strong>锁粗粒度</strong>（如页级锁结合意向锁）和<strong>锁细粒度</strong>（如键范围锁、Next-Key Locking）并用的方案，以在保证事务隔离的同时提升并发性能。微软提出的 <strong>Bw-Tree</strong> 是一个无锁（lock-free）的 B+树变体，通过保持只追加、不修改原页面的方式实现多线程并发且避免加锁。虽然 Bw-Tree 在内存中性能优异，但实现复杂度远高于经典 B+树。</p>
+</li>
+<li><p><strong>键压缩和页内搜索优化：</strong>为减少树高，数据库倾向于使用大的页尺寸（如 4KB 或 8KB）。在一个页中，可再对键进行压缩存储以塞入更多键。此外，利用 SIMD 指令加速页内二分搜索、多键比较等技术（如<strong>k-ary search</strong>）也被研究用于优化 B+树查找的 CPU 性能。</p>
+</li>
+</ul>
+<p>经过长期演进与优化，B+树索引已经能够很好地满足大多数通用负载下的查询需求。然而，随着某些应用数据量和写入压力的爆炸式增长，另一种针对写优化的索引结构——<strong>LSM-Tree</strong> 日益受到关注。下一节我们将详细讨论 LSM-Tree 及其应用。</p>
+<h3 id="数据库中的应用与演变"><a href="#数据库中的应用与演变" class="headerlink" title="数据库中的应用与演变"></a>数据库中的应用与演变</h3><p>B+树几乎被所有主流关系型数据库作为<strong>默认索引</strong>结构使用。例如：</p>
+<ul>
+<li><p>**MySQL InnoDB：**InnoDB 存储引擎采用 B+树实现主键聚簇索引和二级索引。主键聚簇索引叶节点存储完整数据行，而二级索引叶节点存储索引键和对应主键的值。查找二级索引需要先查 B+树找主键，再到主键索引取数据。InnoDB 要求每表必须有主键（若未指定则自动生成隐藏主键），正是因为聚簇索引需要一个唯一键来组织数据。B+树在 InnoDB 中还结合了重做日志、缓冲池等机制，在确保持久性的同时加速读写。</p>
+</li>
+<li><p>**MySQL MyISAM：**旧的 MyISAM 引擎也使用 B+树二级索引，但其索引并非聚簇。MyISAM 的索引叶节点存的是数据记录的文件偏移地址。因此索引检索后需要一次磁盘I/O按偏移读取数据行。这种设计下索引本身较小，但查询性能比聚簇索引稍逊。</p>
+</li>
+<li><p>**PostgreSQL：**PostgreSQL 使用 B+树（其文档称为 B-Tree，但实现上等价于 B+树）作为默认索引，支持唯一索引、表达式索引等。值得一提的是，PostgreSQL 曾长期支持哈希索引但未将其 WAL 日志化，导致崩溃后哈希索引需要重建。从 PostgreSQL 10 开始哈希索引才变为持久安全。但由于 B+树性能和适用性全面占优，<strong>约90%以上场景下用户都直接使用 B-Tree 索引</strong>。</p>
+</li>
+<li><p>**MongoDB：**作为 NoSQL 数据库的代表，MongoDB 也使用 B 树索引（严格来说是 B 树而非 B+树）。MongoDB 的 B 树内部节点可以存储数据，这种选择据称是考虑到文档型数据库较少范围查询需求，以及希望在某些点查场景下减少一层树高。不过总体而言，无论是 B 树还是 B+树，其查找性能都为 O(log n)，且远优于不使用索引的 O(n) 全表扫描。</p>
+</li>
+<li><p>**文件系统与其他：**B+树的高扇出和顺序访问特性也使其广泛用于文件系统的目录索引（如 NTFS、Ext4 的目录项组织）和操作系统的分页机制。在一些NewSQL/分布式数据库中，B+树思想也体现在分片（sharding）的局部索引中。</p>
+</li>
+</ul>
+<p>总的来说，B+树作为经过长期验证的索引方案，在平衡读写性能、实现复杂度和通用性方面表现出色。然而，B+树并非万能，在极端写密集或大批量顺序写场景下，其随机写放大问题催生了另一种索引结构——<strong>LSM-Tree</strong>。下面将详述 LSM-Tree 的原理和应用。</p>
+<h2 id="LSM-Tree-索引"><a href="#LSM-Tree-索引" class="headerlink" title="LSM-Tree 索引"></a>LSM-Tree 索引</h2><h3 id="结构与写入机制"><a href="#结构与写入机制" class="headerlink" title="结构与写入机制"></a>结构与写入机制</h3><p><strong>LSM-Tree（Log-Structured Merge-Tree，日志结构合并树）</strong>是一种面向<strong>写优化</strong>的索引/data结构。它通过将大量随机写转换为顺序批量写，显著提高写入吞吐。LSM-Tree 的核心思想是<strong>分层存储</strong>：将数据分为内存和磁盘上的多级组件，新的数据先写入内存的暂存结构，后续再批量合并到磁盘。</p>
+<p>具体而言，LSM-Tree通常包含如下层次：</p>
+<ul>
+<li><p>**MemTable（内存表）：**在内存中的有序数据结构（通常采用Skip List跳表实现），接受所有新增、更新和删除操作。每次写入首先记录到日志（Write-Ahead Log, WAL）以确保持久性，然后插入 MemTable。由于在内存中，插入操作仅涉及内存排序结构，开销较小且无磁盘随机写。</p>
+</li>
+<li><p>**Immutable MemTable：<strong>当 MemTable 数据量达到阈值时，将其切换为只读的不可变状态并异步地</strong>刷写（Flush）**到磁盘，形成新的持久数据文件。此时应用程序会创建一个新的空 MemTable 来继续接收后续写入。</p>
+</li>
+<li><p><strong>SSTable（有序字符串表）：</strong>刷写到磁盘上的数据文件通常称为 SSTable（Sorted String Table）。每个 SSTable 内部保存一批按键排序的键值对，是<strong>不可变</strong>的，即一旦写入磁盘就不再原地修改。SSTable 可以附带一个稀疏索引和布隆过滤器以加速查找。</p>
+</li>
+<li><p><strong>层级存储（Levels）：</strong>磁盘上的 SSTable 文件按照大小或生成时间分层组织。典型的实现（如 LevelDB、RocksDB）采用<strong>分层（leveled）</strong>架构：Level0 存放最新刷盘的 SSTable，可以有重叠键范围；更低层级（Level1, Level2, …）容量依次增大且同层内各文件键范围不重叠。通过分层，LSM 保证查找一个给定键在每一层至多命中一个文件，从而限制读放大。另一类实现（如 HBase、Cassandra 早期版本）采用<strong>大小分层（size-tiered或称日志结构分层）</strong>：即不强调键范围划分，而是在每层累积一定数量文件后合并为更大文件进入下一层。这两种策略各有优劣，我们稍后讨论。</p>
+</li>
+<li><p><strong>Compaction（压实合并）：</strong>LSM 的关键在于<strong>后台合并</strong>过程。因为数据并不在原地更新或删除，更新实际上会在新文件中写入新版本键值，删除则写入一个墓碑标记。随着时间推移，磁盘上会出现多个包含不同时间段数据的 SSTable 文件。如果任其增长，查询需要遍历更多文件，性能会下降。因此需要定期将同一层或相邻层的 SSTable 文件按键排序<strong>合并</strong>，丢弃过期数据和被删除的记录，以控制文件数量和数据冗余。合并的策略依赖具体实现：leveled 模式通常将 Level0 的文件不断向下归并到更大层，保证低层只有少量大文件；而 size-tiered 模式则在每层聚集文件达到一定数量时合并成一个新文件进入下一层。</p>
+</li>
+</ul>
+<p>通过上述结构，LSM-Tree 将随机写转变为顺序批量写：对数据库的频繁更新首先累积在内存，稍后作为顺序块写入磁盘，避免了传统 B+树那样的任意位置插入磁盘页操作。正如O’Neil等人在发明LSM-Tree时指出的，这种“先写后合并”的架构消除了随机写的寻道开销，极大提升了写入吞吐量。</p>
+<h3 id="查询机制"><a href="#查询机制" class="headerlink" title="查询机制"></a>查询机制</h3><p>LSM-Tree 的查询（读）过程相对复杂一些，因为数据分散在多个层次的多个文件中。一般的查找流程如下：</p>
+<ol>
+<li><p>**内存查找：**首先查询 MemTable（以及可能存在的Immutable MemTable）。如果命中，则直接返回结果。因为 MemTable 中数据最新，这一步可以获取最新写入但尚未刷盘的数据。若在内存未找到，继续查找磁盘。</p>
+</li>
+<li><p>**布隆过滤和稀疏索引：**对于每一层可能的 SSTable 文件，使用其布隆过滤器快速判断目标键是否可能存在于该文件。如果过滤器返回否定，则跳过该文件而无需打开读取。这一步显著减少了不必要的磁盘I/O。若布隆过滤器认为可能存在，则通过该文件的稀疏索引定位近似的位置，再顺序读取少量数据块以查找确切键。</p>
+</li>
+<li><p>**多层文件查找：**在 leveled 模式下，由于各层键范围不重叠，查询可以在每一层至多读取一个文件即可找到结果或确定无果。具体而言，从较小层（新数据）到较大层依次查找，一旦在某层找到目标键则返回；如果到最后一层都未找到，则表示不存在。在 size-tiered 模式下，同层文件键范围可能重叠，必须检查该层的多个文件。这种情况下布隆过滤器尤为重要，用来缩小需要查找的文件集合。</p>
+</li>
+<li><p>**结果返回与版本处理：**由于LSM允许同一键有多个版本存在于不同层文件中（新版本在低层，旧版本尚未被compact掉留在高层），查询需要合并结果。例如找到了某键在多层都有记录，则取最新时间戳的版本作为结果；如果某层存在删除标记（墓碑），则需要忽略更高层的旧数据。通常LSM在compact过程中已经处理大部分版本，但查询阶段仍需注意版本覆盖逻辑。</p>
+</li>
+</ol>
+<p>LSM-Tree 查询的性能取决于文件数量和布隆过滤器的有效性。在设计良好（尤其 leveled 模式）的情况下，一次点查询需要检查 MemTable + 若干层文件，各层各读取一次。在RocksDB等实现中，默认布隆过滤器把误判率控制在 ~1%，从而绝大多数无关文件无需读取，使读放大得到控制。然而，在最坏情况例如 compaction 落后、Level0 累积了大量未合并文件时，查询可能需要扫描多个文件，导致<strong>读放大</strong>：需要多次磁盘读取才能确定一个键不存在。此外，对于需要范围扫描的查询（例如取某key范围内的所有记录），LSM-Tree可能要跨越多个文件、多个层逐一合并结果，顺序性不如聚簇的B+树，因为相邻键可能分布在不同文件中。因此LSM的范围查询性能通常逊于B+树，尤其当数据分散在多层时，需要额外的归并开销。</p>
+<h3 id="适用场景与局限-1"><a href="#适用场景与局限-1" class="headerlink" title="适用场景与局限"></a>适用场景与局限</h3><p>LSM-Tree 非常适合<strong>写密集型和大规模数据</strong>场景。在以下情况下，LSM-Tree 展现出优势：</p>
+<ul>
+<li><p>**高吞吐写入：**对于持续的大量随机写（插入/更新），LSM-Tree 能将写操作转化为顺序批量写，使得机械硬盘也能接近顺序写性能，固态硬盘则充分利用其高顺序带宽。许多日志、监控、时间序列等应用要求每秒写入成千上万条记录，LSM-Tree 可以在单机上提供极高的写入吞吐，同时保持较低的磁盘占用。</p>
+</li>
+<li><p><strong>可扩展性和大数据量：</strong>LSM-Tree 天然支持通过增加层级来扩展数据规模。例如 LevelDB 默认配置下可扩展到数TB数据。尽管数据规模增长会导致更深层级，但 leveled 模式的查找成本对数增长缓慢，而且仍然远小于全表扫描。对于那些<strong>存储海量历史数据</strong>、但单次查询只涉及少量记录的系统（如电子商务订单、日志存档），LSM-Tree 能以较低的写代价记录所有数据，并在查询时通过布隆过滤等手段确保读性能在可接受范围内。</p>
+</li>
+<li><p>**顺序扫描较少的场景：**如果应用主要访问模式是点查询（key-value 获取）而不是范围扫描，那么LSM-Tree的随机读劣势不明显，而写入性能优势会比较突出。例如键值缓存、部分NoSQL存储主要通过主键点查数据，可接受略高的读延迟换取写入吞吐和存储成本优势。</p>
+</li>
+</ul>
+<p>然而，LSM-Tree 也存在局限，需要根据工作负载权衡：</p>
+<ul>
+<li><p>**读放大和尾延迟：**正如前述，LSM-Tree 在点查询时可能涉及多次磁盘读取，远高于B+树一次定位的I/O。如果读取请求频繁而写入较少，LSM在平均延迟和99%尾延迟上都往往高于B+树。尤其当后台合并跟不上写入速度时，未压实的文件越来越多，查询需要检查的文件数随之增加，会出现明显的读性能下降。对于需要严格、低延迟读响应的场景（例如某些金融交易、实时风控系统），LSM-Tree 的波动性可能难以满足要求。</p>
+</li>
+<li><p><strong>写放大和空间放大：</strong>LSM-Tree将写入顺序化的代价是同一数据可能被重复写入多次——数据在不同层级之间移动，从上层文件多次合并到下层文件。例如 size-tiered 策略下，一条记录可能在最终定格前被重写3到10次之多。这造成<strong>写放大</strong>（写入量远大于用户实际写入）和闪存介质磨损问题。同时，未合并的重复数据也导致<strong>空间放大</strong>，即存储占用多于实际数据量。尽管 leveled 模式极大缓解了空间放大，但也相应增加了合并次数。为此，一些改进方案（如 RocksDB 的优化参数、WiscKey 等分离键值策略）致力于降低LSM的写放大和空间放大，我们后续介绍。</p>
+</li>
+<li><p>**复杂性和参数调优：**LSM-Tree 的性能对 compaction 策略、层级大小、布隆过滤器位数等参数高度敏感。不同工作负载下，如何选择 leveled vs universal（size-tiered）合并、memtable 大小、层级扩容因子等需要精细调优。调优不当可能导致性能不升反降。例如 memtable 过小会频繁刷盘生成大量小文件，过大又可能占用内存过多影响前台操作。相比之下，B+树的性能参数主要是页大小、填充因子等，相对稳定且不需要应用层面频繁调整。</p>
+</li>
+</ul>
+<p>综合来看，LSM-Tree擅长“<strong>批量写入、延后整理</strong>”的场景，典型应用包括：日志系统、分析型数据库的实时摄取层、大规模键值存储（如 HBase、Cassandra）等。这类应用重写入吞吐、允许后台慢慢整理数据，同时对单次查询延迟要求相对宽松。在这些场景下，LSM-Tree 常常优于传统B+树架构。而对于读频繁、延迟敏感的OLTP场景，或者需要大量范围扫描的场景（如报表聚合），B+树索引仍更为有利。</p>
+<h3 id="优化方法-1"><a href="#优化方法-1" class="headerlink" title="优化方法"></a>优化方法</h3><p>LSM-Tree 自提出以来也经历了大量改进和优化，旨在缓解其读放大和写放大的不足：</p>
+<ul>
+<li><p>**多级合并策略：**最初的 LevelDB 实现采用 leveled 合并策略，RocksDB 在此基础上增加了 **“通用合并（Universal Compaction）”**选项，即类似 size-tiered 的策略，用于某些写入非常密集且读几乎总是查最新数据的场景，以减少写放大。现代LSM引擎允许根据工作负载在 leveled 和 tiered 策略之间切换，或者对不同列族使用不同策略，以优化性能/空间权衡。</p>
+</li>
+<li><p><strong>布隆过滤器与分区索引：</strong>布隆过滤器已经成为LSM的标配，用于快速判断某层文件是否可能包含某键，几乎所有LSM实现（LevelDB、RocksDB、Cassandra等）都默认对SSTable启用布隆过滤。另外，一些系统在SSTable内部实现<strong>分块索引</strong>和<strong>层级跳表</strong>，比如 RocksDB 支持配置每个SSTable块内的索引，以及针对有序前缀的前缀布隆过滤，从而优化特定查询模式下的读性能。</p>
+</li>
+<li><p><strong>并行和后台优化：</strong>Facebook在改进 LevelDB 时重点增加了<strong>多线程并行压实</strong>能力。RocksDB 允许多个压实任务并发执行，利用多核CPU加速后台合并。特别是 RocksDB 引入了子压实（subcompaction）技术，将一个大文件的合并分拆成多段并行进行，以充分利用IO带宽和CPU核，提高压实速度。更快的压实意味着减少查询读取陈旧文件的几率，从而降低读放大。</p>
+</li>
+<li><p><strong>减少重复写：</strong>为降低写放大，研究者提出了多种改进方案。例如 <strong>WiscKey</strong> 是一篇著名论文提出的优化：将LSM中<strong>值（value）与键分离</strong>，仅将键存在LSM树中，值直接顺序写入单独日志。这样压实时只搬运小键，大量数据写入避免反复重写。类似地，Facebook的 <strong>MyRocks</strong> 引擎也对RocksDB进行改造，如优化压实触发条件、删除了无用的重复删除标记等，显著降低写放大和空间放大，使LSM更适合OLTP场景。</p>
+</li>
+<li><p><strong>硬件感知优化：</strong>LSM算法也在适配新硬件。对于高吞吐低延迟的NVMe SSD，RocksDB 等引擎提供了直接IO、压实IO调度、以及针对SMR盘和PMem的特殊优化等，以充分发挥设备能力。同时，有研究探索<strong>混合架构</strong>，例如 Aerospike 的混合内存架构（HMA）在SSD上仅写不排序的数据块，依赖内存主索引和轻量级垃圾回收，避免多级压实，从而在保证LSM级别写入性能的同时，将每次查询所需的磁盘I/O减少到一次。这些探索为LSM-Tree在新型存储介质上应用提供了新的思路。</p>
+</li>
+</ul>
+<p>总的来说，LSM-Tree经过优化已成为高性能键值存储的核心技术之一。当今许多分布式数据库、NoSQL系统都采用LSM存储引擎以应对海量数据和高并发写入。在应用LSM时，需要根据负载仔细调整参数和策略，使其发挥最佳性能。在偏重读的场景下，也可通过增加内存缓存、二级索引等手段弥补LSM读取偏慢的问题。</p>
+<h3 id="应用实例与演变"><a href="#应用实例与演变" class="headerlink" title="应用实例与演变"></a>应用实例与演变</h3><p>LSM-Tree 由于其卓越的写性能，已在众多数据库系统中得到实践应用，并不断演进：</p>
+<ul>
+<li><p>**LevelDB：**Google 于2011年开源的 LevelDB 是 LSM-Tree 的一个轻量实现，也是 BigTable 存储设计在单机上的微缩版。LevelDB 采用单线程、leveled compaction，默认7层金字塔结构，每层约为前一层的10倍容量。数据以日志文件和两个跳表（MemTable和ImmutTable）在内存维护，刷盘生成新的SSTable。LevelDB 的出现证明了LSM思想在嵌入式KV存储上的可行性，但也暴露了读性能和数据恢复上的一些问题（如崩溃后重放日志慢等）。</p>
+</li>
+<li><p>**RocksDB：**Facebook 在 LevelDB 基础上开发了 RocksDB，对LSM引擎进行了大量增强，包括前述多线程压实、Blob DB（大值单独存储）、更丰富的压实策略和参数调优、支持事务等。RocksDB 极大提升了LSM引擎在高端硬件上的性能，例如在多核服务器和SSD上实现了比LevelDB高数量级的吞吐。RocksDB 已被应用在 Facebook 自己的 MyRocks (MySQL 的 RocksDB 存储引擎实现)、Apache Flink 和Kafka Streams（作为嵌入式状态存储）等众多系统中。可以说 RocksDB 奠定了现代LSM存储的工业标准。</p>
+</li>
+<li><p><strong>BigTable/HBase：</strong>Google BigTable 是最早应用LSM思想于分布式存储的系统（2006年），其数据文件称为 SSTable，后台定期执行<strong>合并压实（Minor/Major Compaction）</strong>。BigTable 的开源实现 Apache HBase 也采用类似架构：内存 MemStore+预写日志，刷盘生成 HFile（等价于SSTable），region 内定期合并 HFile。HBase 默认的合并策略接近 size-tiered，且引入了根据 HFile 数量的合并算法。Cassandra 最初也类似，提供了 Size-Tiered 和 Leveled 两种 Compaction 策略，用户可按工作负载选择。分布式系统通过LSM结构实现了良好的线性扩展和高吞吐写入，但读延迟问题通常通过<strong>Bloom Filter、缓存</strong>以及<strong>并行查询多个副本</strong>等手段缓解。</p>
+</li>
+<li><p>**其他新型引擎：**很多新兴的KV存储都以 LSM 为基础。例如 Apache <strong>Lucene</strong>（搜索引擎库）其实也使用了类似LSM的段合并机制维护倒排索引；Redis 4.0 引入的模块 RocksDB 后端也是LSM；TiKV（PingCAP）采用了优化的 LSM 变种；甚至 MongoDB 在4.0以前的存储引擎 WiredTiger 也引入了 LSM 模式选项。可以说，LSM-Tree 已成为构建高性能存储系统不可或缺的重要工具。</p>
+</li>
+</ul>
+<p>在未来，随着硬件的发展和应用需求的变化，B+树和 LSM-Tree 可能并非“二选一”的对立关系，而是相互借鉴、融合。例如一些混合结构试图结合 B+树的低读延迟和 LSM 的高写吞吐，或者在同一系统中针对不同表/工作负载采用不同索引结构。因此，理解 B+树和 LSM-Tree 的原理和适用性，对于系统设计者做出权衡选择至关重要。下面我们将扩展讨论其他一些常见索引结构，以便全面对比。</p>
+<h2 id="哈希索引"><a href="#哈希索引" class="headerlink" title="哈希索引"></a>哈希索引</h2><p>**哈希索引（Hash Index）**是基于散列函数的索引结构，其基本思想是通过对键值计算哈希码，直接定位到对应桶（bucket）或槽，从而以近似常数时间完成查找。哈希索引通常用散列表（Hash Table）实现，在内存场景下以数组加链表或开放地址法存储。在数据库系统中，哈希索引也可用于磁盘存储，通过动态哈希算法（如可扩展哈希 Extensible Hashing、线性哈希 Linear Hashing）实现按需扩容的磁盘散列索引，以避免大量溢出桶导致性能下降。</p>
+<p>哈希索引的主要优点是<strong>等值查询</strong>速度极快。当查询条件是“键 = 值”形式时，哈希函数可以将键快速映射到对应槽位，然后检索出指向数据记录的指针。理想情况下，查找效率接近 O(1)。相比之下，B+树等树结构为 O(log n)。正因这一点，在一些内存KV存储或缓存系统中，哈希表被广泛采用。</p>
+<p>然而，哈希索引有显著的局限性：</p>
+<ul>
+<li><p>**不支持排序和范围查询：**哈希将键散列打乱，其结果缺乏有序性。因此无法像B+树那样支持顺序遍历。对于范围查询或需要排序输出的查询，哈希索引基本无能为力。例如查询“WHERE score &gt; 90”的记录，用哈希索引无法直接定位所有大于90的键，只能遍历所有桶检查每条记录（全表扫描）。这也是为什么关系数据库很少将哈希索引用于常规索引——应用中既要考虑单点查询，也经常需要范围、排序等操作，B+树可以通用支持，而哈希索引在后者场景性能会急剧恶化。</p>
+</li>
+<li><p>**哈希冲突与维护成本：**理想的哈希函数能将键平均分布到各桶，但实际难免出现冲突，需要拉链或重哈希策略处理冲突。随着数据增长，装载因子升高，冲突增多会导致性能退化。动态哈希索引通过扩展目录或增大哈希位数来缓解，但实现复杂度提高。另外，哈希索引对删除操作也不如B+树友好——删除元素可能需要特殊标记或重组织，以免破坏链表或探查序列的结构。</p>
+</li>
+<li><p>**仅支持精确匹配：**哈希索引一般只支持等值查询，不支持诸如“前缀匹配”“模糊查询”等，需要结合应用层逻辑处理。而树索引可以借助排序性质做多种范围和前缀过滤。</p>
+</li>
+</ul>
+<p>由于上述原因，在传统数据库的通用工作负载下，哈希索引的应用受到限制。例如 PostgreSQL 尽管提供哈希索引类型，但文档曾长期建议尽量使用 B-Tree，因为测试表明 PG 哈希索引在性能和空间上并不明显优于 B-Tree，且功能不如后者（PG 哈希索引一度不支持多列索引、不支持唯一性约束等）。实验也发现某些情况下 PG 哈希索引插入还更慢、体积更大。因此直到最近版本，<strong>PG 官方都不推荐使用哈希索引</strong>，除非用户非常了解其优势和局限。</p>
+<p>尽管如此，哈希索引在特定场景下仍有价值：</p>
+<ul>
+<li>在<strong>内存数据库</strong>或缓存系统中，如 Redis 的主键就是典型哈希索引，追求极致点查性能和简单实现。</li>
+<li>在某些 NewSQL 系统里，用哈希将数据分片到不同节点（一致性哈希），用于分布式路由，但这属于分区策略不完全是索引用途。</li>
+<li>MySQL 内存存储引擎（MEMORY）默认索引即为哈希，适用于内存表的等值查询；InnoDB 也有自适应哈希索引机制（AHI），在检测到某些页的访问模式偏向特定键时，会在内存中为该键构建哈希索引，加速重复查询。</li>
+</ul>
+<p>总的来说，<strong>哈希索引适合键值查询非常频繁且不需要范围检索的场景</strong>，能提供极高的查询吞吐。但在支持复杂查询的通用数据库中，其功能太受限而少被作为主要索引结构。即便在哈希索引有用武之地时，也应注意控制装载因子、选择良好哈希函数，并考虑其维护代价。</p>
+<p>（附注：对于需要动态扩展的磁盘哈希索引，两种经典方案是<strong>可扩展哈希</strong>和<strong>线性哈希</strong>。可扩展哈希使用目录按位拆分桶，扩容时目录翻倍；线性哈希则按线性序号渐进扩容桶，无需全局目录。现代数据库较少直接使用这些方案实现表索引，但它们是数据库原理课程常讨论的主题，此处不展开。）</p>
+<h2 id="跳表索引"><a href="#跳表索引" class="headerlink" title="跳表索引"></a>跳表索引</h2><p>**跳表（Skip List）**是一种基于链表的随机化数据结构，可用于实现有序索引。跳表通过在有序链表基础上增设多级“跳跃”层，使得查找和插入平均性能达到 O(log n)，类似于平衡树，但实现上更加简单。其结构要点是：对于有序链表中的元素，每个元素以一定概率提升到更高层级，从而在高层链表中充当低层元素的“跳板”。第1层是完整的有序链表，每一层都是下一层的抽样子集，直到最高层。查找时从最高层链表开始沿指针前进，比对键值，当越过目标时降一层继续，逐层下潜直至找到元素或确认不存在。</p>
+<p>跳表具有与平衡二叉树<strong>相同的平均时间复杂度 O(log n)<strong>，但由于其结构只是多层链表组合，实现非常简洁，插入和删除只需局部指针操作，无需复杂的树节点旋转或分裂。尤其在并发环境下，跳表相对更容易实现</strong>无锁并发</strong>。学术界已经给出了多种锁自由（lock-free）的跳表算法，使得即使在多线程下，也能通过原子操作维护跳表的一致性。相比之下，经典的 B+树需要严格的锁协议或利用硬件事务才能避免冲突，新型无锁树（如BW-Tree）也复杂得多。因此，一些内存数据库或内存索引更青睐跳表，以发挥多核并发性能。</p>
+<p>跳表索引的<strong>使用场景</strong>主要在<strong>纯内存</strong>或<strong>缓存</strong>场景，以及LSM-Tree的MemTable实现中。典型例子有：</p>
+<ul>
+<li><p>LevelDB及其衍生的RocksDB，默认用跳表（Skip List）实现MemTable。当写入进入内存时，在跳表中按序插入，这样读可以在跳表中快速查找最新数据，而刷盘合并由后台完成。跳表在这些KV存储中体现了易实现和高并发插入的优势。</p>
+</li>
+<li><p>一些现代内存数据库采用跳表作为主索引结构。例如 SingleStore (原 MemSQL) 的内存表索引即选用了跳表而非B树，其开发团队给出的理由包括：跳表基于指针，纯内存使用无需考虑页结构，更简单且易于实现无锁；B+树代码量是跳表的50倍，开发维护复杂度高。SingleStore 通过无锁跳表实现了高并发的内存行存储索引，并特别提到跳表能支持一些额外操作如<strong>快速计算两个键之间包含多少元素</strong>（利用塔层高度估算）以辅助查询优化，这是传统B树难以实现的。</p>
+</li>
+<li><p>Redis 在较早版本的有序集合（Sorted Set）中使用跳表来维护排序数据（同时存储双端链表以支持按索引快速定位）。跳表为 Redis 提供了类似平衡树的效率，但代码实现更简洁。</p>
+</li>
+</ul>
+<p>跳表索引的<strong>性能特点</strong>除了平均情况接近平衡树之外，还包括以下方面：</p>
+<ul>
+<li><p>**空间开销：**跳表为每个元素维护多层指针，理论上空间负担比树结构略高。但平均每个元素塔高度服从几何分布，期望高度为2，即每个元素平均增加常数级的指针。相对于元素本身数据大小，这点额外空间通常可以接受。此外，B+树节点分裂会产生未满页的空间浪费，也是一种空间开销（碎片），两者难以直接比较。</p>
+</li>
+<li><p><strong>局部性和缓存命中率：</strong>与树不同，跳表元素不需要按页存储，指针可能指向内存中任意位置，因此<strong>不具备缓存局部性</strong>。在CPU缓存体系下，B+树可以按页或节点分配，有较好的相邻元素局部性；而跳表因为是链表，节点在内存中可能离散分布，顺序遍历时CPU缓存命中率较低。不过在纯内存DB场景，这一弱点可以部分通过内存分配器的优化（比如集中分配跳表节点）来改善。</p>
+</li>
+<li><p>**范围扫描性能：**跳表的叶层本质就是有序链表，因此顺序遍历性能很好（链表前后指针），相当于B+树顺序扫描叶节点。区别是B+树叶子通常一页包含多个元素，预读效率高，而跳表逐元素访问，预读效果不明显。总体而言，如果扫描大量元素（比如返回100万行排序结果），B+树可能比跳表略有优势，但差别不是数量级的。</p>
+</li>
+</ul>
+<p>总之，<strong>跳表索引适合在内存中替代平衡树</strong>，提供可靠的有序数据访问，并发情况下简化实现复杂度。在磁盘存储方面，由于链表随机访问不友好，传统关系数据库并未采用跳表作为磁盘索引。但在以内存为主存储的新系统里，跳表正成为一种重要选择。例如 SingleStore 的实践表明，在追求开发效率、高并发以及灵活性的内存数据库中，跳表是完全可以胜任索引角色的。</p>
+<h2 id="Trie-树索引（前缀树）"><a href="#Trie-树索引（前缀树）" class="headerlink" title="Trie 树索引（前缀树）"></a>Trie 树索引（前缀树）</h2><p><strong>Trie 树（前缀树）</strong>是一种专门用于保存字符串或序列的数据结构，又称字典树。Trie 树利用键的<strong>字符组成</strong>逐层建立节点：共有前缀的键在Trie中共享路径。与B+树基于比较整个键不同，Trie根据键的每一位逐步下钻。<strong>Trie的最大特点是查询时间与数据规模无关，仅取决于键长度</strong>。理想情况下，查找一个键的复杂度是 O(k)，这里 k 是键长，而不像平衡树那样是 O(log n)（n 是键数）。当数据量 n 非常大而单键长度 k 较小且相对固定时，这种<strong>与 n 无关的查询时间</strong>非常有吸引力。</p>
+<p>Trie 树天然支持<strong>前缀匹配</strong>和<strong>范围查询</strong>：因为树形结构本身就是按字典序展开的。例如，要查找所有以 “pre” 开头的键，只需在Trie中按照字符 ‘p’-&gt;’r’-&gt;’e’ 路径下探到对应节点，然后输出其子孙中所有终止键即可。这对于实现<strong>前缀查询、自动补全</strong>等功能非常高效，而B+树等需要额外定位范围上下界。Trie 中键值对按字典序排列，<strong>有序遍历</strong>可以通过DFS（深度优先）或在节点间维护链接来实现。</p>
+<p>然而Trie的缺点也很明显：<strong>空间利用率低，节点开销大</strong>。在朴素Trie中，每个节点为字母表的每个可能字符保存一个指针（大多为空），这在键不均匀时会浪费大量空间。例如英文小写字母的Trie每节点有26个子指针，而实际用到的可能很少。为改善空间效率，研究者提出了多种改进：</p>
+<ul>
+<li><p>**压缩路径（Patricia Trie）：**如果某节点只有一个子节点，则将它们合并，减少节点数量和指针冗余。也就是将沿路只有单分支的链压缩为单个节点，存储合并的字符串。这称为 Patricia 或基数树（Radix Tree）的基本想法。</p>
+</li>
+<li><p>**自适应节点大小（Adaptive Radix Tree, ART）：**这是近年来著名的改进方案之一。ART通过根据实际子节点数来选择节点表示方式，而非固定数组大小。ART定义了4种节点类型（大小分别可容纳4、16、48、256个子节点），节点会在子数超容量时升级到更大类型。这样当某节点子女稀少时，用小数组存储，提高空间利用率；子女多时用大数组，保持查找效率。同时ART结合了路径压缩与惰性扩展，进一步降低树高。实验表明，ART在实际数据上每个键平均只需8.1字节额外空间，远小于朴素Trie。更重要的是，ART在现代CPU上的性能甚至超越高度优化的B+树。</p>
+</li>
+<li><p>**位图压缩和混合结构：**有些实现用位图来表示节点存在的子字符，避免存大量空指针；或者在Trie低层切换为其他结构（如当剩余少量键时用数组或BST存储），比如Burst Trie、HAT-Trie等方案。</p>
+</li>
+</ul>
+<p>Trie 树的<strong>适用场景</strong>主要是在<strong>字符串或高维键</strong>的搜索上。例如全文检索的字典、IP路由表（最长前缀匹配）、自动补全系统等。对于<strong>高维组合键</strong>，也可以将其编码为字节序列存入Trie。有研究将Trie用于内存数据库索引，尤其是在 in-memory OLTP 系统中，Trie在避免CPU缓存未命中和比较开销上表现突出。例如：</p>
+<ul>
+<li><strong>SAP HANA 内存数据库</strong>采用了基数树（一个ART的前身）作为主要索引，以取代B+树，显著提升纯内存场景的查询性能。</li>
+<li><strong>HyPer/LeanStore</strong>等学术系统也探讨了ART索引的优越性，在TPC-C等基准下ART索引性能超过传统B+树。</li>
+<li><strong>DuckDB</strong> 最近实现了 ART 索引用于加速范围查询和主键查找。</li>
+</ul>
+<p>当然，Trie 树索引通常用于<strong>内存</strong>或部分驻内存场景。如果要落盘，大多数实现会采用页式存储对Trie节点打包（类似B+树页），否则随机指针存盘会产生大量碎片和不顺序I/O。很多现代系统其实采用“混合Trie-B+树”结构，例如 MIT 的 Masstree 把一个长字符串键按固定长度（8字节）切片，每片用一个B+树存储，等价于高维Trie每层是一个B+树，从而兼有Trie前缀共享和B+树局部性的优点。</p>
+<p>总的来说，<strong>Trie/基数树索引在特定场景下能提供无与伦比的查询速度</strong>，尤其当键长适中且前缀重合度高时，它在时间复杂度上优于比较型结构。同时，其按位有序的特性为前缀搜索等操作提供了极大便利。随着内存容量增大和处理器速度提升，Trie类索引正越来越多地出现在对性能极致追求的系统中（特别是内存数据库、键值存储），作为B+树的有力补充或替代。</p>
+<h2 id="位图索引"><a href="#位图索引" class="headerlink" title="位图索引"></a>位图索引</h2><p><strong>位图索引（Bitmap Index）</strong>是一种利用位数组（bitmap）进行快速查询的索引结构，常用于<strong>分析型数据库</strong>和<strong>数据仓库</strong>场景。位图索引针对某一列的值情况，为每个可能取值维护一个位向量。位向量的长度等于表的记录数，每一位对应一条记录，如果该记录在该列上取该值，则相应位标记为1，否则为0。例如，有一个列 Gender 只有 “M”/“F” 两种取值，那么可以建立两个位图：BM 为1表示对应行Gender=”M”，BF 为1表示Gender=”F”。对于多值情况，如列 State 有50种州名，则建立50个位图，每个位图标记对应州的行。</p>
+<p>通过这样的结构，位图索引可以非常高效地执行<strong>多条件组合筛选</strong>。因为位向量可以利用按位 AND、OR、NOT 等布尔运算实现集合运算。例如查询 <code>WHERE Gender=&#39;M&#39; AND State=&#39;CA&#39;</code>，只需将BM 与 B_CA 按位 AND，然后扫描结果位图即可找到满足条件的行号，无需扫描整张表。对于 OR 条件也是类似，用 OR 操作合并位图。现代CPU对位操作有字节/字/向量级指令，处理 64位甚至256位并行位操作非常快，因此位图索引能以极高速度完成复杂组合筛选，这是 B+树等逐行过滤所无法比拟的。</p>
+<p><strong>位图索引的优势</strong>在于：</p>
+<ul>
+<li><p>**多维查询效率：**在典型数据仓库的星型模型中，会有一个超大事实表和多个维度表。对事实表的查询常常涉及多个维度的筛选，如时间范围、地域、产品类别等。如果每个维度列都有位图索引，可以通过按位与操作同时应用多个筛选条件，极其高效地得到结果行集合。Oracle 等商业数据库正是利用位图索引在复杂报表查询中实现了数量级的性能提升。</p>
+</li>
+<li><p><strong>空间节省及可压缩性：</strong>位图索引如果被应用在<strong>低基数列</strong>（distinct值较少）上，会非常紧凑。例如性别列只有M/F两值，两个位图长度=N（行数），如果N很大这个位图还是可能比B树索引小很多。更关键的是位图通常<strong>高度可压缩</strong>：大量为0的位串可以用运行长度编码或字节压缩表示。例如有100万行数据，性别为M约50%，则BM有约50万1分散在100万长度上，可用压缩算法大幅缩减存储。实际中常用的有字节压缩、WAH（Word-Aligned Hybrid）、以及近期流行的Roaring Bitmap等，它们能在位图稀疏时极大压缩，又保持一定的按位操作速度。因此位图索引<strong>存储开销往往只是原数据很小一部分</strong>，不像B树可能占据和数据等量甚至更大的空间。</p>
+</li>
+<li><p>**查询执行效率：**当多个位图按位运算得到最终结果位图后，如果结果只有少量位为1（表示少数行匹配），则可以直接通过位位置快速定位行号，避免扫描全表。因此针对选择性高的组合查询，位图索引可以实现接近常数时间的响应，不受表大小影响。</p>
+</li>
+</ul>
+<p>鉴于上述优势，<strong>位图索引被广泛应用于数据仓库/OLAP</strong>领域，特别是<strong>低并发、大查询</strong>的场景。例如：</p>
+<ul>
+<li><p>Oracle 数据库很早就支持位图索引，并推荐在维度表连接、低基数列筛选等场景使用。比如在一个销售事实表上为性别、地区、产品类别建立位图索引，可以快速回答“某地区男性用户某产品的销售额”这类复杂查询。</p>
+</li>
+<li><p>列存储数据库（ClickHouse、Druid 等）也常用位图或类似位片技术加速过滤。列存储使得每列可以独立存放位图，且配合压缩非常高效。比如 ClickHouse 有**位图索引（实验特性）**用于全文搜索等。</p>
+</li>
+</ul>
+<p>然而，位图索引也有明显<strong>劣势</strong>，使其不适合OLTP场景：</p>
+<ul>
+<li><p><strong>更新代价高：</strong>位图索引对数据修改极其敏感。<strong>任何一条记录的插入/删除/更新，都需要更新该记录在所有相关位图中的一位</strong>。在并发情况下，为保证一致性，经常需要对整个位图分段加锁。举例来说，如果表上有一个位图索引，它可能锁定一组记录的位，导致同时修改这些记录的事务互相等待。Oracle文档提到，当有会话修改数据时，对应位图索引项覆盖的所有行会被锁住，直到事务提交。因此在高并发写入环境下，位图索引将导致严重的锁争用和性能下降。这就是位图索引主要用在<strong>只读或批量加载场景</strong>的原因。</p>
+</li>
+<li><p>**高基数列性能不佳：**尽管有人认为位图只适合低基数，其实现代压缩算法已能支持数千distinct值的列。但如果列基数非常高，比如完全唯一（每行一个不同值），则位图索引需要N个位图（N行有N种值），总位数N*N，空间巨大，不可行。因此位图索引不会用于主键等高基数列，仍主要针对低到中等基数的数据。在选择索引时，需要权衡基数和压缩率，避免50%以上选择性的索引（因为匹配50%数据用索引就没有意义）。</p>
+</li>
+<li><p>**维护复杂：**位图索引需要专门的机制与事务日志集成。部分数据库在DML频繁时会暂时失效位图索引或者延迟维护，或需要定期重建索引来优化布局。维护成本高也限制了其在OLTP中的使用。</p>
+</li>
+</ul>
+<p>归纳来说，<strong>位图索引非常适合“写少读多”的分析查询</strong>。在日常报表、数据分析、数据仓库环境中，它们能够将复杂多条件查询从数分钟缩短到秒级甚至毫秒级。但对于频繁更新的OLTP表，不建议使用位图索引。在实际应用中，通常在ETL之后对数据仓库表建立位图索引，并在查询时利用它们快速筛选数据，从而实现高性能分析查询。</p>
+<h2 id="倒排索引"><a href="#倒排索引" class="headerlink" title="倒排索引"></a>倒排索引</h2><p>**倒排索引（Inverted Index）<strong>是一种广泛应用于全文检索的索引结构。倒排索引针对文档（或记录）内的</strong>词条（Term）**建立到文档ID列表的映射。简单来说，就是存储“词 -&gt; [包含该词的文档列表]”。这个结构之所以称为“倒排”，是相对于原始的“正排”数据（文档 -&gt; 词列表）而言。在数据库中，可以将一个文本列看作文档内容，倒排索引使我们能够快速找到哪些行包含某个词。</p>
+<p>典型的倒排索引由两部分组成：<strong>词典（dictionary）</strong>和<strong>倒排列表（posting list）</strong>。词典存储每个索引词及其在倒排文件中的位置；倒排列表则是按文档ID排序的列表，列出所有包含该词的文档。在很多实现中，倒排列表中还会存储该词在文档中的位置、频次等信息，以支持短语查询、相似度排序等功能。</p>
+<p><strong>倒排索引的主要优势</strong>在于<strong>全文查询的速度</strong>。检索一个关键词只需一次定位词典、顺序扫描对应的倒排列表即可得到所有匹配文档ID，复杂度与包含该词的文档数成比例，而与全集文档数近似无关。这远比逐个文档扫描全文高效。此外，多关键词的布尔查询可以通过对多个倒排列表求交、并等操作实现。例如查询包含词A和词B的文档，只需分别取出倒排列表LA和LB，对两有序列表求交集即可得到结果集。同位图索引类似，这种<strong>基于集合运算的查询</strong>非常高效，远优于逐文档模式匹配。</p>
+<p>几乎所有搜索引擎和数据库的全文检索模块都采用倒排索引。例如：</p>
+<ul>
+<li><p>**搜索引擎Lucene/Elasticsearch：**Lucene维护每个Term的排序文档ID列表，以及位置信息用于短语查询和高亮。它对倒排列表进行了巧妙的压缩（如变长字节编码）以减小存储并加速读取。多个关键词查询时，通过合并多个列表来计算结果集。</p>
+</li>
+<li><p>**关系数据库全文索引：**MySQL InnoDB 的全文索引就是倒排索引实现，其为每个分词存储包含该词的文档（行）的列表以及位置信息。为了加速构建，InnoDB全文索引实际上将倒排表拆成了若干子表，如 <code>fts_index_1</code>~<code>fts_index_6</code> 等，通过哈希分区词典实现并行索引创建。PostgreSQL 则通过 GiST/GIN 索引类型支持全文搜索，其中 GIN（倒排索引的一种实现）也是维护词到包含该词行IDs的映射结构。</p>
+</li>
+</ul>
+<p><strong>倒排索引的不足</strong>主要在于<strong>更新代价和空间开销</strong>。每当有文档新增或修改，就需要将其中每个词插入到对应倒排列表中；删除文档则需把涉及的词的列表里对应ID移除或标记失效。这类似位图索引的问题：一条记录的变化会引起多处索引更新。如果文档很长，包含成百上千词，那么单次文档更新就涉及对成百上千个倒排列表的写操作。为减轻这种开销，实践中搜索引擎通常采用<strong>延迟更新</strong>策略：新文档先写入内存索引，倒排列表批量刷新；或采用<strong>段合并</strong>（类似LSM思想），增量地将新的倒排段合并到已有索引中。例如Lucene采取将新文档积累成段、写成磁盘倒排索引文件，查询时同时查多个段，定期将小段合并为大段。这样避免每次更新都随机改写大索引文件。</p>
+<p>空间方面，倒排索引需要为每个词存储大量文档ID，还可能存词频和位置。对于词典很大的文本集合，这是巨大的数据量。不过，高效的压缩（如<strong>差值编码</strong>存文档ID差异）可以显著降低空间，并且<strong>读取时直接解压</strong>，综合性能依然很好。实际上，倒排索引被认为是文本检索中<strong>空间换时间</strong>的典型：用额外的存储和预处理换取查询时的快速响应。</p>
+<p>倒排索引的<strong>适用场景</strong>显然是<strong>全文本搜索和多值包含查询</strong>。除了文本搜索，在一些结构化数据里也用倒排思想。例如面向列存的分析数据库Doris、StarRocks等对高基数字符串列也提供倒排索引，以支持 LIKE ‘%keyword%’ 等模糊查询。</p>
+<p>需要注意的是，<strong>倒排索引并非只服务于单词查询</strong>。它也可以用于一些结构化查询，比如找出包含某标签的所有对象（将标签视为词，对象ID为文档ID）。这在搜索引擎（如电商商品按属性过滤）以及图像标签搜索等都有应用。</p>
+<p>总而言之，倒排索引通过预先整理“内容 -&gt; 位置”的关系，实现了<strong>用计算换取查询效率</strong>。它在<strong>读多写少的大文本或集合查询</strong>环境中无可替代，但不适合频繁更新的小型事务系统。现代数据库一般将倒排索引作为全文检索的独立功能模块，不会用来替代常规关系索引；开发者在需要全文搜索时，可考虑结合倒排索引或引入搜索引擎来满足需求。</p>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>索引是数据库系统中平衡访问性能与存储开销的关键机制，不同索引结构各擅胜场。<strong>B+树</strong>作为通用关系索引方案，提供了均衡的读写性能和对范围查询的良好支持，在OLTP场景中广泛应用并经过深度优化。在写密集型和超大数据集下，<strong>LSM-Tree</strong>通过延迟写和批量合并展现出巨大优势，成为NoSQL和新兴存储系统的核心索引结构。<strong>哈希索引</strong>在等值查询上性能极佳，但功能有限，通常作为内存加速手段而非通用索引。<strong>跳表</strong>为有序索引提供了实现简洁、并发友好的替代，在内存数据库中正获得关注。<strong>Trie（前缀树）</strong>则针对字符串和前缀匹配，实现了查询时间对数据量的不敏感，在内存检索领域表现突出。<strong>位图索引</strong>和<strong>倒排索引</strong>分别服务于分析查询和全文检索，它们以空间换时间，能在特定场景下实现秒杀级的查询性能。</p>
+<p>对于系统开发者而言，没有“一刀切”的最佳索引，只有针对具体应用负载的最优选择。现实系统中也常常多种索引并存：关系数据库可能同时用B+树和位图索引，搜索系统结合倒排索引和Trie树，分布式数据库以LSM存储引擎配合内存哈希缓存等等。理解不同索引结构的原理和特性，有助于根据需求做出合理设计。例如，在用户画像查询中，可考虑倒排索引优化多标签筛选；在时序数据写入中，引入LSM提升吞吐；在热点键频繁查询时，用哈希索引缓存加速。</p>
+<p>总之，索引设计贯穿了<strong>算法思想与系统工程</strong>的融合：既要考虑理论上的时间空间复杂度，也要权衡实际的硬件特点（磁盘/内存）、并发模式和数据分布。希望本文对常见索引方案的分析，能为系统开发者在架构和优化数据库系统时提供有价值的参考。在未来，随着硬件的发展（比如NVM持久内存、超大内存）和数据需求的变化，索引结构也会不断演进，新的混合型索引或自适应索引可能出现。但无论如何，理解这些经典索引的智慧，对掌握数据库内核和构建高性能系统仍然至关重要。</p>
+<p><strong>参考文献：</strong></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9E%B6%E6%9E%84%E3%80%81%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag"># 架构、数据库</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/06/12/Architecture-is-enterprise-strategy/" rel="prev" title="架构不是技术堆叠，而是企业战略的体现">
+      <i class="fa fa-chevron-left"></i> 架构不是技术堆叠，而是企业战略的体现
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/06/12/index-intro/" rel="next" title="常见索引实现方案的全面分析">
+      常见索引实现方案的全面分析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#B-%E6%A0%91%E7%B4%A2%E5%BC%95"><span class="nav-number">1.</span> <span class="nav-text">B+树索引</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E4%B8%8E%E7%89%B9%E7%82%B9"><span class="nav-number">1.1.</span> <span class="nav-text">结构与特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%92%E5%85%A5%E4%B8%8E%E6%9F%A5%E8%AF%A2%E6%9C%BA%E5%88%B6"><span class="nav-number">1.2.</span> <span class="nav-text">插入与查询机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF%E4%B8%8E%E5%B1%80%E9%99%90"><span class="nav-number">1.3.</span> <span class="nav-text">适用场景与局限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95"><span class="nav-number">1.4.</span> <span class="nav-text">优化方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8%E4%B8%8E%E6%BC%94%E5%8F%98"><span class="nav-number">1.5.</span> <span class="nav-text">数据库中的应用与演变</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LSM-Tree-%E7%B4%A2%E5%BC%95"><span class="nav-number">2.</span> <span class="nav-text">LSM-Tree 索引</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E4%B8%8E%E5%86%99%E5%85%A5%E6%9C%BA%E5%88%B6"><span class="nav-number">2.1.</span> <span class="nav-text">结构与写入机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2%E6%9C%BA%E5%88%B6"><span class="nav-number">2.2.</span> <span class="nav-text">查询机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF%E4%B8%8E%E5%B1%80%E9%99%90-1"><span class="nav-number">2.3.</span> <span class="nav-text">适用场景与局限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95-1"><span class="nav-number">2.4.</span> <span class="nav-text">优化方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%AE%9E%E4%BE%8B%E4%B8%8E%E6%BC%94%E5%8F%98"><span class="nav-number">2.5.</span> <span class="nav-text">应用实例与演变</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%93%88%E5%B8%8C%E7%B4%A2%E5%BC%95"><span class="nav-number">3.</span> <span class="nav-text">哈希索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B7%B3%E8%A1%A8%E7%B4%A2%E5%BC%95"><span class="nav-number">4.</span> <span class="nav-text">跳表索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Trie-%E6%A0%91%E7%B4%A2%E5%BC%95%EF%BC%88%E5%89%8D%E7%BC%80%E6%A0%91%EF%BC%89"><span class="nav-number">5.</span> <span class="nav-text">Trie 树索引（前缀树）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%8D%E5%9B%BE%E7%B4%A2%E5%BC%95"><span class="nav-number">6.</span> <span class="nav-text">位图索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95"><span class="nav-number">7.</span> <span class="nav-text">倒排索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">8.</span> <span class="nav-text">结论</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

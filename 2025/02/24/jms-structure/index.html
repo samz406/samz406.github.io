@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="JVM 虚拟机结构介绍">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM虚拟机结构介绍">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/02/24/jms-structure/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="JVM 虚拟机结构介绍">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-02-24T13:56:47.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.357Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/02/24/jms-structure/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>JVM虚拟机结构介绍 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/02/24/jms-structure/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JVM虚拟机结构介绍
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-02-24 21:56:47" itemprop="dateCreated datePublished" datetime="2025-02-24T21:56:47+08:00">2025-02-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>JVM 虚拟机结构介绍</p>
+<span id="more"></span>
+
+
+
+<p>Java 虚拟机是 Java 平台的核心组件，提供跨平台的执行环境。 Java 虚拟机的结构，包括类文件格式、数据类型、运行时数据区域、对象表示、浮点运算以及指令集等关键概念。</p>
+<h3 id="类文件格式"><a href="#类文件格式" class="headerlink" title="类文件格式"></a>类文件格式</h3><p>Java 虚拟机的编译代码采用与硬件和操作系统无关的二进制格式，即 类文件格式（Class File Format）。类文件包含 Java 类或接口的结构信息，如：</p>
+<ul>
+<li>字节码指令</li>
+<li>常量池</li>
+<li>字段与方法描述</li>
+<li>访问权限信息</li>
+</ul>
+<h3 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h3><p>Java 虚拟机的数据类型分为两大类：基本数据类型和引用数据类型</p>
+<h4 id="基本数据类型"><a href="#基本数据类型" class="headerlink" title="基本数据类型"></a>基本数据类型</h4><p>JVM 直接支持的基本类型包括：</p>
+<ol>
+<li>整数类型<ul>
+<li><code>byte</code>（8 位）</li>
+<li><code>short</code>（16 位）</li>
+<li><code>int</code>（32 位）</li>
+<li><code>long</code>（64 位）</li>
+<li><code>char</code>（16 位无符号整数，表示 Unicode 字符）</li>
+</ul>
+</li>
+<li>浮点类型<ul>
+<li><code>float</code>（32 位，符合 IEEE 754）</li>
+<li><code>double</code>（64 位，符合 IEEE 754）</li>
+</ul>
+</li>
+<li>特殊类型<ul>
+<li><code>boolean</code>：JVM 只提供有限的支持，通常用 <code>int</code> 进行模拟（<code>true = 1</code>，<code>false = 0</code>）。</li>
+<li><code>returnAddress</code>：用于 <code>jsr</code> 和 <code>ret</code> 指令，表示指令地址，主要用于 <code>finally</code> 代码块。</li>
+</ul>
+</li>
+</ol>
+<h4 id="引用数据类型"><a href="#引用数据类型" class="headerlink" title="引用数据类型"></a>引用数据类型</h4><p>引用类型分为：</p>
+<ul>
+<li>类类型（Class Type）：指向类的实例</li>
+<li>数组类型（Array Type）：指向数组实例</li>
+<li>接口类型（Interface Type）：指向实现该接口的对象</li>
+</ul>
+<p>所有引用类型默认值为 <code>null</code>，即未指向任何对象。</p>
+<h3 id="运行时数据区域"><a href="#运行时数据区域" class="headerlink" title="运行时数据区域"></a>运行时数据区域</h3><p>JVM 在运行时维护多个内存区域，以支持多线程执行：</p>
+<h4 id="PC（Program-Counter）寄存器"><a href="#PC（Program-Counter）寄存器" class="headerlink" title="PC（Program Counter）寄存器"></a>PC（Program Counter）寄存器</h4><p>PC 寄存器在 JVM 中的作用类似于物理 CPU 中的程序计数器，用于跟踪当前线程执行的字节码指令。其主要功能包括：</p>
+<ol>
+<li>指示当前执行的指令：<ul>
+<li>PC 寄存器保存当前线程所执行的 <strong><strong>字节码指令的地址</strong></strong>，以便 JVM 知道下一步应该执行哪条指令。</li>
+</ul>
+</li>
+<li>支持多线程并发执行：<ul>
+<li>在 JVM 中，每个线程都有自己的 独立 PC 寄存器，不同线程的 PC 寄存器互不影响。</li>
+<li>JVM 采用时间片轮转（Time-Slicing）策略调度线程，每个线程在被调度到执行时，会从它自己的 PC 寄存器中恢复指令地址继续执行。</li>
+</ul>
+</li>
+<li>用于方法调用和返回：<ul>
+<li>方法调用后，JVM 需要保存返回地址，以便执行 <code>return</code> 指令时能够跳回原方法的正确位置。</li>
+<li>PC 寄存器帮助 JVM 追踪方法调用链，使控制流能够正确回溯。</li>
+</ul>
+</li>
+<li>区分 Java 代码和本地代码（native method）：<ul>
+<li>当一个线程正在执行 Java 方法（字节码），PC 寄存器存储的是 当前指令的地址。</li>
+<li>当线程执行本地方法（Native Method，如 JNI 调用）时，PC 寄存器的值是 未定义（Undefined）。</li>
+</ul>
+</li>
+</ol>
+<h4 id="Java-虚拟机栈"><a href="#Java-虚拟机栈" class="headerlink" title="Java 虚拟机栈"></a>Java 虚拟机栈</h4><p>每个线程都有一个独立的 JVM 栈，用于存储方法调用的栈帧（Frame）。栈帧包括：</p>
+<ul>
+<li><p>局部变量表（Local Variables）</p>
+</li>
+<li><p>操作数栈（Operand Stack）</p>
+</li>
+<li><p>动态链接（Dynamic Linking）</p>
+</li>
+<li><p>方法返回值</p>
+</li>
+<li><p>如果栈溢出（Stack Overflow），JVM 会抛出 <code>StackOverflowError</code>。</p>
+</li>
+</ul>
+<h4 id="堆（Heap）"><a href="#堆（Heap）" class="headerlink" title="堆（Heap）"></a>堆（Heap）</h4><p>堆（Heap） 是 Java 虚拟机（JVM）运行时数据区的一部分，用于存储 所有对象实例和数组。JVM 的垃圾回收机制（Garbage Collection, GC）负责自动管理堆内存，使程序员无需手动释放内存。堆的特点</p>
+<ul>
+<li>所有对象都在堆中分配（除非经过特定优化，如栈上分配）</li>
+<li>堆是线程共享的（不同于线程私有的 Java 虚拟机栈）</li>
+<li>堆的大小可以动态扩展或收缩（取决于 JVM 的实现）</li>
+<li>GC 负责堆内存的自动管理</li>
+</ul>
+<h4 id="方法区"><a href="#方法区" class="headerlink" title="方法区"></a>方法区</h4><ul>
+<li>方法区 类似于传统的代码段，存储：<ul>
+<li>已加载类的元数据</li>
+<li>运行时常量池</li>
+<li>字段和方法信息</li>
+<li>字节码</li>
+</ul>
+</li>
+<li>由于 JVM 规范没有强制要求方法区的实现方式，因此不同 JVM 可能有不同的内存管理策略。</li>
+<li>在 HotSpot JVM 中，方法区由在 Java 8 之后 元空间（Metaspace） 取代了 永久代（PermGen）。Metaspace 位于 本地内存，而不是 JVM 堆中。</li>
+</ul>
+<h4 id="运行时常量池"><a href="#运行时常量池" class="headerlink" title="运行时常量池"></a>运行时常量池</h4><ul>
+<li><p>每个类或接口在方法区中有一个 </p>
+<p>运行时常量池,用于存储：字符串常量、类和方法的符号引用、数字字面量</p>
+</li>
+<li><p>运行时解析时，符号引用会转换成实际的地址引用。</p>
+</li>
+</ul>
+<h4 id="本地方法栈"><a href="#本地方法栈" class="headerlink" title="本地方法栈"></a>本地方法栈</h4><ul>
+<li>存储本地方法（Native Methods）调用时所需的栈数据。</li>
+<li>并非所有 JVM 实现都需要本地方法栈。</li>
+</ul>
+<hr>
+<h3 id="栈帧（Frame）"><a href="#栈帧（Frame）" class="headerlink" title="栈帧（Frame）"></a>栈帧（Frame）</h3><p>栈帧（Frame） 是方法调用过程中的核心数据结构。每个方法被调用时，JVM 都会创建一个新的栈帧，并将其推入当前线程的 Java 虚拟机栈。当方法执行完成后，相应的栈帧会被弹出，返回调用方法的执行环境。栈帧主要用于存储局部变量、操作数栈、动态链接信息、方法返回值及异常处理等内容。</p>
+<p>每个方法调用都会创建一个新的 栈帧（Frame），存储：</p>
+<ol>
+<li>局部变量表（Local Variables）</li>
+<li>操作数栈（Operand Stack）</li>
+<li>动态链接（Dynamic Linking）</li>
+<li>方法返回地址</li>
+<li>异常处理信息</li>
+</ol>
+<h4 id="局部变量表"><a href="#局部变量表" class="headerlink" title="局部变量表"></a>局部变量表</h4><ul>
+<li><p>局部变量表是一个数组，用于存储方法的局部变量，包括：</p>
+<ul>
+<li>方法参数</li>
+<li>方法内部定义的局部变量</li>
+</ul>
+</li>
+<li><p>变量可以是 基本数据类型（int、float、long、double、boolean、char、short、byte） 或 引用类型（reference）。</p>
+</li>
+<li><p><code>long</code> 和 <code>double</code> 类型占用两个连续的槽位（slot）。</p>
+</li>
+</ul>
+<h4 id="操作数栈"><a href="#操作数栈" class="headerlink" title="操作数栈"></a>操作数栈</h4><ul>
+<li>操作数栈是一个 后进先出（LIFO） 的数据结构，主要用于：<ul>
+<li>计算表达式</li>
+<li>方法调用</li>
+<li>作为参数传递的中间存储</li>
+</ul>
+</li>
+<li>JVM 通过指令（如 <code>iload</code>, <code>istore</code>, <code>iadd</code>）操作操作数栈。</li>
+<li>操作数栈的最大深度在编译时已确定。</li>
+</ul>
+<h4 id="动态链接"><a href="#动态链接" class="headerlink" title="动态链接"></a>动态链接</h4><p>每个栈帧都包含对 运行时常量池（Run-Time Constant Pool） 的引用，用于 动态解析方法和字段的符号引用。</p>
+<p><strong>符号引用解析</strong>：</p>
+<ul>
+<li>编译时，方法调用和变量访问使用符号引用（如 <code>ClassName.methodName</code>）。</li>
+<li>运行时，JVM 解析符号引用，转换为实际的内存地址或方法指针。</li>
+</ul>
+<h4 id="方法调用的完成"><a href="#方法调用的完成" class="headerlink" title="方法调用的完成"></a>方法调用的完成</h4><ul>
+<li>正常完成：方法执行 <code>return</code> 指令，返回到调用方法。</li>
+<li>异常完成：方法执行过程中抛出未捕获的异常。</li>
+</ul>
+<h4 id="栈帧的管理"><a href="#栈帧的管理" class="headerlink" title="栈帧的管理"></a>栈帧的管理</h4><ul>
+<li>栈帧是线程私有的，不同线程的栈帧不能互相访问。JVM 使用栈帧来管理方法调用，栈深度过大会导致 栈溢出（StackOverflowError）。垃圾回收（GC）不会直接回收栈帧，但方法执行完毕后栈帧自动释放。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    foo(); <span class="comment">// 无限递归</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>比如上面代码。每次递归调用都会创建新的栈帧，最终耗尽栈内存，导致 <code>StackOverflowError</code>。</p>
+<h3 id="对象的表示"><a href="#对象的表示" class="headerlink" title="对象的表示"></a>对象的表示</h3><p>JVM 规范未规定对象的具体存储方式，不同实现可能有所不同。 在 HotSpot JVM 中：</p>
+<ul>
+<li>对象引用指向 对象头（header） 和 实例数据（instance data）。</li>
+<li>对象头包含：<ul>
+<li>Mark Word：存储对象哈希码、GC 状态、锁状态等信息。</li>
+<li>Class Pointer：指向方法区中的类元数据。</li>
+</ul>
+</li>
+</ul>
+<h3 id="浮点运算"><a href="#浮点运算" class="headerlink" title="浮点运算"></a>浮点运算</h3><p>JVM 遵循 IEEE 754 浮点数标准：</p>
+<ul>
+<li>单精度（float）：32 位</li>
+<li>双精度（double）：64 位</li>
+<li>特殊值<ul>
+<li><code>+0.0</code> 和 <code>-0.0</code>（相等，但计算结果可能不同）</li>
+<li><code>NaN</code>（Not a Number）</li>
+<li><code>Infinity</code>（无穷大）</li>
+</ul>
+</li>
+</ul>
+<p>JVM 支持 严格浮点运算，确保所有浮点数计算结果可预测。</p>
+<hr>
+<h3 id="JVM-指令集类型"><a href="#JVM-指令集类型" class="headerlink" title="JVM 指令集类型"></a>JVM 指令集类型</h3><p>JVM 指令集由 1 字节操作码（opcode） + 0 或多个操作数组成，主要分为：</p>
+<ul>
+<li>加载与存储</li>
+<li>算术运算</li>
+<li>类型转换</li>
+<li>对象操作</li>
+<li>栈操作</li>
+<li>控制流</li>
+<li>方法调用与返回</li>
+<li>异常处理</li>
+<li>同步</li>
+</ul>
+<p><strong>总结下</strong></p>
+<table>
+<thead>
+<tr>
+<th>JVM 组件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PC 寄存器</td>
+<td>存储当前执行指令的地址</td>
+</tr>
+<tr>
+<td>Java 虚拟机栈</td>
+<td>维护方法调用的栈帧</td>
+</tr>
+<tr>
+<td>操作数栈</td>
+<td>计算过程中存储临时变量</td>
+</tr>
+<tr>
+<td>方法区</td>
+<td>存储类元数据、方法字节码</td>
+</tr>
+<tr>
+<td>堆</td>
+<td>存储对象实例</td>
+</tr>
+<tr>
+<td>本地方法栈</td>
+<td>执行 JNI 方法</td>
+</tr>
+</tbody></table>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/02/24/TOGAF/" rel="prev" title="TOGAF标准简介">
+      <i class="fa fa-chevron-left"></i> TOGAF标准简介
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/02/24/jms-class-format/" rel="next" title="JVM虚拟机CLASS文件格式">
+      JVM虚拟机CLASS文件格式 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">类文件格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.1.</span> <span class="nav-text">基本数据类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%95%E7%94%A8%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.2.</span> <span class="nav-text">引用数据类型</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA%E5%9F%9F"><span class="nav-number">3.</span> <span class="nav-text">运行时数据区域</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#PC%EF%BC%88Program-Counter%EF%BC%89%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">3.1.</span> <span class="nav-text">PC（Program Counter）寄存器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Java-%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A0%88"><span class="nav-number">3.2.</span> <span class="nav-text">Java 虚拟机栈</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A0%86%EF%BC%88Heap%EF%BC%89"><span class="nav-number">3.3.</span> <span class="nav-text">堆（Heap）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E5%8C%BA"><span class="nav-number">3.4.</span> <span class="nav-text">方法区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%E5%B8%B8%E9%87%8F%E6%B1%A0"><span class="nav-number">3.5.</span> <span class="nav-text">运行时常量池</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E6%96%B9%E6%B3%95%E6%A0%88"><span class="nav-number">3.6.</span> <span class="nav-text">本地方法栈</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%88%E5%B8%A7%EF%BC%88Frame%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">栈帧（Frame）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B1%80%E9%83%A8%E5%8F%98%E9%87%8F%E8%A1%A8"><span class="nav-number">4.1.</span> <span class="nav-text">局部变量表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E6%95%B0%E6%A0%88"><span class="nav-number">4.2.</span> <span class="nav-text">操作数栈</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5"><span class="nav-number">4.3.</span> <span class="nav-text">动态链接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8%E7%9A%84%E5%AE%8C%E6%88%90"><span class="nav-number">4.4.</span> <span class="nav-text">方法调用的完成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A0%88%E5%B8%A7%E7%9A%84%E7%AE%A1%E7%90%86"><span class="nav-number">4.5.</span> <span class="nav-text">栈帧的管理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E7%9A%84%E8%A1%A8%E7%A4%BA"><span class="nav-number">5.</span> <span class="nav-text">对象的表示</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%AE%E7%82%B9%E8%BF%90%E7%AE%97"><span class="nav-number">6.</span> <span class="nav-text">浮点运算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM-%E6%8C%87%E4%BB%A4%E9%9B%86%E7%B1%BB%E5%9E%8B"><span class="nav-number">7.</span> <span class="nav-text">JVM 指令集类型</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

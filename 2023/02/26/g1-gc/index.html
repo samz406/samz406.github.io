@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文将深入探讨G1 GC 分区回收算法 的设计原理、内存结构、收集过程以及性能调优方法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="解析 G1 GC">
+<meta property="og:url" content="http://www.sanmuzi.com/2023/02/26/g1-gc/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="本文将深入探讨G1 GC 分区回收算法 的设计原理、内存结构、收集过程以及性能调优方法">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-02-26T14:56:47.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.356Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2023/02/26/g1-gc/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>解析 G1 GC | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2023/02/26/g1-gc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          解析 G1 GC
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-02-26 22:56:47" itemprop="dateCreated datePublished" datetime="2023-02-26T22:56:47+08:00">2023-02-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p> 本文将深入探讨G1 GC 分区回收算法 的设计原理、内存结构、收集过程以及性能调优方法</p>
+<span id="more"></span>
+
+<h3 id="G1-GC的背景与设计目标"><a href="#G1-GC的背景与设计目标" class="headerlink" title="G1 GC的背景与设计目标"></a>G1 GC的背景与设计目标</h3><h4 id="G1-GC的诞生背景"><a href="#G1-GC的诞生背景" class="headerlink" title="G1 GC的诞生背景"></a>G1 GC的诞生背景</h4><p>在G1 GC出现之前，HotSpot虚拟机主要使用的是Serial、ParNew、Parallel Scavenge、CMS等垃圾收集器。这些收集器各有特点，但也存在一些共同的局限性：</p>
+<ol>
+<li><strong>内存分代固定</strong>：传统收集器将堆内存严格划分为新生代和老年代，比例相对固定，难以根据应用特性灵活调整。</li>
+<li><strong>全堆收集停顿长</strong>：当进行Full GC时，往往需要停止所有应用线程(Stop-The-World)，对整个堆进行处理，导致较长的停顿时间。</li>
+<li><strong>内存碎片问题</strong>：特别是CMS收集器，在长时间运行后可能产生严重的<strong>内存碎片</strong>，影响内存分配效率。</li>
+<li><strong>大内存处理能力有限</strong>：随着服务器内存容量不断增长，传统收集器在处理数十GB甚至上百GB内存时，性能下降明显。</li>
+</ol>
+<h4 id="G1-GC的设计目标"><a href="#G1-GC的设计目标" class="headerlink" title="G1 GC的设计目标"></a>G1 GC的设计目标</h4><p>G1 GC的名称”Garbage-First”体现了其核心设计理念：优先回收垃圾最多的内存区域。与传统收集器相比，G1 GC有着明确的设计目标：</p>
+<ol>
+<li><strong>可预测的停顿时间模型</strong>：允许用户指定期望的停顿时间目标，G1会尽力满足这一目标，使得GC停顿更加可控。</li>
+<li><strong>大堆支持</strong>：针对堆内存在6GB至数百GB的大型服务器应用进行了优化。</li>
+<li><strong>高吞吐量</strong>：在满足停顿时间目标的前提下，保持较高的吞吐量。</li>
+<li><strong>避免或减少Full GC</strong>：尽量避免对整个堆进行收集，减少长时间停顿。</li>
+<li><strong>内存碎片整理</strong>：在回收过程中自动进行内存整理，避免碎片问题。</li>
+<li><strong>更加智能的堆管理</strong>：不再严格区分新生代和老年代，而是采用更灵活的内存区域划分方式。</li>
+</ol>
+<h3 id="G1-GC的内存结构"><a href="#G1-GC的内存结构" class="headerlink" title="G1 GC的内存结构"></a>G1 GC的内存结构</h3><p>G1 GC的一个重大创新是其独特的堆内存结构设计。与传统的垃圾收集器不同，G1不再将内存严格划分为连续的新生代和老年代，G1 的老年代和年轻代不再是一块连续的空间，整个堆被划分成若干个大小相同的 Region，也就是区。</p>
+<h4 id="Region概念"><a href="#Region概念" class="headerlink" title="Region概念"></a>Region概念</h4><p>G1将整个Java堆划分为大小相等的区域（Region），这些Region是内存分配和回收的基本单位。在JVM启动时，G1会根据堆的大小自动决定Region的数量，通常在2000个左右，每个Region的大小通常为1MB到32MB，默认目标是2048个Region。</p>
+<p>Region的大小计算公式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Region大小 = 堆内存大小 / 2048</span><br></pre></td></tr></table></figure>
+
+<p>Region大小会被调整为2的幂次，如1MB, 2MB, 4MB, 8MB, 16MB或32MB。可以通过参数<code>-XX:G1HeapRegionSize</code>手动指定Region大小。</p>
+<p>每个Region在逻辑上可以属于Eden、Survivor、Old（老年代）或Humongous（巨型对象）区域：</p>
+<ol>
+<li>Eden区域：用于分配新对象，类似于传统的Eden空间。</li>
+<li>Survivor区域：存放经过垃圾收集存活下来的、尚未达到晋升条件的对象。</li>
+<li>Old区域：存放达到一定年龄或直接分配的老年代对象。</li>
+<li>Humongous区域：专门用于存储大对象，即大小超过Region一半（默认）的对象。这些对象可能会跨多个连续的Region。</li>
+</ol>
+<p>ps: 虽然Region在逻辑上有不同的分类，但物理上它们是不连续的、分散在整个堆内存中的。这种设计为G1提供了灵活调整各代内存占比的能力，不再受制于传统的固定代空间比例。</p>
+<h4 id="记忆集（Remembered-Sets）"><a href="#记忆集（Remembered-Sets）" class="headerlink" title="记忆集（Remembered Sets）"></a>记忆集（Remembered Sets）</h4><p>G1为了实现高效的跨Region引用跟踪，引入了记忆集（Remembered Sets，简称RSet）的概念。每个Region都有一个对应的RSet，记录了从其他Region指向该Region中对象的引用信息。</p>
+<p>RSet的主要作用是帮助垃圾收集器在回收某个Region时，<strong>快速找到外部引用，而不需要扫描整个堆</strong>。这大大提高了垃圾收集的效率，特别是在部分收集模式下。</p>
+<p>具体实现上，RSet采用了精确到卡页（Card Page）的记录方式。当一个对象的引用发生变化时，JVM会通过写屏障（Write Barrier）技术捕获这一变化，并更新相应的RemSet信息。</p>
+<h4 id="收集集合（Collection-Set）"><a href="#收集集合（Collection-Set）" class="headerlink" title="收集集合（Collection Set）"></a>收集集合（Collection Set）</h4><p>收集集合（Collection Set，简称CSet）是G1在垃圾收集过程中要<strong>回收</strong>的Region集合（mixed GC 中选取的老年代对象 Region 的集合）。在每次垃圾收集时，G1会选择一部分Region放入CSet中进行回收。</p>
+<p>CSet的选择遵循”垃圾优先”(垃圾优先策略（Garbage First），也是 G1 GC 名称的由来)原则，即优先选择垃圾多的Region进行回收，以最小的收集代价获取最大的收集收益。G1通过定期对堆进行采样，维护一个优先级队列，根据各Region的回收价值（预估回收得到的空间大小与回收所需时间的比值）进行排序，从而决定CSet的组成。</p>
+<h4 id="Humongous对象处理"><a href="#Humongous对象处理" class="headerlink" title="Humongous对象处理"></a>Humongous对象处理</h4><p>G1专门设计了处理巨型对象（Humongous Objects）的机制。巨型对象是指大小超过Region一半(50%是默认值)的对象，它们被分配在连续的多个特殊的Humongous Region中。</p>
+<p>巨型对象的处理有几个特点：</p>
+<ol>
+<li>巨型对象总是在老年代分配，绕过了常规的分代收集流程。</li>
+<li>一个巨型对象可能占用多个连续的Region，第一个Region称为”起始巨型区域”，后续的称为”连续巨型区域”。</li>
+<li>为了减少内存碎片和提高大对象分配效率，G1会尝试在并发标记阶段回收符合条件的巨型对象。</li>
+<li>从JDK 8u40版本开始，G1增强了对巨型对象的处理，可以在Young GC阶段回收巨型对象，而不必等到全局并发标记。</li>
+</ol>
+<h3 id="G1-GC的收集过程"><a href="#G1-GC的收集过程" class="headerlink" title="G1 GC的收集过程"></a>G1 GC的收集过程</h3><p>G1 GC的收集过程比传统收集器更加复杂，整体可分为两大类：Young GC（年轻代收集）和Mixed GC（混合收集）。此外，在极端情况下，G1也会触发Full GC作为最后的保障措施。</p>
+<h4 id="Young-GC"><a href="#Young-GC" class="headerlink" title="Young GC"></a>Young GC</h4><p>Young GC主要负责回收Eden区域和Survivor区域中的垃圾对象。当Eden区域空间不足，无法分配新对象时，会触发Young GC。与传统收集器类似，Young GC是完全Stop-The-World的。</p>
+<p>Young GC的主要步骤如下：</p>
+<ol>
+<li>停止所有应用线程（Stop-The-World）。</li>
+<li>选定Collection Set：所有Eden区域和部分Survivor区域被加入CSet。</li>
+<li>根扫描：扫描全局根节点，如线程栈、静态变量、JNI引用等，找出直接可达的对象。</li>
+<li>更新RSet：处理所有由并发标记阶段记录但尚未处理的引用更新缓冲区。</li>
+<li>处理CSet：扫描CSet中的Region，将存活对象复制到幸存者区域或老年代区域，过程中考虑对象的年龄。</li>
+<li>处理引用：处理软引用、弱引用、虚引用等特殊引用类型。</li>
+<li>释放CSet：回收CSet中的Region，使其可以用于下次分配。</li>
+<li>重新开始应用线程：恢复应用程序执行。</li>
+</ol>
+<p>值得注意的是，G1的Young GC采用<strong>复制算法</strong>，将存活对象从Eden和Survivor区域复制到新的Survivor区域或老年代。与传统的分代收集器不同，G1的新生代大小和组成是动态变化的，会根据停顿时间目标和应用行为自动调整。</p>
+<h4 id="并发标记"><a href="#并发标记" class="headerlink" title="并发标记"></a>并发标记</h4><p>并发标记周期是G1进行全局垃圾标记的过程，它为后续的Mixed GC提供决策依据。并发标记周期主要在后台与应用线程并发执行，只有少数几个阶段需要短暂的停顿。</p>
+<p>并发标记周期的主要阶段包括：</p>
+<ol>
+<li><strong>初始标记</strong>：标记从GC Root直接可达的对象，这个阶段需要短暂停顿，通常搭载在Young GC上完成，以减少额外停顿。</li>
+<li><strong>根区域扫描</strong>：扫描Survivor区域中的对象引用，这个阶段是并发的，但必须在下一次Young GC前完成。</li>
+<li><strong>并发标记</strong>：遍历整个堆，标记所有可达对象，这个阶段与应用线程并发执行。使用SATB（Snapshot-At-The-Beginning）算法确保标记的正确性。</li>
+<li><strong>重新标记</strong>：处理SATB缓冲区中的引用更新，并确保所有存活对象都被正确标记。这个阶段需要短暂停顿。</li>
+<li><strong>清理</strong>：统计各个Region中的存活对象数量，识别完全空闲的Region，并更新TAMS（Top-at-Mark-Start）指针。这个阶段部分工作需要短暂停顿，部分可以并发执行。</li>
+</ol>
+<p>并发标记周期的触发条件通常是堆内存使用率达到一定阈值（默认为45%，可通过<code>-XX:InitiatingHeapOccupancyPercent</code>参数调整）。</p>
+<h4 id="Mixed-GC"><a href="#Mixed-GC" class="headerlink" title="Mixed GC"></a>Mixed GC</h4><p>Mixed GC是G1的特色收集模式，它同时回收年轻代和部分老年代Region。Mixed GC通常在并发标记结束后执行，利用标记收集的存活对象信息来选择最有价值的老年代Region进行回收。</p>
+<p>Mixed GC的主要步骤与Young GC类似，区别在于其Collection Set包含：</p>
+<ol>
+<li>所有Eden区域</li>
+<li>部分Survivor区域</li>
+<li>部分老年代区域（根据垃圾占比、回收难度等因素选择）</li>
+</ol>
+<p>G1会根据用户设定的停顿时间目标（通过<code>-XX:MaxGCPauseMillis</code>参数设置，默认200ms），估算每次Mixed GC中能够处理的老年代Region数量，确保停顿时间在可接受范围内。</p>
+<p>一次并发标记周期后，通常会连续执行多次Mixed GC（默认最多8次，可通过<code>-XX:G1MixedGCCountTarget</code>调整），以逐步回收老年代空间。当老年代空间占用率降低到一定阈值（通过<code>-XX:G1HeapWastePercent</code>设置，默认5%）后，后续的收集会恢复为普通的Young GC。</p>
+<h4 id="Full-GC"><a href="#Full-GC" class="headerlink" title="Full GC"></a>Full GC</h4><p>虽然G1的设计目标之一是避免Full GC，但在某些极端情况下，G1仍然可能退化为传统的Full GC，例如：</p>
+<ol>
+<li>并发模式失败：当并发标记还未完成，老年代已经无法分配对象时。</li>
+<li>疏散失败：当进行Young GC或Mixed GC时，没有足够的空闲Region来容纳存活对象。</li>
+<li>巨型对象分配失败：当需要分配巨型对象，但没有足够的连续空闲Region时。</li>
+</ol>
+<p>G1的Full GC是单线程的（在JDK 10之前）或多线程的（JDK 10及之后版本），需要Stop-The-World，使用标记-清除-压缩算法处理整个堆。Full GC的性能通常较差，应当尽量避免其发生。</p>
+<h3 id="G1-GC的关键技术"><a href="#G1-GC的关键技术" class="headerlink" title="G1 GC的关键技术"></a>G1 GC的关键技术</h3><h4 id="SATB（Snapshot-At-The-Beginning）标记算法"><a href="#SATB（Snapshot-At-The-Beginning）标记算法" class="headerlink" title="SATB（Snapshot-At-The-Beginning）标记算法"></a>SATB（Snapshot-At-The-Beginning）标记算法</h4><p>SATB是G1采用的并发标记算法，它在标记阶段开始时对堆内存对象图做一个逻辑快照，确保标记过程的正确性。与CMS使用的增量更新算法不同，SATB算法具有以下特点：</p>
+<ol>
+<li><strong>原始快照保留</strong>：SATB保证在标记阶段开始时存活的对象在整个标记过程中都被当作存活对象处理，即使它们在标记过程中变成了垃圾。</li>
+<li><strong>写前屏障</strong>：当应用线程修改引用关系时，写屏障会记录被覆盖的旧引用，确保原始引用的对象不会被错误地回收。</li>
+<li><strong>并发效率</strong>：SATB算法通过牺牲一定的空间（保留部分垃圾对象）换取时间效率，减少了重新标记阶段的工作量，使得G1能够更好地满足低延迟目标。</li>
+</ol>
+<p>SATB算法的实现依赖于写屏障（Write Barrier）机制，当引用被修改时，写屏障会将旧引用记录到一个线程本地的SATB缓冲区中，后续由并发标记线程或重新标记阶段处理。</p>
+<h4 id="记忆集（Remembered-Sets）和写屏障（Write-Barrier）"><a href="#记忆集（Remembered-Sets）和写屏障（Write-Barrier）" class="headerlink" title="记忆集（Remembered Sets）和写屏障（Write Barrier）"></a>记忆集（Remembered Sets）和写屏障（Write Barrier）</h4><p>G1的记忆集（Remembered Sets，简称RSet）是跨Region引用跟踪的关键数据结构。每个Region都有一个对应的RSet，记录了从堆中其他Region指向本Region的引用。</p>
+<p>RSet的维护依赖于写屏障机制：，写屏障主要有两个作用：</p>
+<p>1 在并发标记阶段解决活跃对象漏标问题；</p>
+<p>2 在写屏障里使用 card table 维护维护跨分区引用。</p>
+<ol>
+<li><strong>后置写屏障</strong>（Post-Write Barrier）：在引用字段更新后执行，记录新的跨Region引用。</li>
+<li><strong>SATB写屏障</strong>：在引用字段更新前执行，记录旧的引用关系，用于并发标记。</li>
+</ol>
+<p>G1采用了卡表（Card Table）的变种来实现RSet，使用哈希表存储卡表条目，通过精确到子卡页的精度来减少空间开销和处理粒度。</p>
+<p>写屏障虽然带来了一定的运行时开销，但这种开销通常可以通过JIT编译器的优化得到缓解。与处理整个堆的代价相比，这种局部性的开销是值得的。</p>
+<h4 id="停顿预测模型"><a href="#停顿预测模型" class="headerlink" title="停顿预测模型"></a>停顿预测模型</h4><p>G1的一个重要特性是其停顿预测模型，它能够根据历史收集数据和用户设定的目标停顿时间，自动调整收集策略和范围。</p>
+<p>停顿预测模型主要包括以下组件：</p>
+<ol>
+<li><strong>收集数据记录</strong>：G1会记录每次收集的详细信息，包括各种操作的耗时、处理的Region数量、存活对象比例等。</li>
+<li><strong>区域统计</strong>：对每个Region维护详细的统计信息，如存活对象比例、对象年龄分布等。</li>
+<li><strong>预测算法</strong>：基于历史数据，预测处理不同类型Region所需的时间。</li>
+<li><strong>动态调整</strong>：根据预测结果动态调整CSet的大小和组成，尽量在目标停顿时间内最大化收集效益。</li>
+</ol>
+<p>停顿预测模型使得G1能够在不同的应用场景和负载条件下，自适应地调整收集策略，维持较为稳定的停顿时间。</p>
+<h4 id="增量收集与可中断性"><a href="#增量收集与可中断性" class="headerlink" title="增量收集与可中断性"></a>增量收集与可中断性</h4><p>G1的另一个重要特性是增量收集能力。与传统收集器需要一次性处理整个堆或整个代空间不同，G1可以每次只处理一部分Region，将大型收集任务分解为多个较小的收集任务，分散在多次GC中完成。</p>
+<p>这种增量收集的能力主要体现在：</p>
+<ol>
+<li><strong>Mixed GC阶段</strong>：每次Mixed GC只处理部分老年代Region，而不是全部。</li>
+<li><strong>多次Mixed GC连续执行</strong>：一次标记周期后，通常会执行多次Mixed GC，逐步清理老年代空间。</li>
+<li><strong>动态调整收集范围</strong>：根据停顿时间目标，动态调整每次收集的Region数量。</li>
+</ol>
+<p>增量收集使得G1能够将大量的收集工作分散在多次GC中，避免长时间停顿，提供更平滑的性能表现。</p>
+<h3 id="G1-GC的性能调优"><a href="#G1-GC的性能调优" class="headerlink" title="G1 GC的性能调优"></a>G1 GC的性能调优</h3><p>尽管G1设计为”自适应”的垃圾收集器，能够在大多数场景下无需特别调优就能提供良好性能，但在一些特定场景中，合理的参数调整仍然能够显著提升G1的表现。</p>
+<h4 id="基本参数设置"><a href="#基本参数设置" class="headerlink" title="基本参数设置"></a>基本参数设置</h4><p>以下是G1 GC最基本的参数设置：</p>
+<ol>
+<li><p><strong>启用G1收集器</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:+UseG1GC</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>设置堆大小</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Xms&lt;初始堆大小&gt; -Xmx&lt;最大堆大小&gt;</span><br></pre></td></tr></table></figure>
+<p>推荐将初始堆和最大堆设置为相同值，以避免堆调整带来的性能波动。</p>
+</li>
+<li><p><strong>设置目标停顿时间</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:MaxGCPauseMillis=&lt;毫秒数&gt;</span><br></pre></td></tr></table></figure>
+<p>默认值为200毫秒。降低这个值会导致G1更频繁地执行GC，可能影响吞吐量；增大这个值则可能导致单次GC停顿时间延长。</p>
+</li>
+<li><p><strong>设置Region大小</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:G1HeapRegionSize=&lt;大小M&gt;</span><br></pre></td></tr></table></figure>
+<p>默认情况下，G1会根据堆大小自动选择合适的Region大小，范围从1MB到32MB，且为2的幂次。手动设置时应考虑堆大小和对象特征。</p>
+</li>
+</ol>
+<h4 id="高级调优参数"><a href="#高级调优参数" class="headerlink" title="高级调优参数"></a>高级调优参数</h4><p>对于需要更精细调优的场景，以下参数可能有所帮助：</p>
+<ol>
+<li><p><strong>并发标记启动阈值</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:InitiatingHeapOccupancyPercent=&lt;百分比&gt;</span><br></pre></td></tr></table></figure>
+<p>默认值为45%，表示当老年代占用堆内存的45%时启动并发标记。对于对象晋升速度快的应用，可能需要降低这个值；对于对象较稳定的应用，可以适当提高。</p>
+</li>
+<li><p><strong>Mixed GC数量目标</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:G1MixedGCCountTarget=&lt;次数&gt;</span><br></pre></td></tr></table></figure>
+<p>默认值为8，表示一次标记周期后计划执行的Mixed GC次数。增大这个值会减少每次Mixed GC处理的老年代Region数量，可能减少单次GC停顿时间，但增加总体GC次数。</p>
+</li>
+<li><p><strong>可回收阈值</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:G1HeapWastePercent=&lt;百分比&gt;</span><br></pre></td></tr></table></figure>
+<p>默认值为5%，表示允许的堆空间浪费比例。当可回收的空间小于这个比例时，G1不再执行Mixed GC。增大这个值可以减少Mixed GC次数，但可能增加内存使用。</p>
+</li>
+<li><p><strong>新生代大小控制</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-XX:G1NewSizePercent=&lt;百分比&gt;   # 最小新生代比例，默认5%</span><br><span class="line">-XX:G1MaxNewSizePercent=&lt;百分比&gt;  # 最大新生代比例，默认60%</span><br></pre></td></tr></table></figure>
+<p>这两个参数设置新生代占堆的比例范围。对于吞吐量敏感的应用，可以考虑增大新生代比例；对于延迟敏感的应用，可能需要限制新生代大小。</p>
+</li>
+<li><p><strong>并行工作线程数</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-XX:ParallelGCThreads=&lt;线程数&gt;   # STW阶段的线程数</span><br><span class="line">-XX:ConcGCThreads=&lt;线程数&gt;      # 并发阶段的线程数</span><br></pre></td></tr></table></figure>
+<p>这两个参数控制GC工作线程数量。通常<code>ConcGCThreads</code>设置为<code>ParallelGCThreads</code>的1/4。增加线程数可以加速GC，但也会增加CPU使用和上下文切换开销。</p>
+</li>
+</ol>
+<h3 id="5-3-调优策略和常见问题"><a href="#5-3-调优策略和常见问题" class="headerlink" title="5.3 调优策略和常见问题"></a>5.3 调优策略和常见问题</h3><p>在进行G1调优时，可以遵循以下策略：</p>
+<ol>
+<li><p><strong>监控关键指标</strong>：</p>
+<ul>
+<li>GC停顿时间及频率</li>
+<li>各代空间使用情况</li>
+<li>对象晋升速率</li>
+<li>并发标记周期频率</li>
+<li>Full GC情况</li>
+</ul>
+</li>
+<li><p><strong>针对高延迟问题</strong>：</p>
+<ul>
+<li>降低<code>MaxGCPauseMillis</code></li>
+<li>增加<code>G1MixedGCCountTarget</code></li>
+<li>适当降低<code>InitiatingHeapOccupancyPercent</code></li>
+</ul>
+</li>
+<li><p><strong>针对吞吐量问题</strong>：</p>
+<ul>
+<li>增加堆内存</li>
+<li>提高<code>MaxGCPauseMillis</code></li>
+<li>增加并行线程数</li>
+</ul>
+</li>
+<li><p><strong>针对Full GC问题</strong>：</p>
+<ul>
+<li>增加堆内存</li>
+<li>降低<code>InitiatingHeapOccupancyPercent</code></li>
+<li>检查巨型对象分配情况</li>
+</ul>
+</li>
+<li><p><strong>常见问题及解决方法</strong>：</p>
+<ul>
+<li><p><strong>问题：频繁的Young GC</strong><br>解决：增加堆内存或调整新生代比例</p>
+</li>
+<li><p><strong>问题：Mixed GC停顿时间过长</strong><br>解决：降低<code>G1OldCSetRegionThresholdPercent</code>或增加<code>G1MixedGCCountTarget</code></p>
+</li>
+<li><p><strong>问题：并发模式失败导致Full GC</strong><br>解决：降低<code>InitiatingHeapOccupancyPercent</code>或增加并发标记线程数</p>
+</li>
+<li><p><strong>问题：疏散失败导致Full GC</strong><br>解决：增加堆内存或保留更多空闲空间（调整<code>G1ReservePercent</code>，默认10%）</p>
+</li>
+<li><p><strong>问题：巨型对象分配问题</strong><br>解决：尝试减少大对象分配或增加Region大小</p>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="5-4-JDK版本差异"><a href="#5-4-JDK版本差异" class="headerlink" title="5.4 JDK版本差异"></a>5.4 JDK版本差异</h3><p>不同JDK版本的G1实现有一定差异，这些差异可能影响调优策略：</p>
+<ul>
+<li><strong>JDK 8</strong>：首次将G1作为生产可用的收集器，但仍有一些性能问题，特别是Full GC是单线程的。</li>
+<li><strong>JDK 9</strong>：G1成为默认垃圾收集器，增强了字符串去重等功能。</li>
+<li><strong>JDK 10</strong>：实现了并行Full GC，大幅改善了最坏情况下的性能。</li>
+<li><strong>JDK 11</strong>：增加了主动整理功能（Proactive Uncommit），可以更积极地释放内存给操作系统。</li>
+<li><strong>JDK 12及以后</strong>：增加了可中断的混合收集、自适应周期调整等特性。</li>
+</ul>
+<p>在选择JDK版本和调优参数时，应当考虑这些差异，并尽可能使用新版本的JDK以获取性能改进。</p>
+<h3 id="G1与CMS的比较"><a href="#G1与CMS的比较" class="headerlink" title="G1与CMS的比较"></a>G1与CMS的比较</h3><p>CMS（Concurrent Mark Sweep）曾经是HotSpot虚拟机中针对低延迟优化的主要收集器，在JDK 14中被正式弃用。两者差异如下：</p>
+<ol>
+<li><p><strong>内存结构</strong>：</p>
+<ul>
+<li>CMS：基于传统的连续<strong>分代</strong>内存布局，年轻代和老年代物理隔离。</li>
+<li>G1：基于<strong>Region</strong>的内存布局，打破了连续分代的概念，更加灵活。</li>
+</ul>
+</li>
+<li><p><strong>收集算法</strong>：</p>
+<ul>
+<li>CMS：老年代使用标记-清除算法，不整理内存，容易产生碎片。</li>
+<li>G1：整体采用标记-整理算法，每次收集都进行内存整理，减少碎片。</li>
+</ul>
+</li>
+<li><p><strong>并发标记算法</strong>：</p>
+<ul>
+<li>CMS：使用增量更新算法。</li>
+<li>G1：使用SATB算法。</li>
+</ul>
+</li>
+<li><p><strong>可预测性</strong>：</p>
+<ul>
+<li>CMS：停顿时间不太可控，特别是在内存碎片严重时可能触发耗时较长的Full GC。</li>
+<li>G1：提供了停顿预测模型，可以指定目标停顿时间，整体更加可控。</li>
+</ul>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/07/20/Software-Architecture-Patterns/" rel="prev" title="软件架构模式">
+      <i class="fa fa-chevron-left"></i> 软件架构模式
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/01/03/java-object-header/" rel="next" title="JAVA对象头介绍">
+      JAVA对象头介绍 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#G1-GC%E7%9A%84%E8%83%8C%E6%99%AF%E4%B8%8E%E8%AE%BE%E8%AE%A1%E7%9B%AE%E6%A0%87"><span class="nav-number">1.</span> <span class="nav-text">G1 GC的背景与设计目标</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#G1-GC%E7%9A%84%E8%AF%9E%E7%94%9F%E8%83%8C%E6%99%AF"><span class="nav-number">1.1.</span> <span class="nav-text">G1 GC的诞生背景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#G1-GC%E7%9A%84%E8%AE%BE%E8%AE%A1%E7%9B%AE%E6%A0%87"><span class="nav-number">1.2.</span> <span class="nav-text">G1 GC的设计目标</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#G1-GC%E7%9A%84%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">G1 GC的内存结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Region%E6%A6%82%E5%BF%B5"><span class="nav-number">2.1.</span> <span class="nav-text">Region概念</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%B0%E5%BF%86%E9%9B%86%EF%BC%88Remembered-Sets%EF%BC%89"><span class="nav-number">2.2.</span> <span class="nav-text">记忆集（Remembered Sets）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%94%B6%E9%9B%86%E9%9B%86%E5%90%88%EF%BC%88Collection-Set%EF%BC%89"><span class="nav-number">2.3.</span> <span class="nav-text">收集集合（Collection Set）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Humongous%E5%AF%B9%E8%B1%A1%E5%A4%84%E7%90%86"><span class="nav-number">2.4.</span> <span class="nav-text">Humongous对象处理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#G1-GC%E7%9A%84%E6%94%B6%E9%9B%86%E8%BF%87%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">G1 GC的收集过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Young-GC"><span class="nav-number">3.1.</span> <span class="nav-text">Young GC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E6%A0%87%E8%AE%B0"><span class="nav-number">3.2.</span> <span class="nav-text">并发标记</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Mixed-GC"><span class="nav-number">3.3.</span> <span class="nav-text">Mixed GC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Full-GC"><span class="nav-number">3.4.</span> <span class="nav-text">Full GC</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#G1-GC%E7%9A%84%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF"><span class="nav-number">4.</span> <span class="nav-text">G1 GC的关键技术</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SATB%EF%BC%88Snapshot-At-The-Beginning%EF%BC%89%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95"><span class="nav-number">4.1.</span> <span class="nav-text">SATB（Snapshot-At-The-Beginning）标记算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%B0%E5%BF%86%E9%9B%86%EF%BC%88Remembered-Sets%EF%BC%89%E5%92%8C%E5%86%99%E5%B1%8F%E9%9A%9C%EF%BC%88Write-Barrier%EF%BC%89"><span class="nav-number">4.2.</span> <span class="nav-text">记忆集（Remembered Sets）和写屏障（Write Barrier）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%81%9C%E9%A1%BF%E9%A2%84%E6%B5%8B%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.3.</span> <span class="nav-text">停顿预测模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A2%9E%E9%87%8F%E6%94%B6%E9%9B%86%E4%B8%8E%E5%8F%AF%E4%B8%AD%E6%96%AD%E6%80%A7"><span class="nav-number">4.4.</span> <span class="nav-text">增量收集与可中断性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#G1-GC%E7%9A%84%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98"><span class="nav-number">5.</span> <span class="nav-text">G1 GC的性能调优</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE"><span class="nav-number">5.1.</span> <span class="nav-text">基本参数设置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%AB%98%E7%BA%A7%E8%B0%83%E4%BC%98%E5%8F%82%E6%95%B0"><span class="nav-number">5.2.</span> <span class="nav-text">高级调优参数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-%E8%B0%83%E4%BC%98%E7%AD%96%E7%95%A5%E5%92%8C%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98"><span class="nav-number">6.</span> <span class="nav-text">5.3 调优策略和常见问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-4-JDK%E7%89%88%E6%9C%AC%E5%B7%AE%E5%BC%82"><span class="nav-number">7.</span> <span class="nav-text">5.4 JDK版本差异</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#G1%E4%B8%8ECMS%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-number">8.</span> <span class="nav-text">G1与CMS的比较</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

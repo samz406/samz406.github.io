@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="我们觉得这个功能应该挺好用的。” “这个页面的数据看着还可以。” “这周用户增长了，看起来方向是对的。” 很多早期团队的产品决策，靠的是感觉、经验、猜测。 甚至连数据都有了，却依旧：  不知道该看哪一条； 不知道数据好是因为什么，坏又代表什么； 不知道如何从数据反推出产品的问题。  这就是缺乏指标体系的表现。不是没数据，而是没有把数据变成“判断力”。 本章我们来讲讲：  什么是“早期产品的指标体系">
+<meta property="og:type" content="article">
+<meta property="og:title" content="技术产品早期如何构建指标体系：别用感觉做产品，要用信号走路">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/04/13/product-thinking-12/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="我们觉得这个功能应该挺好用的。” “这个页面的数据看着还可以。” “这周用户增长了，看起来方向是对的。” 很多早期团队的产品决策，靠的是感觉、经验、猜测。 甚至连数据都有了，却依旧：  不知道该看哪一条； 不知道数据好是因为什么，坏又代表什么； 不知道如何从数据反推出产品的问题。  这就是缺乏指标体系的表现。不是没数据，而是没有把数据变成“判断力”。 本章我们来讲讲：  什么是“早期产品的指标体系">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-04-13T06:38:47.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.372Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/04/13/product-thinking-12/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>技术产品早期如何构建指标体系：别用感觉做产品，要用信号走路 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/04/13/product-thinking-12/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          技术产品早期如何构建指标体系：别用感觉做产品，要用信号走路
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-04-13 14:38:47" itemprop="dateCreated datePublished" datetime="2025-04-13T14:38:47+08:00">2025-04-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%BA%A7%E5%93%81/" itemprop="url" rel="index"><span itemprop="name">产品</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>我们觉得这个功能应该挺好用的。”<br> “这个页面的数据看着还可以。”<br> “这周用户增长了，看起来方向是对的。”</p>
+<p>很多早期团队的产品决策，靠的是<strong>感觉</strong>、<strong>经验</strong>、<strong>猜测</strong>。<br> 甚至连数据都有了，却依旧：</p>
+<ul>
+<li>不知道该看哪一条；</li>
+<li>不知道数据好是因为什么，坏又代表什么；</li>
+<li>不知道如何从数据反推出产品的问题。</li>
+</ul>
+<p>这就是<strong>缺乏指标体系</strong>的表现。不是没数据，而是<strong>没有把数据变成“判断力”</strong>。</p>
+<p>本章我们来讲讲：</p>
+<ul>
+<li>什么是“早期产品的指标体系”？</li>
+<li>早期资源有限时，怎么选出最重要的那几条？</li>
+<li>技术团队怎么用“数据感”替代“拍脑袋”？</li>
+<li>给你一套“技术产品指标系统的核心框架”。</li>
+</ul>
+<span id="more"></span>
+
+
+
+<h2 id="一、为什么早期更需要指标体系？"><a href="#一、为什么早期更需要指标体系？" class="headerlink" title="一、为什么早期更需要指标体系？"></a>一、为什么早期更需要指标体系？</h2><p>你可能会想：“我们现在连用户都不多，看啥指标？”</p>
+<p>但越是早期，越不能靠直觉走路。因为：</p>
+<blockquote>
+<p><strong>早期试错窗口小，方向不对就浪费几周甚至几个月。</strong></p>
+</blockquote>
+<p>指标体系的目的不是汇报，而是：</p>
+<ul>
+<li>帮你快速判断某条产品路径是否值得继续；</li>
+<li>帮你判断哪个用户行为是“价值行为”；</li>
+<li>帮你甄别“假象增长”与“真实沉淀”；</li>
+<li>帮你团队统一语言，减少争论。</li>
+</ul>
+<p><strong>指标不是为了证明你对，而是为了判断你错没错。</strong></p>
+<hr>
+<h2 id="二、你真正要追踪的，不是“汇总数据”，而是“行为信号”"><a href="#二、你真正要追踪的，不是“汇总数据”，而是“行为信号”" class="headerlink" title="二、你真正要追踪的，不是“汇总数据”，而是“行为信号”"></a>二、你真正要追踪的，不是“汇总数据”，而是“行为信号”</h2><p>很多技术产品团队喜欢看：</p>
+<ul>
+<li>本周注册用户数；</li>
+<li>登录活跃人数；</li>
+<li>页面访问量；</li>
+</ul>
+<p>这些没错，但它们只能说明：“用户来过”或者“你投放有效”，<strong>却无法说明产品有没有价值。</strong></p>
+<p>你真正要看的，是：</p>
+<ul>
+<li>用户是否完成了“你设计的任务”？</li>
+<li>用户是否留下来？（留存）</li>
+<li>用户是否愿意继续推荐或转化？（复用 or 支付）</li>
+</ul>
+<hr>
+<h2 id="三、早期产品指标体系的三层结构"><a href="#三、早期产品指标体系的三层结构" class="headerlink" title="三、早期产品指标体系的三层结构"></a>三、早期产品指标体系的三层结构</h2><p>你可以用这个结构建立自己的“核心判断系统”：</p>
+<h3 id="第一层：核心任务指标（North-Star-Metric）"><a href="#第一层：核心任务指标（North-Star-Metric）" class="headerlink" title="第一层：核心任务指标（North Star Metric）"></a>第一层：核心任务指标（North Star Metric）</h3><blockquote>
+<p><strong>一个用户来这儿的“最终目标动作”，你定义清楚了吗？</strong></p>
+</blockquote>
+<p>比如：</p>
+<ul>
+<li>GPT写作工具：用户生成一次可用的长文本</li>
+<li>报表工具：成功导出一次报告</li>
+<li>项目协作工具：创建一个项目并分配成员</li>
+<li>理财APP：添加第一笔支出并设定预算</li>
+</ul>
+<p>这个指标必须是：</p>
+<ul>
+<li>用户完成之后会觉得“有价值”的</li>
+<li>你希望所有用户都完成的</li>
+<li>可以追踪和细分的</li>
+</ul>
+<p><strong>一切指标都应该为这个“北极星指标”服务。</strong></p>
+<hr>
+<h3 id="第二层：行为漏斗指标"><a href="#第二层：行为漏斗指标" class="headerlink" title="第二层：行为漏斗指标"></a>第二层：行为漏斗指标</h3><blockquote>
+<p>用户从进入 → 理解 → 操作 → 完成 的整个路径，流失在哪一环？</p>
+</blockquote>
+<p>你需要构建一个基本漏斗：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">曝光 → 点击 → 注册 → 上手 → 完成关键动作 → 二次使用</span><br></pre></td></tr></table></figure>
+
+<p>你要看的不是绝对值，而是：</p>
+<ul>
+<li><strong>跳失率</strong>：哪个步骤让用户卡住了？（比如注册流程）</li>
+<li><strong>转化率</strong>：从注册到首次使用的比率低，是不是引导不到位？</li>
+<li><strong>完成率</strong>：到了核心功能页面，却没有做出结果，说明理解门槛太高。</li>
+</ul>
+<p>每一步都在告诉你：“用户正在掉队”。</p>
+<hr>
+<h3 id="第三层：留存-amp-再次激活指标"><a href="#第三层：留存-amp-再次激活指标" class="headerlink" title="第三层：留存 &amp; 再次激活指标"></a>第三层：留存 &amp; 再次激活指标</h3><blockquote>
+<p><strong>一次用完不回来，产品就没生命力。</strong></p>
+</blockquote>
+<p>建议用基础三组留存数据：</p>
+<ul>
+<li><strong>Day 1 留存</strong>：是否是“下次还愿意来看看”？</li>
+<li><strong>Day 7 留存</strong>：是否已经开始“形成使用习惯”？</li>
+<li><strong>Day 30 留存</strong>：是否真正“沉淀下来”？</li>
+</ul>
+<p>如果Day 1 &lt; 20%，可能连“上手体验”都没有做好。<br> Day 7 &lt; 10%，说明产品没有“连续价值”；<br> Day 30 &lt; 5%，你几乎就是在烧流量，不是做产品。</p>
+<p>再激活指标也重要：</p>
+<ul>
+<li>用户第一次回来是因为什么触发的？</li>
+<li>他回来之后，是否又留下来了？</li>
+<li>是触达机制有效，还是产品功能升级带来的？</li>
+</ul>
+<p>这些可以帮你决定：“是继续优化产品主流程，还是加强召回策略？”</p>
+<hr>
+<h2 id="四、技术产品的指标地图（常用对照表）"><a href="#四、技术产品的指标地图（常用对照表）" class="headerlink" title="四、技术产品的指标地图（常用对照表）"></a>四、技术产品的指标地图（常用对照表）</h2><table>
+<thead>
+<tr>
+<th>目标类型</th>
+<th>指标名称</th>
+<th>代表什么</th>
+<th>常见误区</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>引导上手</td>
+<td>核心任务完成率</td>
+<td>是否成功完成了第一个关键动作</td>
+<td>只看注册数，没看是否上手</td>
+</tr>
+<tr>
+<td>路径分析</td>
+<td>每步转化率</td>
+<td>哪一步在流失</td>
+<td>页面访问没问题，流程却没人走完</td>
+</tr>
+<tr>
+<td>留存沉淀</td>
+<td>D1 / D7 / D30留存</td>
+<td>用户是否留下来</td>
+<td>留存差却只加功能</td>
+</tr>
+<tr>
+<td>召回激活</td>
+<td>回访率 / 唤醒点击率</td>
+<td>触达系统是否有效</td>
+<td>用户回来但不做动作，指标无效</td>
+</tr>
+<tr>
+<td>深度使用</td>
+<td>单用户功能调用频次</td>
+<td>用户是否只“浅尝辄止”</td>
+<td>活跃不代表价值感强</td>
+</tr>
+<tr>
+<td>付费行为</td>
+<td>注册→试用→转化率</td>
+<td>价值感是否抵达“愿付费”的点</td>
+<td>“支付转化”并非产品好坏唯一标准</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="五、三个重要的“数据判断原则”"><a href="#五、三个重要的“数据判断原则”" class="headerlink" title="五、三个重要的“数据判断原则”"></a>五、三个重要的“数据判断原则”</h2><h3 id="原则-1：指标不是汇报，是决策的依据"><a href="#原则-1：指标不是汇报，是决策的依据" class="headerlink" title="原则 1：指标不是汇报，是决策的依据"></a>原则 1：指标不是汇报，是决策的依据</h3><p>别设太多无用指标。每一条你追踪的数据，都要回答一个问题：</p>
+<blockquote>
+<p>“这条数据的变化，是否会影响我的产品决策？”</p>
+</blockquote>
+<hr>
+<h3 id="原则-2：指标不是看“高低”，而是看“趋势”"><a href="#原则-2：指标不是看“高低”，而是看“趋势”" class="headerlink" title="原则 2：指标不是看“高低”，而是看“趋势”"></a>原则 2：指标不是看“高低”，而是看“趋势”</h3><ul>
+<li>注册多但留存低，不是好事；</li>
+<li>活跃低但稳定上升，是健康信号；</li>
+<li>触达点击率下降，可能是疲劳，也可能是触达时机不对；</li>
+</ul>
+<p>你要看的不是“这周涨没涨”，而是<strong>你这条路径是否在变得更通畅</strong>。</p>
+<hr>
+<h3 id="原则-3：用指标构建“行为假设→验证→修正”的闭环"><a href="#原则-3：用指标构建“行为假设→验证→修正”的闭环" class="headerlink" title="原则 3：用指标构建“行为假设→验证→修正”的闭环"></a>原则 3：用指标构建“行为假设→验证→修正”的闭环</h3><p>比如：</p>
+<ul>
+<li>假设：我们缩短注册流程能提升上手率</li>
+<li>操作：将三步流程合并成一步</li>
+<li>验证：D1 留存是否提升？上手率是否提升？操作中断率是否下降？</li>
+<li>修正：如果没效果，是流程逻辑问题？还是说明流程并不是主要阻力？</li>
+</ul>
+<p><strong>数据不该“跟着走”，而该“带着你走”。</strong></p>
+<hr>
+<h2 id="指标感，就是“对方向的定力-对节奏的判断力”"><a href="#指标感，就是“对方向的定力-对节奏的判断力”" class="headerlink" title="指标感，就是“对方向的定力 + 对节奏的判断力”"></a>指标感，就是“对方向的定力 + 对节奏的判断力”</h2><p>你做技术产品，永远在走一条“黑盒路径”——你不可能在一开始就知道答案。但有指标系统，就像夜航中的仪表盘：</p>
+<ul>
+<li>哪些行为该加力？</li>
+<li>哪条路径该修正？</li>
+<li>哪种功能该砍掉？</li>
+<li>用户到底在什么地方“决定留下”？</li>
+</ul>
+<blockquote>
+<p>产品不是靠直觉走对的，是靠持续判断、修正和节奏掌控撑出来的。</p>
+</blockquote>
+<p><strong>别再用感觉做产品，学会用信号走路。</strong></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/04/13/product-thinking-13/" rel="prev" title="如何设计你的第一个商业闭环">
+      <i class="fa fa-chevron-left"></i> 如何设计你的第一个商业闭环
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/04/13/product-thinking-11/" rel="next" title="构建高质量的用户触达系统：节奏感、信任感与价值感">
+      构建高质量的用户触达系统：节奏感、信任感与价值感 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88%E6%97%A9%E6%9C%9F%E6%9B%B4%E9%9C%80%E8%A6%81%E6%8C%87%E6%A0%87%E4%BD%93%E7%B3%BB%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">一、为什么早期更需要指标体系？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E4%BD%A0%E7%9C%9F%E6%AD%A3%E8%A6%81%E8%BF%BD%E8%B8%AA%E7%9A%84%EF%BC%8C%E4%B8%8D%E6%98%AF%E2%80%9C%E6%B1%87%E6%80%BB%E6%95%B0%E6%8D%AE%E2%80%9D%EF%BC%8C%E8%80%8C%E6%98%AF%E2%80%9C%E8%A1%8C%E4%B8%BA%E4%BF%A1%E5%8F%B7%E2%80%9D"><span class="nav-number">2.</span> <span class="nav-text">二、你真正要追踪的，不是“汇总数据”，而是“行为信号”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%97%A9%E6%9C%9F%E4%BA%A7%E5%93%81%E6%8C%87%E6%A0%87%E4%BD%93%E7%B3%BB%E7%9A%84%E4%B8%89%E5%B1%82%E7%BB%93%E6%9E%84"><span class="nav-number">3.</span> <span class="nav-text">三、早期产品指标体系的三层结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E5%B1%82%EF%BC%9A%E6%A0%B8%E5%BF%83%E4%BB%BB%E5%8A%A1%E6%8C%87%E6%A0%87%EF%BC%88North-Star-Metric%EF%BC%89"><span class="nav-number">3.1.</span> <span class="nav-text">第一层：核心任务指标（North Star Metric）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%B1%82%EF%BC%9A%E8%A1%8C%E4%B8%BA%E6%BC%8F%E6%96%97%E6%8C%87%E6%A0%87"><span class="nav-number">3.2.</span> <span class="nav-text">第二层：行为漏斗指标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E5%B1%82%EF%BC%9A%E7%95%99%E5%AD%98-amp-%E5%86%8D%E6%AC%A1%E6%BF%80%E6%B4%BB%E6%8C%87%E6%A0%87"><span class="nav-number">3.3.</span> <span class="nav-text">第三层：留存 &amp; 再次激活指标</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E6%8A%80%E6%9C%AF%E4%BA%A7%E5%93%81%E7%9A%84%E6%8C%87%E6%A0%87%E5%9C%B0%E5%9B%BE%EF%BC%88%E5%B8%B8%E7%94%A8%E5%AF%B9%E7%85%A7%E8%A1%A8%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">四、技术产品的指标地图（常用对照表）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E4%B8%89%E4%B8%AA%E9%87%8D%E8%A6%81%E7%9A%84%E2%80%9C%E6%95%B0%E6%8D%AE%E5%88%A4%E6%96%AD%E5%8E%9F%E5%88%99%E2%80%9D"><span class="nav-number">5.</span> <span class="nav-text">五、三个重要的“数据判断原则”</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%88%99-1%EF%BC%9A%E6%8C%87%E6%A0%87%E4%B8%8D%E6%98%AF%E6%B1%87%E6%8A%A5%EF%BC%8C%E6%98%AF%E5%86%B3%E7%AD%96%E7%9A%84%E4%BE%9D%E6%8D%AE"><span class="nav-number">5.1.</span> <span class="nav-text">原则 1：指标不是汇报，是决策的依据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%88%99-2%EF%BC%9A%E6%8C%87%E6%A0%87%E4%B8%8D%E6%98%AF%E7%9C%8B%E2%80%9C%E9%AB%98%E4%BD%8E%E2%80%9D%EF%BC%8C%E8%80%8C%E6%98%AF%E7%9C%8B%E2%80%9C%E8%B6%8B%E5%8A%BF%E2%80%9D"><span class="nav-number">5.2.</span> <span class="nav-text">原则 2：指标不是看“高低”，而是看“趋势”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%88%99-3%EF%BC%9A%E7%94%A8%E6%8C%87%E6%A0%87%E6%9E%84%E5%BB%BA%E2%80%9C%E8%A1%8C%E4%B8%BA%E5%81%87%E8%AE%BE%E2%86%92%E9%AA%8C%E8%AF%81%E2%86%92%E4%BF%AE%E6%AD%A3%E2%80%9D%E7%9A%84%E9%97%AD%E7%8E%AF"><span class="nav-number">5.3.</span> <span class="nav-text">原则 3：用指标构建“行为假设→验证→修正”的闭环</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%87%E6%A0%87%E6%84%9F%EF%BC%8C%E5%B0%B1%E6%98%AF%E2%80%9C%E5%AF%B9%E6%96%B9%E5%90%91%E7%9A%84%E5%AE%9A%E5%8A%9B-%E5%AF%B9%E8%8A%82%E5%A5%8F%E7%9A%84%E5%88%A4%E6%96%AD%E5%8A%9B%E2%80%9D"><span class="nav-number">6.</span> <span class="nav-text">指标感，就是“对方向的定力 + 对节奏的判断力”</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

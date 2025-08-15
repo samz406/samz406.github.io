@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="架构设计27个原则">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件架构原则">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/02/18/software-arch-prinpl/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="架构设计27个原则">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-02-18T11:44:56.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.376Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="架构">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/02/18/software-arch-prinpl/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件架构原则 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/02/18/software-arch-prinpl/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件架构原则
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-02-18 19:44:56" itemprop="dateCreated datePublished" datetime="2025-02-18T19:44:56+08:00">2025-02-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>架构设计27个原则</p>
+<span id="more"></span>
+
+
+
+<p>本文来自《系统架构：复杂系统的产品设计和开发》一书。以下是书中提到的设计原则。</p>
+<p><strong>涌现原则</strong></p>
+<p> 当各实体拼合成一个系统时，实体之间的交互会把功能、行为、性能和其他内在属性涌现出来。</p>
+<p><strong>整体原则</strong></p>
+<p>每个系统都作为某一个或某些个大系统的一小部分而运作，同时，每个系统中也都包含着更小的一些系统。</p>
+<p><strong>聚焦原则</strong></p>
+<p> 在任何一个点上都能发现很多影响系统的问题，而其数量已经超出了人们的理解能力。因此，我们必须找出其中最关键、最重要的那些问题，并集中精力思考它们。</p>
+<p><strong>二元原则</strong></p>
+<p> 所有由人类构建而成的系统，其本身都同时存在于物理领域和信息领域中。</p>
+<p><strong>受益原则</strong></p>
+<p> 好的架构必须使人受益，要想把架构做好，就要专注于功能的涌现，使得系统能够把它的主要功能通过跨越系统边界的接口对外展示出来。</p>
+<p><strong>价值与架构原则</strong></p>
+<p> 价值是有着一定成本的利益。架构是由形式所承载的功能。由于利益要通过功能而体现，同时形式又与成本相关，因此，这两个论述之间形成一种特别紧密的联系。</p>
+<p><strong>与特定解决方案无关的功能原则</strong></p>
+<p> 糟糕的系统规范书总是把人引向预先定好的某一套具体解决方案、功能或形式中，这可能会令系统架构师的视野变窄，从而不去探索更多的潜在选项。</p>
+<p><strong>架构师角色原则</strong></p>
+<p> 架构师的角色是解决歧义、专注创新，并简化复杂度。</p>
+<p><strong>歧义原则</strong> </p>
+<p>系统架构的早期阶段充满了歧义。架构师必须解决这种歧义，以便给架构团队定出目标，并持续更新该目标。</p>
+<p><strong>现代实践压力原则</strong></p>
+<p> 现代产品开发过程是由同时工作着的多个分布式团队来进行的，而且还有供应商的参与，因此，它更加需要有优秀的架构。</p>
+<p><strong>架构决策原则</strong></p>
+<p> 我们要把架构决策与其他决策分开，并且要提前花一些时间来谨慎地决定这些问题，因为以后如果想变更会付出很高的代价。</p>
+<p><strong>遗留元素复用原则</strong></p>
+<p>要透彻地理解遗留系统及其涌现属性，并在新的架构中把必要的遗留元素包括进来。</p>
+<p><strong>产品进化原则</strong> </p>
+<p>系统必须进化，否则就会失去竞争力。在进行架构时，应该把系统中较为稳固的部分定义为接口，以便给元素的进化提供便利。</p>
+<p><strong>开端原则</strong></p>
+<p> 在产品定义的早期阶段列出的（企业内部和企业外部的）利益相关者会对架构产生极其重大的影响。</p>
+<p><strong>平衡原则</strong> </p>
+<p>有很多因素会影响并作用于系统的构想、设计、实现及操作。架构师必须在这些因素中寻求一个平衡点，使大多数重要的利益相关者得到满足。</p>
+<p><strong>系统问题陈述原则</strong></p>
+<p> 对问题所做的陈述会确定系统的高层目标，并划定系统的边界。就问题陈述的正确性进行反复的辩论和完善，直到你认为满意为止。</p>
+<p><strong>歧义与目标原则</strong></p>
+<p> 架构师必须解决这些歧义，以便提出几条有代表性的目标并持续地更新它们。这些目标要完备且一致，要兼具挑战性和可达成性，同时又要能够为人类所解决。</p>
+<p><strong>创新原则</strong></p>
+<p> 在架构中进行创新，就是要追求一种能够解决矛盾的好架构。</p>
+<p><strong>表面复杂度原则</strong></p>
+<p> 我们要对系统进行分解、抽象及分层，将其表面复杂度控制在人类所能理解的范围之内。</p>
+<p><strong>必备复杂度原则</strong></p>
+<p> 系统的必备复杂度取决于它的功能。把系统必须实现的功能仔细描述出来，然后选择一个复杂度最低的概念。</p>
+<p><strong>第二定律原则</strong></p>
+<p> 系统的实际复杂度总是会超过必备复杂度。架构师要令实际复杂度尽量接近必备复杂度。</p>
+<p><strong>分解原则</strong></p>
+<p>分解是架构师主动做出的选择，它会影响系统的性能衡量标准、组织的运作方式以及供应商的价值捕获潜力。在设计系统时，架构师需要决定如何将系统分解为更小的、可管理的部分。这种分解应该考虑到性能、维护性和扩展性。</p>
+<p><strong>“2下1上”原则</strong>为了判断对最高层（Level 1）所做的分解是否合适，架构师需要再向下分解一层，以确定下一层（Level 2）中的各种关系。这有助于确保分解的合理性和一致性，避免在高层设计中遗漏重要的细节。</p>
+<p><strong>优雅原则</strong><br>如果一个系统的必备复杂度较低，并且其分解方式能够与多个分解平面相匹配，那么该系统被认为是优雅的。架构师应该追求设计出既简单又灵活的系统，这样的系统更容易维护和扩展。</p>
+<p><strong>架构健壮程度原则</strong></p>
+<p>好的架构应该能够应对各种变化，无论是通过健壮性（能够处理环境中的变化）还是通过适应性（能够适应环境中的变化）。在设计时，架构师需要考虑系统的灵活性和鲁棒性，确保系统能够适应未来可能的变化。</p>
+<p><strong>架构决策的耦合与整理原则</strong></p>
+<p>架构决策应该根据指标对决策的敏感度以及决策之间的连接度来排定先后顺序。这意味着在做出架构决策时，应该优先考虑那些对系统影响最大且与其他决策紧密相关的决策。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/02/17/software-system-optimize/" rel="prev" title="软件系统优化手段">
+      <i class="fa fa-chevron-left"></i> 软件系统优化手段
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/02/19/uestion/" rel="next" title="建立有效的代理">
+      建立有效的代理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="PyCharm中遇到 Unresolved reference &#39;xxx 问题排查与解决,多个 Python Interpreter">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PyCharm中遇到 &#96;Unresolved reference &#39;xxx&#96; 问题排查与解决">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/05/12/python-unresolve/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="PyCharm中遇到 Unresolved reference &#39;xxx 问题排查与解决,多个 Python Interpreter">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-05-12T14:55:01.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.373Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/05/12/python-unresolve/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>PyCharm中遇到 `Unresolved reference 'xxx` 问题排查与解决 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/05/12/python-unresolve/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PyCharm中遇到 `Unresolved reference 'xxx` 问题排查与解决
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-05-12 22:55:01" itemprop="dateCreated datePublished" datetime="2025-05-12T22:55:01+08:00">2025-05-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AI/" itemprop="url" rel="index"><span itemprop="name">AI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>PyCharm中遇到 <code>Unresolved reference &#39;xxx</code> 问题排查与解决,多个 Python Interpreter </p>
+<span id="more"></span>
+
+<h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>在使用 PyCharm 开发基于 <code>langchain-openai</code> 和 <code>asyncio</code> 的 AI 应用时，遇到了常见但又容易被忽略的 <code>Unresolved reference &#39;langchain_openai&#39;</code> 报错。</p>
+<p>Python 代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> asyncio</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> dotenv <span class="keyword">import</span> load_dotenv</span><br><span class="line"><span class="keyword">from</span> langchain_openai <span class="keyword">import</span> ChatOpenAI  <span class="comment"># 报错位置</span></span><br><span class="line"><span class="keyword">from</span> browser_use <span class="keyword">import</span> Agent</span><br><span class="line"><span class="keyword">from</span> pydantic <span class="keyword">import</span> SecretStr</span><br></pre></td></tr></table></figure>
+
+<p><strong>报错信息：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Unresolved reference &#x27;langchain_openai&#x27;</span><br></pre></td></tr></table></figure>
+
+<h3 id="原因排查"><a href="#原因排查" class="headerlink" title="原因排查"></a>原因排查</h3><h5 id="第一步：检查-Python-解释器"><a href="#第一步：检查-Python-解释器" class="headerlink" title="第一步：检查 Python 解释器"></a>第一步：检查 Python 解释器</h5><p>打开 PyCharm → Preferences → Project → Python Interpreter，发现当前解释器为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/bin/python3 (Python 3.8)</span><br></pre></td></tr></table></figure>
+
+<p>而在 Terminal 终端输入：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">which</span> python3</span><br><span class="line">python3 --version</span><br></pre></td></tr></table></figure>
+
+<p>显示结果为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/opt/homebrew/bin/python3</span><br><span class="line">Python 3.11.8</span><br></pre></td></tr></table></figure>
+
+<p>这说明<strong>系统终端和 PyCharm 使用的解释器不一致</strong>，导致 PyCharm 使用的环境下没有安装 <code>langchain-openai</code>。</p>
+<h5 id="第二步：检查包安装位置"><a href="#第二步：检查包安装位置" class="headerlink" title="第二步：检查包安装位置"></a>第二步：检查包安装位置</h5><p>在 Terminal 下执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip3 show langchain-openai</span><br></pre></td></tr></table></figure>
+
+<p>显示安装路径为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/opt/homebrew/lib/python3.11/site-packages</span><br></pre></td></tr></table></figure>
+
+<p>进一步确认 PyCharm 的解释器确实没识别到该包。</p>
+<h3 id="根因总结"><a href="#根因总结" class="headerlink" title="根因总结"></a>根因总结</h3><blockquote>
+<p>PyCharm 使用了系统自带的 <code>/usr/bin/python3 (Python 3.8)</code>，而 <code>langchain-openai</code> 实际安装在 <code>Homebrew</code> 安装的 Python 3.11 环境下。</p>
+<p>导致：</p>
+<ul>
+<li>PyCharm 中的代码无法识别 <code>langchain_openai</code>。</li>
+<li>Terminal 中可以正常运行，但 IDE 中失败。</li>
+</ul>
+</blockquote>
+<h3 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h3><h5 id="步骤一：在-PyCharm-添加-Homebrew-Python-3-11-解释器"><a href="#步骤一：在-PyCharm-添加-Homebrew-Python-3-11-解释器" class="headerlink" title="步骤一：在 PyCharm 添加 Homebrew Python 3.11 解释器"></a>步骤一：在 PyCharm 添加 Homebrew Python 3.11 解释器</h5><ol>
+<li><p>打开 PyCharm → <code>Preferences</code> → <code>Python Interpreter</code>。</p>
+</li>
+<li><p>点击右上角 ➕。</p>
+</li>
+<li><p>选择 <code>System Interpreter</code>。</p>
+</li>
+<li><p>指定解释器路径为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/opt/homebrew/bin/python3</span><br></pre></td></tr></table></figure></li>
+<li><p>点击 <code>Apply</code> → <code>OK</code>。</p>
+</li>
+</ol>
+<h5 id="步骤二：验证环境切换成功"><a href="#步骤二：验证环境切换成功" class="headerlink" title="步骤二：验证环境切换成功"></a>步骤二：验证环境切换成功</h5><ol>
+<li><p>确保 PyCharm 左下角或右下角显示：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Python 3.11 ( /opt/homebrew/bin/python3 )</span><br></pre></td></tr></table></figure></li>
+<li><p>确认 <code>langchain-openai</code> 出现在解释器的包列表。</p>
+</li>
+<li><p>重新运行代码，确认不再报错。</p>
+</li>
+</ol>
+<h5 id="步骤三（可选）：清理旧解释器"><a href="#步骤三（可选）：清理旧解释器" class="headerlink" title="步骤三（可选）：清理旧解释器"></a>步骤三（可选）：清理旧解释器</h5><p>为避免混淆，可以从 PyCharm 中删除 <code>/usr/bin/python3 (Python 3.8)</code> 解释器。</p>
+<h5 id="附：常用检查命令"><a href="#附：常用检查命令" class="headerlink" title="附：常用检查命令"></a>附：常用检查命令</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查当前 Python 路径</span></span><br><span class="line"><span class="built_in">which</span> python3</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查当前 Python 版本</span></span><br><span class="line">python3 --version</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查是否安装 langchain-openai</span></span><br><span class="line">python3 -m pip list | grep langchain-openai</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/05/12/architectural-trade-offs/" rel="prev" title="在权衡中寻求最优解">
+      <i class="fa fa-chevron-left"></i> 在权衡中寻求最优解
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/05/15/high-availability-architecture-pattern/" rel="next" title="常见的高可用架构模式：主备、主从与集群全景解析">
+      常见的高可用架构模式：主备、主从与集群全景解析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%9B%A0%E6%8E%92%E6%9F%A5"><span class="nav-number">2.</span> <span class="nav-text">原因排查</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E6%A3%80%E6%9F%A5-Python-%E8%A7%A3%E9%87%8A%E5%99%A8"><span class="nav-number">2.0.1.</span> <span class="nav-text">第一步：检查 Python 解释器</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E6%A3%80%E6%9F%A5%E5%8C%85%E5%AE%89%E8%A3%85%E4%BD%8D%E7%BD%AE"><span class="nav-number">2.0.2.</span> <span class="nav-text">第二步：检查包安装位置</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B9%E5%9B%A0%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">根因总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">4.</span> <span class="nav-text">解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4%E4%B8%80%EF%BC%9A%E5%9C%A8-PyCharm-%E6%B7%BB%E5%8A%A0-Homebrew-Python-3-11-%E8%A7%A3%E9%87%8A%E5%99%A8"><span class="nav-number">4.0.1.</span> <span class="nav-text">步骤一：在 PyCharm 添加 Homebrew Python 3.11 解释器</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4%E4%BA%8C%EF%BC%9A%E9%AA%8C%E8%AF%81%E7%8E%AF%E5%A2%83%E5%88%87%E6%8D%A2%E6%88%90%E5%8A%9F"><span class="nav-number">4.0.2.</span> <span class="nav-text">步骤二：验证环境切换成功</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4%E4%B8%89%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89%EF%BC%9A%E6%B8%85%E7%90%86%E6%97%A7%E8%A7%A3%E9%87%8A%E5%99%A8"><span class="nav-number">4.0.3.</span> <span class="nav-text">步骤三（可选）：清理旧解释器</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%99%84%EF%BC%9A%E5%B8%B8%E7%94%A8%E6%A3%80%E6%9F%A5%E5%91%BD%E4%BB%A4"><span class="nav-number">4.0.4.</span> <span class="nav-text">附：常用检查命令</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

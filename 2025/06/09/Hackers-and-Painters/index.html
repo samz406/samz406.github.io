@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在大多数公共叙事里，“黑客”往往被贴上神秘或叛逆的标签，而“画家”被视作一个沉浸在色彩与情感中的创作者。保罗·格雷厄姆（Paul Graham）将这两个看似遥远的身份并置，目的正是挑战工业时代以来根深蒂固的专业分工观念。他想说明：真正的创新者既要有彻底的技术掌握力，又要有超越功利的审美与想象。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《黑客与画家》：在代码与颜料之间发现未来的思维座标">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/06/09/Hackers-and-Painters/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="在大多数公共叙事里，“黑客”往往被贴上神秘或叛逆的标签，而“画家”被视作一个沉浸在色彩与情感中的创作者。保罗·格雷厄姆（Paul Graham）将这两个看似遥远的身份并置，目的正是挑战工业时代以来根深蒂固的专业分工观念。他想说明：真正的创新者既要有彻底的技术掌握力，又要有超越功利的审美与想象。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-06-09T02:33:52.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.337Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="思考">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/06/09/Hackers-and-Painters/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>《黑客与画家》：在代码与颜料之间发现未来的思维座标 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/06/09/Hackers-and-Painters/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          《黑客与画家》：在代码与颜料之间发现未来的思维座标
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-06-09 10:33:52" itemprop="dateCreated datePublished" datetime="2025-06-09T10:33:52+08:00">2025-06-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%80%9D%E8%80%83/" itemprop="url" rel="index"><span itemprop="name">思考</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在大多数公共叙事里，“黑客”往往被贴上神秘或叛逆的标签，而“画家”被视作一个沉浸在色彩与情感中的创作者。保罗·格雷厄姆（Paul Graham）将这两个看似遥远的身份并置，目的正是挑战工业时代以来根深蒂固的专业分工观念。他想说明：真正的创新者既要有彻底的技术掌握力，又要有超越功利的审美与想象。</p>
+<span id="more"></span>
+
+<h3 id="跨越-15-篇随笔的核心脉络"><a href="#跨越-15-篇随笔的核心脉络" class="headerlink" title="跨越 15 篇随笔的核心脉络"></a>跨越 15 篇随笔的核心脉络</h3><p>虽然《黑客与画家》以散文集的形式呈现，内在却有一条清晰的思想主线：<strong>“创造力的本质”与“创造者的社会位置”</strong>。下面以四个维度串联全书要旨，并为后文的哲学思考埋下伏笔。</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>代表篇章</th>
+<th>关键信息</th>
+<th>延伸命题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>创造力来源</td>
+<td>《黑客与画家》,《设计与研究》</td>
+<td>编程与绘画共享“快速原型—反复修订”的工作流；持续迭代是创造力的温床</td>
+<td><strong>敏捷是艺术，而非流程模板</strong></td>
+</tr>
+<tr>
+<td>财富与价值</td>
+<td>《如何创造财富》,《做什么才重要》</td>
+<td>财富并非零和，真正的财富来自于“提高世界效率或体验”的非对称洞见</td>
+<td><strong>价值创造 = 发现系统空隙 + 构造杠杆</strong></td>
+</tr>
+<tr>
+<td>系统与自由</td>
+<td>《好与坏的编程语言》,《防御型电子邮件》</td>
+<td>系统语言与工具会反向塑造思考方式；追求简洁=追求心智自由</td>
+<td><strong>工具哲学：限制即解放</strong></td>
+</tr>
+<tr>
+<td>社会与未来</td>
+<td>《比尔·盖茨如何改变世界》,《为何聪明人不受欢迎》</td>
+<td>创造群体往往先被边缘化；技术进步与社会结构互相牵引</td>
+<td><strong>创新的社会契约与孤独代价</strong></td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="来自《黑客与画家》的七个深刻洞见"><a href="#来自《黑客与画家》的七个深刻洞见" class="headerlink" title="来自《黑客与画家》的七个深刻洞见"></a>来自《黑客与画家》的七个深刻洞见</h3><h4 id="1-迭代式真理：知识是被“做”出来的"><a href="#1-迭代式真理：知识是被“做”出来的" class="headerlink" title="1. 迭代式真理：知识是被“做”出来的"></a>1. <strong>迭代式真理：知识是被“做”出来的</strong></h4><p>格雷厄姆一再强调“写了再说”（Release Early, Release Often）。这不仅是一种工程方法论，更是一种“实践先于真理”的认识论：<strong>只有把概念注入程序并让其跑在真实环境中，脑海中的模糊图景才会被逼出细节</strong>。古典哲学关注演绎推理，而“黑客哲学”则相信“程序即实验”。在这种认知框架里，每一次部署都是一次小型的科学革命，真理总处于“可被热更新”状态。</p>
+<blockquote>
+<p><strong>延伸思考</strong>：如果真理是迭代式生成，那么教育和科研体制就必须从“知识灌输”转向“问题驱动—原型验证—持续反思”的循环。传统答题式考试评估的，是静态记忆而非动态创造；它评价的“掌握”，在迭代视角下可能只是“停滞”。</p>
+</blockquote>
+<h4 id="2-简洁不只是审美，而是认知压缩率"><a href="#2-简洁不只是审美，而是认知压缩率" class="headerlink" title="2. 简洁不只是审美，而是认知压缩率"></a>2. <strong>简洁不只是审美，而是认知压缩率</strong></h4><p>在《好与坏的编程语言》中，格雷厄姆提出“语言即思考的上限”。一门晦涩冗长的语言会强迫开发者在语法噪音中迷失，无法直击问题本质；而“Lisp 式的极简”令他得以用最短的表达捕捉最复杂的概念。这一观点的哲学核心是：<strong>复杂系统的可管理性取决于抽象层的压缩比</strong>。当抽象失效，系统便向失控的熵滑落。</p>
+<blockquote>
+<p><strong>延伸思考</strong>：信息时代的“精神内耗”往往来自对无效复杂度的支付。一个简洁 API、一个易懂的数据视图，乃至一次精准的对话，都能大幅减少认知摩擦，释放心智能量。<strong>简洁的美学背后是对有限注意力资源的尊重</strong>。</p>
+</blockquote>
+<h4 id="3-反脆弱生存：边缘是创新的孵化室"><a href="#3-反脆弱生存：边缘是创新的孵化室" class="headerlink" title="3. 反脆弱生存：边缘是创新的孵化室"></a>3. <strong>反脆弱生存：边缘是创新的孵化室</strong></h4><p>格雷厄姆自述在大学宿舍写出了带有原生 Web 应用雏形的 Viaweb（后被雅虎收购）。最初的混乱环境——时间碎片、资金短缺、无层级管理——恰恰构成了**“高波动—高反馈—小投入”**的实验场，使创意得以快速试错。<strong>边缘性不是失败，而是一种能量压缩</strong>：中心化的体系因路径依赖而惰性增长，反而难以演化。</p>
+<blockquote>
+<p><strong>延伸思考</strong>：在进化生物学里，小种群在边缘生态位更易发生“创始者效应”；在社会学里，亚文化往往涌现新叙事框架。黑客社群的地下文化能量，与博伊特林厄姆艺术圈的前卫性，其实同是一枚硬币的两面：<strong>边缘，是宏大系统自我更新的毛细血管</strong>。</p>
+</blockquote>
+<h4 id="4-财富是偏差的函数，而非规模的加总"><a href="#4-财富是偏差的函数，而非规模的加总" class="headerlink" title="4. 财富是偏差的函数，而非规模的加总"></a>4. <strong>财富是偏差的函数，而非规模的加总</strong></h4><p>《如何创造财富》以“财富 = 价值 × 杠杆”拆解了创业成功的非线性本质：<strong>微小洞察通过技术杠杆可以放大成指数级经济效益</strong>。这颠覆了传统按工时计报酬的“线性公平”观。格雷厄姆主张“让聪明人自由地追逐问题”，社会才能收获倍增式回报；对个人而言，则是<strong>寻找尚未被价格化的价值洼地</strong>。</p>
+<blockquote>
+<p><strong>延伸思考</strong>：数字化时代，“零边际成本”让价值函数更像是一张陡峭的幂律曲线。文化上若坚持平均主义分配逻辑，必然陷入对杠杆者的道德审判；经济上若忽视这种非线性，又会抑制创新供给。<strong>如何在承认分配不均与鼓励机会平等之间取得动态平衡，是新的社会契约课题</strong>。</p>
+</blockquote>
+<h4 id="5-语言的隐形手铐：工具将伦理写进技术肌理"><a href="#5-语言的隐形手铐：工具将伦理写进技术肌理" class="headerlink" title="5. 语言的隐形手铐：工具将伦理写进技术肌理"></a>5. <strong>语言的隐形手铐：工具将伦理写进技术肌理</strong></h4><p>防御型电子邮件（邮件往返确认、CC 滥用、信息过载）分析显示：技术系统并非中性容器，其设计假设内化了对人的“期望行为模型”。当年早期邮件协议没考虑现代协作场景，今日我们便不得不在收件箱里疲于奔命。格雷厄姆借此提醒：<strong>选择什么样的工具，就是选择什么样的未来</strong>。</p>
+<blockquote>
+<p><strong>延伸思考</strong>：大语言模型横空出世，并非只是更好的“打字机”，它会改变沟通耗散结构，促生新的决策流程。若缺乏<em>design ethics</em>，我们可能把注意力与判断力都外包给模型，从而放弃了<strong>人之为人最关键的反思能力</strong>。</p>
+</blockquote>
+<h4 id="6-审美即策略：好设计是面向未来的折叠"><a href="#6-审美即策略：好设计是面向未来的折叠" class="headerlink" title="6. 审美即策略：好设计是面向未来的折叠"></a>6. <strong>审美即策略：好设计是面向未来的折叠</strong></h4><p>在书名篇《黑客与画家》中，格雷厄姆从 Renaissance 匠人与 Impressionist 艺术家身上提取原则：<strong>大胆舍弃非关键细节，用最直接的线条让注意力聚焦在“能量中心”</strong>。他将这一原则映射到软件架构——高内聚、低耦合、接口化——从而获得可演化的系统。由此引申出一个深刻洞见：<strong>“优雅”并非矫饰，而是对未来的投资</strong>；审美判断其实是一种“跨时间决策策略”。</p>
+<blockquote>
+<p><strong>延伸思考</strong>：复杂社会里的决策失败，往往不是因为算得不够，而是审美失灵。对外观、叙事、流程缺乏整体感，就会不断产生局部修补的需求，致使系统日益臃肿。<strong>培养美感，就是训练在多维约束下找到最小令人满意解的能力</strong>。</p>
+</blockquote>
+<h4 id="7-孤独的秩序：创造者的社会定位悖论"><a href="#7-孤独的秩序：创造者的社会定位悖论" class="headerlink" title="7. 孤独的秩序：创造者的社会定位悖论"></a>7. <strong>孤独的秩序：创造者的社会定位悖论</strong></h4><p>《为何聪明人不受欢迎》是一篇人类学式观察。青少年文化把“合群”当作第一准则，而富有探索欲的人习惯离群索居，因而成为潜在的社会“异感者”。格雷厄姆指明：<strong>真正的创新者要在疏离中维系内心秩序</strong>；他们既要足够脆弱以保持好奇，又要足够坚定以对抗外部噪声。社会若想从这些边缘心灵中受益，就必须包容其“不合时宜”。</p>
+<blockquote>
+<p><strong>延伸思考</strong>：这是技术浪潮下一道更宏大的伦理命题——<em>如何构建支持深度思考与长周期赌注的文化土壤</em>。就像艺术赞助曾孕育文艺复兴，现代社会若无法给“思考时间”与“失败安全网”定价，那么许多潜在的突破将被提前淘汰。</p>
+</blockquote>
+<hr>
+<p>###对当代技术与人文生态的哲学启示</p>
+<ol>
+<li><p><strong>工具与主体的再定义</strong><br>当 AI 工具开始自动生成代码与图像，“黑客”与“画家”的边界被再次模糊。灵魂问题是：<em>当生成式模型既可写程序又可作画，人类创造者的价值坐标如何重塑？</em></p>
+<ul>
+<li><strong>答案一（悲观）</strong>：创造沦为调参，人类退化为“选择即消费”的点击者。</li>
+<li><strong>答案二（进取）</strong>：大模型把“实现层”外包，人类得以上升到<strong>问题定义与价值判断</strong>层。<br>——《黑客与画家》提示我们：<strong>未来的核心竞争力仍是原创洞见</strong>，而非复杂度堆砌。生成式工具只是新的“颜料”，真正的艺术在于构思与结构。</li>
+</ul>
+</li>
+<li><p><strong>“慢”与“快”的辩证</strong><br>书中提倡快速迭代，但格雷厄姆也提醒读者：<strong>迭代的意义在于让作品不断逼近本质，而不是追逐节奏本身</strong>。当今软件业的“加班文化”若仅把迭代当作 KPI，而忽视深度审视与重构，那就背离了黑客精神的初衷。</p>
+<ul>
+<li>真正的“快”是认知反馈快，而非人肉工时堆砌。</li>
+<li>真正的“慢”是允许思维渗透，打磨隐喻与抽象。<br><strong>“快慢交替”才是生产创造性成果的节奏律</strong>。</li>
+</ul>
+</li>
+<li><p><strong>社会尺度的“技术债”</strong><br>软件有技术债，社会同样存在“制度债”与“文化债”。格雷厄姆呼吁利用新工具重写旧系统，正是对抗“债务雪崩”的方案。</p>
+<ul>
+<li>编程语言之争投射到公共政策，也意味着我们该<strong>用面向演化的框架替换僵硬的法规</strong>。</li>
+<li>邮件过载映射到信息社会的注意力危机，需以<strong>协议级别</strong>而非个人自律来治理。</li>
+</ul>
+<blockquote>
+<p><strong>洞见</strong>：当技术迭代速度远超制度更新，集体的“拖延症”将不断累积风险。<em>重构不仅关乎代码，也关乎文明。</em></p>
+</blockquote>
+</li>
+<li><p><strong>“有用”与“有趣”双螺旋</strong><br>书中最诗性的结论是：<strong>真正的好点子往往源自“看似无用但异常有趣”的偏好</strong>。这与科学史上“无用之用”的反复印证遥相呼应——从弦理论到量子计算，从立体主义到生成艺术。</p>
+<ul>
+<li><strong>有用性</strong>驱动资源投入，</li>
+<li><strong>有趣性</strong>触发个人激情；<br><strong>二者共振，才可能穿透平庸与重复</strong>。因此，一个善待好奇心的社会，也极可能是技术领先的社会。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<p>###在“黑客—画家”坐标系中定位自我</p>
+<p>如果说 20 世纪的典型职业模型是“工程师”或“艺术家”，那 21 世纪更像是一个光谱：<strong>从写代码的诗人，到运营指标驱动的算法舞者，再到用 SQL 与水彩并行记录世界的人</strong>。面对 AI 时代的深度渗透，我们需要的不只是更快的芯片或更大的参数，而是一种 <strong>“黑客的实干 + 画家的洞察”</strong> 的新人文精神：</p>
+<ol>
+<li><strong>保持对细节的洁癖</strong>——像黑客调试一样对待概念漏洞；</li>
+<li><strong>练习对整体的想象</strong>——像画家构图一样在混沌中捕捉秩序；</li>
+<li><strong>尊重迭代的节拍</strong>——让每一次发布都是向真理逼近的一小步；</li>
+<li><strong>善用工具又警惕工具</strong>——让技术成为心灵延伸，而非思考桎梏；</li>
+<li><strong>在边缘寻找元问题</strong>——因为那里埋着最大的不均衡与最深的机会。</li>
+</ol>
+<p>当你在键盘与画布之间游走，请记得格雷厄姆的宣言：<em>“做有意义的事先，做有趣的事。”</em><br>代码与颜料都只是媒介，真正的作品是<strong>不断自我更新的灵魂</strong>。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%80%9D%E8%80%83/" rel="tag"># 思考</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/06/08/LangGraph-LlamaIndex-Agent/" rel="prev" title="LangGraph与LlamaIndex Agent实现对比">
+      <i class="fa fa-chevron-left"></i> LangGraph与LlamaIndex Agent实现对比
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/06/09/Shane-Parrish/" rel="next" title="Shane Parrish 思想研究">
+      Shane Parrish 思想研究 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%A8%E8%B6%8A-15-%E7%AF%87%E9%9A%8F%E7%AC%94%E7%9A%84%E6%A0%B8%E5%BF%83%E8%84%89%E7%BB%9C"><span class="nav-number">1.</span> <span class="nav-text">跨越 15 篇随笔的核心脉络</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9D%A5%E8%87%AA%E3%80%8A%E9%BB%91%E5%AE%A2%E4%B8%8E%E7%94%BB%E5%AE%B6%E3%80%8B%E7%9A%84%E4%B8%83%E4%B8%AA%E6%B7%B1%E5%88%BB%E6%B4%9E%E8%A7%81"><span class="nav-number">2.</span> <span class="nav-text">来自《黑客与画家》的七个深刻洞见</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E8%BF%AD%E4%BB%A3%E5%BC%8F%E7%9C%9F%E7%90%86%EF%BC%9A%E7%9F%A5%E8%AF%86%E6%98%AF%E8%A2%AB%E2%80%9C%E5%81%9A%E2%80%9D%E5%87%BA%E6%9D%A5%E7%9A%84"><span class="nav-number">2.1.</span> <span class="nav-text">1. 迭代式真理：知识是被“做”出来的</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E7%AE%80%E6%B4%81%E4%B8%8D%E5%8F%AA%E6%98%AF%E5%AE%A1%E7%BE%8E%EF%BC%8C%E8%80%8C%E6%98%AF%E8%AE%A4%E7%9F%A5%E5%8E%8B%E7%BC%A9%E7%8E%87"><span class="nav-number">2.2.</span> <span class="nav-text">2. 简洁不只是审美，而是认知压缩率</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%8F%8D%E8%84%86%E5%BC%B1%E7%94%9F%E5%AD%98%EF%BC%9A%E8%BE%B9%E7%BC%98%E6%98%AF%E5%88%9B%E6%96%B0%E7%9A%84%E5%AD%B5%E5%8C%96%E5%AE%A4"><span class="nav-number">2.3.</span> <span class="nav-text">3. 反脆弱生存：边缘是创新的孵化室</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E8%B4%A2%E5%AF%8C%E6%98%AF%E5%81%8F%E5%B7%AE%E7%9A%84%E5%87%BD%E6%95%B0%EF%BC%8C%E8%80%8C%E9%9D%9E%E8%A7%84%E6%A8%A1%E7%9A%84%E5%8A%A0%E6%80%BB"><span class="nav-number">2.4.</span> <span class="nav-text">4. 财富是偏差的函数，而非规模的加总</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-%E8%AF%AD%E8%A8%80%E7%9A%84%E9%9A%90%E5%BD%A2%E6%89%8B%E9%93%90%EF%BC%9A%E5%B7%A5%E5%85%B7%E5%B0%86%E4%BC%A6%E7%90%86%E5%86%99%E8%BF%9B%E6%8A%80%E6%9C%AF%E8%82%8C%E7%90%86"><span class="nav-number">2.5.</span> <span class="nav-text">5. 语言的隐形手铐：工具将伦理写进技术肌理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-%E5%AE%A1%E7%BE%8E%E5%8D%B3%E7%AD%96%E7%95%A5%EF%BC%9A%E5%A5%BD%E8%AE%BE%E8%AE%A1%E6%98%AF%E9%9D%A2%E5%90%91%E6%9C%AA%E6%9D%A5%E7%9A%84%E6%8A%98%E5%8F%A0"><span class="nav-number">2.6.</span> <span class="nav-text">6. 审美即策略：好设计是面向未来的折叠</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-%E5%AD%A4%E7%8B%AC%E7%9A%84%E7%A7%A9%E5%BA%8F%EF%BC%9A%E5%88%9B%E9%80%A0%E8%80%85%E7%9A%84%E7%A4%BE%E4%BC%9A%E5%AE%9A%E4%BD%8D%E6%82%96%E8%AE%BA"><span class="nav-number">2.7.</span> <span class="nav-text">7. 孤独的秩序：创造者的社会定位悖论</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

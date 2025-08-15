@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="用更低的复杂度、更高的可维护性去应对软件规模与需求变迁带来的挑战">
+<meta property="og:type" content="article">
+<meta property="og:title" content="要架构设计的4原则">
+<meta property="og:url" content="http://www.sanmuzi.com/2024/10/20/arch-4-principle/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="用更低的复杂度、更高的可维护性去应对软件规模与需求变迁带来的挑战">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-10-20T11:20:56.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.346Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="架构">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2024/10/20/arch-4-principle/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>要架构设计的4原则 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2024/10/20/arch-4-principle/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          要架构设计的4原则
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-10-20 19:20:56" itemprop="dateCreated datePublished" datetime="2024-10-20T19:20:56+08:00">2024-10-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>用更低的复杂度、更高的可维护性去应对软件规模与需求变迁带来的挑战</p>
+<span id="more"></span>
+
+<h3 id="为什么需要架构设计的基本准则"><a href="#为什么需要架构设计的基本准则" class="headerlink" title="为什么需要架构设计的基本准则"></a>为什么需要架构设计的基本准则</h3><p>当我们在软件开发领域工作时，面临的第一个难题往往不是编程语言的学习，也不是特定技术框架的应用，而是如何在瞬息万变的业务需求与技术演进中保持软件整体的可维护性、可扩展性与可演进性。多数开发者在职业生涯的早期阶段会遭遇这样一个真实的场景：需求变化频繁导致代码屡屡被大幅度重构，团队间沟通成本高企导致进度不断延误，缺乏系统化测试导致产品质量无法保证等。所有这些痛点的背后，都离不开对软件整体架构把握不足或缺乏系统性设计原则。</p>
+<p>本文章将围绕如下几个关键原则展开讨论：</p>
+<p><strong>KISS</strong>：简单比复杂好</p>
+<p><strong>Modularity</strong>：模块化设计</p>
+<p><strong>Testable</strong>：保证可测试性</p>
+<p><strong>Orthogonal Decomposition</strong>：正交分解</p>
+<h3 id="KISS原则"><a href="#KISS原则" class="headerlink" title="KISS原则"></a>KISS原则</h3><h5 id="1）KISS-原则简述"><a href="#1）KISS-原则简述" class="headerlink" title="1）KISS 原则简述"></a>1）KISS 原则简述</h5><p>KISS 是 “Keep It Simple, Stupid” 的缩写，常翻译为“保持简洁，不要自作聪明”或者“让事情保持简单”，是软件工程乃至各种工程管理中经常被提及的核心原则。这条原则之所以广为人知，根源在于<strong>在面对复杂系统时，人类大脑更容易被表面现象或短期需求驱动，而忽略了软件复杂性迅速膨胀后带来的维护成本与不可控风险</strong>。</p>
+<p>简单，并不意味着功能缺失或缺少技术深度；恰恰相反，它意味着在同等功能需求下，能以更少、更易理解、更能快速迭代的方式完成目标。许多在短期看似很“高大上”的实现方式，一旦维护周期拉长或团队规模扩大，复杂性往往会成为持续演进的障碍。</p>
+<h5 id="2）违反-KISS-的常见原因"><a href="#2）违反-KISS-的常见原因" class="headerlink" title="2）违反 KISS 的常见原因"></a>2）违反 KISS 的常见原因</h5><p><strong>过度设计</strong>：项目早期就引入过于复杂的设计模式和框架。例如，在一个小型内部应用上就采用了十多个微服务，引入消息队列、分布式事务协调等，而实际流量与需求并不足以支撑微服务带来的性能收益，最终却背上了相当的运维成本。</p>
+<p><strong>工具泛滥</strong>：开发团队频繁使用“最流行”或“最前沿”的工具，但并没有思考其与项目需求是否真正匹配。结果在代码库中充满了各种外部依赖，一旦工具作者停止维护或版本升级不兼容，系统本身也面临灾难。</p>
+<p><strong>团队协作不善</strong>：当沟通不畅时，各个模块负责人为了保证自身功能的完备，可能会“自我加戏”，在系统中添加大量额外逻辑，导致系统耦合度提升，进一步增添了不必要的复杂度。</p>
+<p><strong>业务需求变化频繁</strong>：在短时间内大量扩展需求，而缺乏合理的评估和抽象设计，也会导致系统复杂度飞涨。</p>
+<h5 id="3）如何践行-KISS-原则"><a href="#3）如何践行-KISS-原则" class="headerlink" title="3）如何践行 KISS 原则"></a>3）如何践行 KISS 原则</h5><p><strong>从核心需求出发</strong>：在任何功能开发之前，先要明确问题的本质是什么。是提高处理速度？减少人工操作错误？扩大并发流量？只有紧密围绕最核心需求，才不会引入不必要的复杂逻辑。</p>
+<p><strong>小步快跑的演进</strong>：实践上可以用敏捷迭代思维：以小步迭代的方式逐步扩展功能，每一步都确保系统是稳定、可交付和可维护的。如此即便系统最终复杂度增加，也是在一个有序与可控的过程之中。</p>
+<p><strong>审视技术栈</strong>：团队应定期审视所用技术栈，对那些过度复杂或已经无实际价值的依赖进行清理，保持一个核心、可持续的技术组合。</p>
+<p><strong>减少层级与抽象</strong>：在满足可维护与可扩展的前提下，不要随意增加多余的抽象层。这些抽象层一旦没有被用到或没有被正确设计，就会成为沉重的技术债务。</p>
+<h3 id="模块化设计"><a href="#模块化设计" class="headerlink" title="模块化设计"></a>模块化设计</h3><h5 id="1）-模块化的价值"><a href="#1）-模块化的价值" class="headerlink" title="1） 模块化的价值"></a>1） 模块化的价值</h5><p>模块化（Modularity）是支撑大规模软件开发的最关键方法之一。它强调将软件系统划分成相对独立、功能明确的模块，并通过明确定义的接口（Interface）或契约（Contract）相互通信，从而达到以下目标：</p>
+<p><strong>降低耦合度</strong>：如果系统的组件之间高度耦合，任何变更都可能导致牵一发而动全身，调试和排错成本极高。模块化通过限制模块间的依赖范围，使得某个模块的变化不会广泛影响其它模块。</p>
+<p><strong>提升可维护性</strong>：模块化系统可以将业务逻辑相近、数据依赖紧密的功能聚合在一起，使得维护人员能够专注于特定功能领域，而无需对整个系统一览无余。当系统出现故障时，也能更快定位到问题所在。</p>
+<p><strong>提高可扩展性</strong>：模块化设计往往伴随“可替换性”的思路。一个模块要升级或重写，只要接口不变就能无缝替换。这使得系统在需求变更或技术栈升级时显得更加灵活。</p>
+<p><strong>利于团队协作</strong>：在多人协作开发时，模块划分能降低相互之间的冲突。每个团队或个人可以各自负责某些模块的开发与维护，通过团队间约定的接口进行集成，大幅度降低沟通与冲突成本。</p>
+<p>目前流行的微服务也算是实践模块化，按照服务粒度拆分。</p>
+<h5 id="2）-模块化的常见误区"><a href="#2）-模块化的常见误区" class="headerlink" title="2） 模块化的常见误区"></a>2） 模块化的常见误区</h5><ol>
+<li><strong>过度微服务化</strong>：微服务的确是模块化设计的一种极端体现，但有时候团队会在尚未具备成熟 DevOps 与运维能力的情况下，就将系统切割成数十甚至上百个微服务，从而面临配置混乱、部署复杂、监控压力巨大的问题。过度微服务化不等于高质量的模块化，往往得不偿失。</li>
+<li><strong>分而不治</strong>：有些团队仅仅是形式上做了模块划分，但核心逻辑依然相互纠缠。例如在“业务模块”与“数据模块”之间，还存在大量的数据库交互耦合，导致这个所谓的“模块化”名存实亡。</li>
+<li><strong>忽视公共基础组件</strong>：模块化设计中，通常会有一些可复用的基础组件或公共服务，比如鉴权模块、日志模块、缓存模块等。如果这些基础模块没有做好抽象或者仍然耦合在某个单一业务模块里，就会破坏模块化的整体性与一致性。</li>
+</ol>
+<h5 id="3）-模块化实践策略"><a href="#3）-模块化实践策略" class="headerlink" title="3） 模块化实践策略"></a>3） 模块化实践策略</h5><ol>
+<li><strong>自顶向下的需求分解</strong>：在做软件架构之前，应从业务维度进行拆解，找到不同的业务域（Domain），将系统划分为若干个子域或功能聚合区。遵循一个原则：<strong>业务逻辑相似且数据来源相同或相似的功能应归属到同一个模块</strong>。</li>
+<li><strong>定义明晰的接口</strong>：在确立模块边界后，为各个模块定义清晰、稳定且可演进的接口。例如，使用 GRPC、REST、GraphQL 等。接口需要精心设计，以保证消费者只需要依赖稳定的声明文件，而不用去关注实现细节。</li>
+<li><strong>隐藏实现细节</strong>：模块内部的类与函数、数据结构最好是“私有”的，只有对外部暴露特定且封装良好的访问方式。这样既能防止外部直接使用内部结构，又利于后期替换或升级内部实现。</li>
+<li><strong>抽象公共服务</strong>：对于那些和业务无关但对所有业务模块都必不可少的功能，比如日志监控、安全鉴权、配置管理等，可以封装为独立且通用的基础服务或库模块，以被所有业务模块共享。</li>
+</ol>
+<p>当我们从整体视角去设计模块化体系时，需要兼顾企业规模、团队能力、技术栈特性以及业务发展趋势等多个方面。<strong>模块化带来的好处显而易见，但前提是需要一个合理的切分方式</strong>。盲目追求“更细粒度”或“更时髦”的划分方式，往往会导致系统更为复杂，进一步加大运维和协调的难度。唯有在团队共识和业务需求的双重驱动下，使模块划分既体现功能独立，又能彼此协同互补，才算真正落地了模块化设计的精髓。</p>
+<h3 id="可测试性"><a href="#可测试性" class="headerlink" title="可测试性"></a>可测试性</h3><h5 id="为什么可测试性重要"><a href="#为什么可测试性重要" class="headerlink" title="为什么可测试性重要"></a>为什么可测试性重要</h5><p>任何软件系统都要经历需求变更与功能迭代的过程，如果系统无法轻易进行自动化测试，就意味着在每次变更后都需要花费大量的人力进行手动回归测试，这往往会拖慢迭代速度，甚至容易导致漏测问题，继而在生产环境中出现故障。</p>
+<p>可测试性（Testability）就是要让每个模块或组件能够<strong>独立地进行测试</strong>（单元测试、集成测试、端到端测试等），并且在有需求变化时，测试可以快速、自动化地执行，以此保证软件的正确性和稳定性。这在现代软件交付过程中几乎是必不可少的要求。</p>
+<h5 id="不可测试或难以测试的常见原因"><a href="#不可测试或难以测试的常见原因" class="headerlink" title="不可测试或难以测试的常见原因"></a>不可测试或难以测试的常见原因</h5><ol>
+<li><strong>耦合度过高</strong>：如果某一个组件在运行时依赖多个外部服务或共享状态，那么要测试这个组件就必须同时搭建或模拟所有这些依赖，使得测试非常繁琐。此时往往意味着架构缺乏清晰的边界设计。</li>
+<li><strong>缺乏依赖注入</strong>：如果代码中直接实例化依赖对象，而不是通过接口或依赖注入容器来获取，测试时难以方便地替换真实依赖为“虚拟依赖”（如 Mock 对象、Stubs 等），导致测试过程被阻碍或测试覆盖面不足。</li>
+<li><strong>功能过度集中</strong>：当一段函数逻辑过长或一个模块职责过多，就需要设置大量前置条件来测试这些功能，其结果就是测试本身变得庞大而脆弱，很容易在需求变动时全部失效。</li>
+<li><strong>接口不稳定</strong>：如果模块的接口总是在短时间内发生重大改动，测试用例也会随之频繁改动，最终难以跟上快速变动的步伐。</li>
+</ol>
+<h5 id="提升可测试性的关键措施"><a href="#提升可测试性的关键措施" class="headerlink" title="提升可测试性的关键措施"></a>提升可测试性的关键措施</h5><ol>
+<li><strong>依赖分离（Dependency Injection）</strong>：采用依赖注入框架或手动注入的方式来获取外部依赖，这样在测试时可以使用替身（Mock、Stub 或 Fake）来模拟外部环境。例如在 Java/Spring 中，通过构造方法或注解的方式将依赖传递给类，以便单元测试时能够注入假对象进行测试。</li>
+<li><strong>接口契约化</strong>：强调为每一个模块或服务制定契约），并在测试环境中使用契约测试技术来验证服务提供者和调用者的通信一致性。这可以很好地提高团队间协作下的测试保障。</li>
+<li><strong>细粒度的测试策略</strong>：根据系统规模和复杂度，合理地划分单元测试、集成测试、端到端测试、性能测试的关注点。单元测试主要验证模块内部逻辑，集成测试验证多个模块间的协作，端到端测试则验证整体流程。这样多层次的测试体系能更好地发现问题，也能减少重复测试。</li>
+<li><strong>保持函数短小、单一职责</strong>：遵循经典的“单一职责”理念，每一个函数或类只做一件事且做得好，就可以让单元测试容易编写、容易阅读并且更加稳健。</li>
+<li>可以运用整洁架构之道提的谦卑对象，它是一种专门用于隔离难以测试代码的模式。</li>
+<li></li>
+</ol>
+<p>可测试性的追求不能仅存在于测试团队或测试人员之中，而应当渗透在整体架构设计和开发文化中。<strong>当可测试性成为项目的第一公民时，许多后续的维护、扩展、性能优化等就变得更容易</strong>。反之，忽视可测试性的后果往往是在后期某次重大版本迭代后，团队突然发现回归测试几乎无从下手，或需要通宵加班去逐行验证功能，严重影响开发者士气与产品质量。</p>
+<p>事前发现总比事后好。</p>
+<h3 id="正交分解"><a href="#正交分解" class="headerlink" title="正交分解"></a>正交分解</h3><h5 id="正交分解的概念与意义"><a href="#正交分解的概念与意义" class="headerlink" title="正交分解的概念与意义"></a>正交分解的概念与意义</h5><p>正交分解（Orthogonal Decomposition）指的是在架构设计中将不同关注点或功能维度区分开，尽量避免它们在同一个维度上的耦合或相互影响。换句话说，对于同一个软件系统，如果可以从多个方向去考虑需求或实现细节，那么这些方向或维度最好是互不干扰、相对独立，或者只有极少的交集。</p>
+<p>举例来说，业务逻辑、持久化策略、用户界面、网络通信、日志监控等都是不同的关注点。如果我们能使这些关注点独立成不同的层次或模块，而且在接口、数据结构及交互模式方面尽量减少缠绕，就称之为正交分解做得好。正交分解带来的好处是：<strong>当我们需要改变某一个关注点时，其他关注点受到的影响最小</strong>。</p>
+<h5 id="常见的正交分解实例"><a href="#常见的正交分解实例" class="headerlink" title="常见的正交分解实例"></a>常见的正交分解实例</h5><ol>
+<li><strong>MVC/MVP/MVVM 模式</strong>：这是在前端或应用层中，将数据模型、视图展现和业务逻辑分离，保证开发者在修改页面布局或 UI 交互时，不必重写业务逻辑，反之亦然。</li>
+<li><strong>水平切分与垂直切分</strong>：在大规模分布式系统中，常见做法是在垂直方向上将不同的业务领域拆分为独立服务（如订单服务、支付服务、库存服务等），而在水平方向上对每个服务进行分片或分库。垂直拆分与水平拆分都属于不同维度的拆分方法，它们相互正交，可以在不相互干扰的情况下分别扩展或维护。</li>
+<li><strong>功能配置与逻辑代码分离</strong>：将可变的配置（如第三方服务地址、特性开关、实验参数等）从代码逻辑中分离出来，通过配置文件、环境变量等方式进行管理，从而保证在需要调整运行参数时，无需重新部署或修改主干代码。</li>
+<li><strong>AOP (Aspect Oriented Programming) 思想</strong>：对日志、权限、事务管理等与业务逻辑无关的截面关注点，采用面向切面编程来分离，让核心业务代码不必显式包含这些与业务不直接相关的操作或逻辑。</li>
+</ol>
+<h5 id="如何在实践中应用正交分解"><a href="#如何在实践中应用正交分解" class="headerlink" title="如何在实践中应用正交分解"></a>如何在实践中应用正交分解</h5><ol>
+<li><strong>识别关注点</strong>：要想实现正交分解，首先需要识别系统中存在的主要关注点。这可能包括业务逻辑、数据处理、安全、监控、配置管理、缓存策略等等。</li>
+<li><strong>确定每个关注点的边界</strong>：明确每个关注点的输入、输出、关键接口或核心数据结构，并对与其他关注点的交互模式做出清晰规定。例如，日志模块只负责日志的记录与输出，不应该介入业务逻辑判断，业务逻辑只需调用日志接口即可。</li>
+<li><strong>借力框架或中间件</strong>：在服务端可以采用 Spring AOP 或其他同类机制来分离通用截面逻辑；在微服务架构中，可以采用服务网关（API Gateway）来统一做授权、限流、监控等工作，而不让每个微服务都重复实现。</li>
+<li><strong>坚持迭代与回顾</strong>：随着系统不断演进与功能迭代，最初的正交分解可能慢慢被侵蚀（例如，新需求要求打通业务逻辑与某些安全策略导致耦合上升）。因此要定期进行架构回顾，及时重构或剥离已经耦合到一起的关注点，重新保持正交。</li>
+</ol>
+<p><strong>正交分解的实质是对复杂系统分而治之，避免关注点之间的相互干扰</strong>。它与前面提到的“模块化”在理念上高度契合——都是希望通过清晰的边界和接口，减轻系统复杂度，提高可维护性和可演进性。但正交分解更侧重于关注点的纵横交错，而模块化更倾向于功能或结构上的拆分。两者相辅相成，共同构成高可维护、高可扩展的架构设计基础。</p>
+<h3 id="一些冲突"><a href="#一些冲突" class="headerlink" title="一些冲突"></a>一些冲突</h3><ul>
+<li><strong>KISS 与性能优化的冲突</strong>：有时为了性能，需要引入缓存、异步队列、数据切分等复杂手段，这可能牺牲了简单；如何把握好度，需要在系统的需求场景与用户规模上下功夫，既不盲目堆砌技术，也不生硬地坚持“简单而失去必要的功能”。</li>
+<li><strong>模块化与团队规模的矛盾</strong>：团队很小、业务简单时，如果强行使用极其复杂的模块边界或微服务拆分，实际落地成本会过高；反之，团队足够大时，如果不做模块拆分，几乎所有人都要改动同一个代码库，冲突与混乱不堪。</li>
+<li><strong>可测试性与开发效率的取舍</strong>：一开始就将测试覆盖率拉到 80% 以上，可能会大幅放慢短期交付速度；但从长远来看，高质量自动化测试又能减少后期维护成本。一种平衡方法是对核心模块进行高覆盖率测试，对次要模块适度放宽，逐步提高整体测试水平。</li>
+<li><strong>正交分解与业务融合的张力</strong>：在一些极复杂业务场景中，不同领域关注点之间其实存在大量交集或相互依赖。例如需要按照用户级别定制功能、按照产品类型结合库存与支付策略，这些交集在理想架构中可能被剥离，但现实中却难以完全隔离。这个时候就需要反复权衡在模型上如何表达这些交集，保持系统的灵活性并避免陷入过度耦合。</li>
+</ul>
+<p>架构是一门权衡的艺术。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/01/03/java-object-header/" rel="prev" title="JAVA对象头介绍">
+      <i class="fa fa-chevron-left"></i> JAVA对象头介绍
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/01/01/rpc-1/" rel="next" title="RPC 总体概述">
+      RPC 总体概述 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%87%86%E5%88%99"><span class="nav-number">1.</span> <span class="nav-text">为什么需要架构设计的基本准则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KISS%E5%8E%9F%E5%88%99"><span class="nav-number">2.</span> <span class="nav-text">KISS原则</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1%EF%BC%89KISS-%E5%8E%9F%E5%88%99%E7%AE%80%E8%BF%B0"><span class="nav-number">2.0.1.</span> <span class="nav-text">1）KISS 原则简述</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2%EF%BC%89%E8%BF%9D%E5%8F%8D-KISS-%E7%9A%84%E5%B8%B8%E8%A7%81%E5%8E%9F%E5%9B%A0"><span class="nav-number">2.0.2.</span> <span class="nav-text">2）违反 KISS 的常见原因</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3%EF%BC%89%E5%A6%82%E4%BD%95%E8%B7%B5%E8%A1%8C-KISS-%E5%8E%9F%E5%88%99"><span class="nav-number">2.0.3.</span> <span class="nav-text">3）如何践行 KISS 原则</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E5%8C%96%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.</span> <span class="nav-text">模块化设计</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1%EF%BC%89-%E6%A8%A1%E5%9D%97%E5%8C%96%E7%9A%84%E4%BB%B7%E5%80%BC"><span class="nav-number">3.0.1.</span> <span class="nav-text">1） 模块化的价值</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2%EF%BC%89-%E6%A8%A1%E5%9D%97%E5%8C%96%E7%9A%84%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA"><span class="nav-number">3.0.2.</span> <span class="nav-text">2） 模块化的常见误区</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3%EF%BC%89-%E6%A8%A1%E5%9D%97%E5%8C%96%E5%AE%9E%E8%B7%B5%E7%AD%96%E7%95%A5"><span class="nav-number">3.0.3.</span> <span class="nav-text">3） 模块化实践策略</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AF%E6%B5%8B%E8%AF%95%E6%80%A7"><span class="nav-number">4.</span> <span class="nav-text">可测试性</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AF%E6%B5%8B%E8%AF%95%E6%80%A7%E9%87%8D%E8%A6%81"><span class="nav-number">4.0.1.</span> <span class="nav-text">为什么可测试性重要</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%8D%E5%8F%AF%E6%B5%8B%E8%AF%95%E6%88%96%E9%9A%BE%E4%BB%A5%E6%B5%8B%E8%AF%95%E7%9A%84%E5%B8%B8%E8%A7%81%E5%8E%9F%E5%9B%A0"><span class="nav-number">4.0.2.</span> <span class="nav-text">不可测试或难以测试的常见原因</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8F%90%E5%8D%87%E5%8F%AF%E6%B5%8B%E8%AF%95%E6%80%A7%E7%9A%84%E5%85%B3%E9%94%AE%E6%8E%AA%E6%96%BD"><span class="nav-number">4.0.3.</span> <span class="nav-text">提升可测试性的关键措施</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A3%E4%BA%A4%E5%88%86%E8%A7%A3"><span class="nav-number">5.</span> <span class="nav-text">正交分解</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%AD%A3%E4%BA%A4%E5%88%86%E8%A7%A3%E7%9A%84%E6%A6%82%E5%BF%B5%E4%B8%8E%E6%84%8F%E4%B9%89"><span class="nav-number">5.0.1.</span> <span class="nav-text">正交分解的概念与意义</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E7%9A%84%E6%AD%A3%E4%BA%A4%E5%88%86%E8%A7%A3%E5%AE%9E%E4%BE%8B"><span class="nav-number">5.0.2.</span> <span class="nav-text">常见的正交分解实例</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%9C%A8%E5%AE%9E%E8%B7%B5%E4%B8%AD%E5%BA%94%E7%94%A8%E6%AD%A3%E4%BA%A4%E5%88%86%E8%A7%A3"><span class="nav-number">5.0.3.</span> <span class="nav-text">如何在实践中应用正交分解</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E5%86%B2%E7%AA%81"><span class="nav-number">6.</span> <span class="nav-text">一些冲突</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

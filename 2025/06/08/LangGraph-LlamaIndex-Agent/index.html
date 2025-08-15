@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="LangGraph：图驱动的多智能体框架 – LangGraph 是 LangChain 生态中的开源库，专为 构建有状态、多智能体的 LLM 应用 而设计。其核心架构引入循环有向图作为流程表示，通过节点（代表函数或 LangChain 可运行单元）和边（定义执行顺序和数据流）来组织 Agent 工作流。这种图结构支持智能体在流程中循环往复、动态决策，确保多个 LLM Agent 间的信息交换和执">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LangGraph与LlamaIndex Agent实现对比">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/06/08/LangGraph-LlamaIndex-Agent/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="LangGraph：图驱动的多智能体框架 – LangGraph 是 LangChain 生态中的开源库，专为 构建有状态、多智能体的 LLM 应用 而设计。其核心架构引入循环有向图作为流程表示，通过节点（代表函数或 LangChain 可运行单元）和边（定义执行顺序和数据流）来组织 Agent 工作流。这种图结构支持智能体在流程中循环往复、动态决策，确保多个 LLM Agent 间的信息交换和执">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-06-08T00:53:09.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.338Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="AI">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/06/08/LangGraph-LlamaIndex-Agent/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>LangGraph与LlamaIndex Agent实现对比 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/06/08/LangGraph-LlamaIndex-Agent/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          LangGraph与LlamaIndex Agent实现对比
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-06-08 08:53:09" itemprop="dateCreated datePublished" datetime="2025-06-08T08:53:09+08:00">2025-06-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A0%94%E7%A9%B6%E6%8A%A5%E5%91%8A/" itemprop="url" rel="index"><span itemprop="name">研究报告</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong>LangGraph：图驱动的多智能体框架</strong> – LangGraph 是 LangChain 生态中的开源库，专为 <strong>构建有状态、多智能体的 LLM 应用</strong> 而设计。其核心架构引入<strong>循环有向图</strong>作为流程表示，通过节点（代表函数或 LangChain 可运行单元）和边（定义执行顺序和数据流）来组织 Agent 工作流。这种图结构支持智能体在流程中循环往复、动态决策，确保多个 LLM Agent 间的信息交换和执行顺序得到协调。LangGraph 本质上扩展了 LangChain 的 Agent 能力，提供了<strong>多智能体编排</strong>的运行环境。例如，一个典型的 LangGraph 工作流由多个节点（每个节点可调用一个 LLM或工具函数）连接而成，数据沿有向边传递，并在循环中不断更新共享状态。这种架构使得复杂任务可以被拆解为可控的子步骤，并支持 Agent 之间的协作对话。除了开源库，LangGraph 还提供了对应的平台（LangGraph Cloud），用于部署和<strong>扩展 LangGraph 应用</strong>，内置可伸缩基础设施、专用 API 以及开发者工作台等。总的来说，LangGraph 通过<strong>图计算的方式</strong>实现 Agent 工作流，使开发者能够显式地定义各 Agent 的交互关系和执行逻辑，从而打造复杂的多智能体系统。</p>
+<p><strong>LlamaIndex：数据驱动的 Agent 框架</strong> – LlamaIndex（前称 GPT Index）最初是面向 <strong>LLM 应用的数据接入与检索框架</strong>。它提供一套完整工具用于文档摄取、索引构建、查询接口等，使大型语言模型能方便地接入私有或公共数据源。然而发展至 2025 年，LlamaIndex 已扩展为一款<strong>构建 Agent 的通用框架</strong>，强调让 LLM <strong>“连接你的数据并自主行动”</strong>。其架构核心是引入了<strong>Workflow/AgentWorkflow</strong>抽象，支持<strong>单智能体或多智能体</strong>的编排与运行。LlamaIndex 的 Agent 实现采用<strong>事件驱动</strong>模型：将复杂任务拆解为一系列步骤（Step），每个步骤处理特定“事件”并可产生新事件，从而驱动后续步骤执行。一个 AgentWorkflow 可以管理多个 Agent 的合作，自动处理它们之间的<strong>任务交接（handoff）</strong>和上下文共享。框架内置了对<strong>状态管理</strong>、<strong>工具使用</strong>、<strong>异步执行</strong>、<strong>流式输出</strong>等的支持，使开发者能更轻松地构建<strong>复杂且可扩展的 Agent 系统</strong>。简而言之，LlamaIndex 从一个强大的<strong>检索增强生成（RAG）</strong>库演进为一个<strong>面向 Agent 的轻量框架</strong>，提供从数据接入到多智能体协作的一站式支持，被誉为“最灵活的 Agent 框架”之一。</p>
+<span id="more"></span>
+<h2 id="状态管理、记忆机制、工具集成、推理策略差异"><a href="#状态管理、记忆机制、工具集成、推理策略差异" class="headerlink" title="状态管理、记忆机制、工具集成、推理策略差异"></a>状态管理、记忆机制、工具集成、推理策略差异</h2><h3 id="状态管理与记忆机制"><a href="#状态管理与记忆机制" class="headerlink" title="状态管理与记忆机制"></a>状态管理与记忆机制</h3><p><strong>LangGraph</strong> 采用<strong>全局可持久状态</strong>的设计，每次执行过程中会更新一个共享的状态对象，以在各节点间传递数据，实现跨步骤的上下文保持。由于其<strong>有状态的编排</strong>特点，LangGraph 能在循环执行中保持之前步骤的结果，并允许 Agent <strong>多轮迭代</strong>时“记住”先前信息。2024 年下半年起，LangGraph 显著增强了其记忆能力，引入<strong>短期记忆</strong>和<strong>长期记忆</strong>机制。例如，官方为长期记忆增加了<strong>语义搜索</strong>支持，使 Agent 能根据含义检索过往记忆，而不仅是精确匹配。开发者可以将 Agent 的历史交互存入外部存储（如向量数据库）并通过 LangGraph 检索，这赋予 Agent 更强的上下文延续性。此外，LangGraph 还推出了工具直接修改状态的能力，使 Agent 在调用工具后能<strong>即时更新全局状态</strong>（例如记录新的知识），大大提升了状态管理的灵活性。总的来说，LangGraph 的状态与记忆机制以<strong>集中式状态对象</strong>为核心，通过循环图在多轮推理中持续更新，实现了<strong>连续性（Continuity）</strong>和<strong>长短期结合</strong>的记忆效果。</p>
+<p><strong>LlamaIndex</strong> 则通过<strong>Context上下文对象</strong>来管理状态和记忆。每个 Workflow/AgentWorkflow 都维护一个 <code>Context</code>，Agent 可以将信息写入或读取该上下文，从而在多 Agent 或多轮对话间共享状态。例如，Agent 的工具函数可以获取当前上下文中的“state”并更新其中内容，这一过程对开发者是透明且简便的。这种 <strong>序列化的上下文对象</strong> 也支持在不同运行之间持久化（例如保存到磁盘或数据库），以便 Agent 系统在重启后继续先前的状态。在 2025 年，LlamaIndex 引入了全新的<strong>Memory组件</strong>来强化记忆机制。短期记忆方面，LlamaIndex 提供 <strong>对话历史存储</strong>：将一定窗口内的对话消息保存在一个 SQLite 数据库中（默认使用内存数据库）。当短期记忆达到设定的 token 上限时，可以选择将旧消息<strong>丢弃</strong>或者<strong>转入长期记忆</strong>。长期记忆方面，新版 Memory 支持三种<strong>长期记忆块（memory blocks）</strong>：</p>
+<ul>
+<li><strong>静态记忆块（StaticMemoryBlock）</strong>：存储固定不变的信息（如用户基本资料）作为上下文。</li>
+<li><strong>事实提取记忆块</strong>：从对话中提取重要事实列表，供后续参考。</li>
+<li><strong>向量记忆块</strong>：对过往对话生成嵌入并存入向量索引，以支持基于语义的记忆检索。</li>
+</ul>
+<p>Memory 组件允许开发者按需组合多个长期记忆块。每当短期内存溢出时，系统会将相关内容写入这些长期块，实现**“短记忆+长记忆”<strong>的配合。例如，可以配置当对话历史过长时，将旧聊天记录Embedding后存入向量存储，Agent 回答问题时会自动检索相关的旧对话片段。这些改进使 LlamaIndex 的 Agent 能够同时拥有</strong>对话上下文记忆<strong>和</strong>知识长时记忆**，满足更复杂的交互需求。因此，相比 LangGraph 早期需借助第三方存储实现长期记忆的状况，如今两者在记忆机制上都支持<strong>短期对话上下文和长期知识</strong>，但 LlamaIndex 通过高层封装提供了更开箱即用的记忆模块，而 LangGraph 则给予开发者更底层的控制和自定义空间。</p>
+<h3 id="工具（Tools）集成能力"><a href="#工具（Tools）集成能力" class="headerlink" title="工具（Tools）集成能力"></a>工具（Tools）集成能力</h3><p><strong>LangGraph</strong> 依托 LangChain 庞大的工具生态，实现了<strong>无缝的工具接入</strong>。由于LangGraph 完全兼容 LangChain，一切 LangChain 已有的工具（搜索、计算、API 调用等）都可直接在 LangGraph 中使用。开发者可以将 LangChain 的 Tool 作为一个节点插入图中，Agent 即可调用该工具函数。同时，LangGraph 提供对<strong>多模态工具</strong>的支持，例如接入图像处理、代码执行等节点，让 Agent 能借助不同能力完成任务。此外，LangGraph 还允许<strong>在图中灵活配置工具的先后顺序</strong>：开发者可以通过设计不同的节点顺序或条件分支，控制何时调用何种工具。例如，可以先用一个节点让 Agent 选择工具，再根据输出在后续节点实际调用对应工具。总的来说，借助 LangChain 的互操作性，LangGraph <strong>整合了丰富的第三方工具与模型</strong>，可用于网络搜索、数据库查询、代码执行等任意扩展，使 Agent 的能力边界得以极大拓展。</p>
+<p><strong>LlamaIndex</strong> 同样非常重视工具集成，强调让 Agent <strong>“调用你的数据和服务”</strong>。其 AgentWorkflow 支持 Agent 使用多种类型的工具，从<strong>简单的本地函数</strong>到<strong>完整的查询引擎</strong>皆可作为工具供 Agent 调用。LlamaIndex 通过两种主要方式整合工具：一是<strong>函数形式</strong>，开发者可以将任意 Python 函数（例如数据库查询函数、REST API 调用等）传入 Agent，框架会自动将它包装成可供 LLM 调用的工具。对于 OpenAI 等具备函数调用能力的模型，LlamaIndex 提供了 <code>FunctionAgent</code>，能够根据函数签名直接使用模型的函数调用格式选取并调用正确的工具。二是通过<strong>LlamaHub</strong>社区提供的<strong>工具连接器</strong>。LlamaHub 是 LlamaIndex 的插件库，汇聚了 30+ 种现成工具（如搜索引擎、SQL查询、文件读取等）的适配器。开发者可以直接使用这些封装好的工具<strong>免去重复集成工作</strong>。无论哪种方式，LlamaIndex 都鼓励明确定义工具的输入输出类型（利用 Python 类型提示或 Pydantic 模型），LLM 将据此产生结构化调用，从而<strong>降低错误调用的概率</strong>。在工具调用过程中，LlamaIndex 还支持<strong>异步执行</strong>和<strong>中间结果流式输出</strong>，使多个工具并行或按需执行成为可能。总的来说，LlamaIndex 提供了<strong>高度模块化且可扩展</strong>的工具接口，加上丰富的内置工具，使 Agent 可以方便地与外部世界交互，执行包括网络搜索、数据库操作、代码生成运行等在内的各种任务。</p>
+<h3 id="推理与任务规划策略"><a href="#推理与任务规划策略" class="headerlink" title="推理与任务规划策略"></a>推理与任务规划策略</h3><p>在 <strong>推理策略</strong> 方面，LangGraph 和 LlamaIndex 均支持经典的 ReAct(思考-行动) Agent 模式和更高级的任务规划机制，但实现思路有所不同。</p>
+<p><strong>LangGraph</strong> 倾向于<strong>显式规划</strong>：开发者通过构建流程图，将 Agent 解决问题的步骤<strong>前置规划</strong>为节点序列。每个节点可以视作 Agent 思考链中的一步（例如一个决策、一次查询等），边则决定了下一步走向。借助循环和条件判断节点，LangGraph 能实现灵活的控制流，比如让 Agent 重复先前步骤以修正错误（循环边）或根据某条件走不同分支（条件边）。这种图式推理相当于<strong>提前设计好了 Agent 的推理框架</strong>，LLM 只需在各节点内完成局部决策和输出。优点是<strong>行为可控、结果可预测</strong>，尤其适合对关键流程有严格要求的场景。例如，在代码生成应用中，LangGraph 工作流可以固定为：“生成代码→执行测试→根据结果判断是否需要修正→循环”，确保 Agent 按既定逻辑迭代改进代码。这种图驱动的反复测试-反思策略取得了显著效果：实验证明相比一次性生成，加入<strong>循环测试修正</strong>的 LangGraph Agent 将代码正确率从 55%提升到了 81%。此外，LangGraph 新增的 <code>Command</code> 特性进一步增强了推理灵活性，允许节点在运行时<strong>动态决定下一个执行节点</strong>，突破了预先连接固定边的限制。这相当于为 Agent 引入了<strong>运行时规划</strong>能力——节点本身可以根据当前上下文选择后续步骤，形成**无边图（edgeless graph）**结构，从而适应不可预知的对话走向。这使 LangGraph 能胜任更开放式的推理任务，同时仍保留框架对于每个步骤的可控性和监视能力。</p>
+<p><strong>LlamaIndex</strong> 的推理策略则更<strong>面向开发者友好</strong>和<strong>自动化</strong>。通过 AgentWorkflow，开发者可以以接近自然语言逻辑的方式描述任务流程，而框架在底层以事件驱动方式调度 LLM 推理和工具调用。默认情况下，LlamaIndex 提供了两类常用 Agent架构：<strong>ReActAgent</strong>和<strong>FunctionAgent</strong>。<strong>ReActAgent</strong> 实现了经典的 ReAct 模式，适用于<strong>任意聊天模型</strong>（不要求函数调用能力），通过提示模板让模型产生“思考/观察/行动”序列来选择工具使用或给出最终答案。<strong>FunctionAgent</strong> 则利用 OpenAI GPT-4 等模型的函数调用接口，将工具封装成函数供模型直接调用。对于支持函数调用的模型，这种方式能让 LLM 自动选择和执行函数工具，类似让模型自己做规划。开发者也可以扩展框架，定义自定义的 Agent 类型，以适应特殊的推理需求。在多智能体协作方面，LlamaIndex 内置了<strong>Agent Handoff</strong>机制：一个 Agent 可以根据对话上下文<strong>无缝地将任务交接给另一个 Agent</strong>。例如，在多 Agent 对话助手中，如果当前 Agent 判断某问题需由更专业的 Agent 回答，它可以触发 Context 中的交接事件，将控制权转移给目标 Agent。这类似于 OpenAI 提出的 Swarm 框架中的“handoff”概念。借助 Workflow 的事件流，LlamaIndex 实现这种交接几乎无需额外延迟，多个 Agent <strong>协同作答如同一个团队各司其职</strong>。相较之下，传统没有交接机制的多Agent链式调用会产生很多不必要的往返和延迟。可见，LlamaIndex 强调通过<strong>框架自动协调</strong>来减少人工规划负担。例如，开发者不必显式连线Agent顺序，只需定义各Agent擅长领域，Workflow就能在运行时根据对话内容将用户请求路由给适当的Agent。这种<strong>声明式、事件驱动</strong>的策略极大降低了构建复杂Agent系统的门槛。有评论指出，LlamaIndex 通过关注“定义事件和处理步骤”而非“手工绘制每个节点和边”，使开发<strong>更直观</strong>，在不牺牲可靠性的前提下<strong>降低了入门难度</strong>。综上，在推理策略上，LangGraph 提供了<strong>精细控制</strong>和<strong>固定流程</strong>的优势，适合严谨的任务流程；而 LlamaIndex 提供<strong>更智能的动态调度</strong>和<strong>开发便捷性</strong>，Agent 可以更自主地决定步骤顺序，适合快速开发和需求变化频繁的场景。</p>
+<h2 id="多步推理、知识库问答、任务规划等场景的性能与开发体验差异"><a href="#多步推理、知识库问答、任务规划等场景的性能与开发体验差异" class="headerlink" title="多步推理、知识库问答、任务规划等场景的性能与开发体验差异"></a>多步推理、知识库问答、任务规划等场景的性能与开发体验差异</h2><h3 id="多步推理场景"><a href="#多步推理场景" class="headerlink" title="多步推理场景"></a>多步推理场景</h3><p>对于需要<strong>多步骤推理</strong>（Multi-step Reasoning）的任务，如一步步解决复杂问题或连续追问，LangGraph 和 LlamaIndex 都能胜任，但方式略有不同。在LangGraph中，开发者可以将每个推理步骤设为图中的节点，让Agent按预定顺序执行。例如在数学推导或代码调试场景，可用多个节点依次完成“理解问题→规划方案→逐步求解→验证结果”等步骤。如果某步失败，还能借助循环边回退重试。得益于这种<strong>显式分步</strong>设计，LangGraph在复杂推理中表现出色，能够避免LLM一口气尝试解决导致的混乱，提高成功率。实验表明，通过在LangGraph中增加<strong>单元测试反馈循环</strong>，Agent多步代码生成的性能提升了约 <strong>47%<strong>。开发体验上，这要求开发者</strong>手工设计</strong>这些步骤和循环逻辑，对新人来说有一定复杂度。相对的，LlamaIndex 倾向于让LLM自己在<strong>一条对话中处理多步推理</strong>，框架主要提供支持而不强制拆步骤。如果问题需要分解，Agent可以在一次对话中调用多个工具（通过ReAct模式自行决定）或者通过Workflow的<strong>事件机制</strong>将任务拆成子事件序列。对于开发者而言，不需要像画流程图那样定义每一步，而是<strong>关注任务本身</strong>，让模型基于工具反馈决定下一步。这种模式下，多步推理的性能取决于底层模型的推理能力和提示设计。LlamaIndex通过<strong>工具结果的实时流出</strong>和<strong>上下文自动存储</strong>来帮助模型更好地完成多轮推理。例如，当Agent需要搜索然后总结时，Workflow可以自动将搜索结果传给总结步骤的Prompt，无需人工粘合。而且，LlamaIndex 支持<strong>循环事件</strong>：可以让Workflow在满足条件时触发同一Agent再次执行，实现类似LangGraph的循环过程（如反复试错直到条件满足）。总体来说，如果需要对<strong>推理过程有精细控制</strong>（如科研推导、复杂计算验证），LangGraph 的明确分步流程提供了可靠性；如果追求<strong>开发效率和模型自发的推理</strong>，LlamaIndex 则凭借事件驱动让模型自由探索多步解答，并通过上下文和工具支持尽量保证正确率。</p>
+<h3 id="知识库问答（RAG）场景"><a href="#知识库问答（RAG）场景" class="headerlink" title="知识库问答（RAG）场景"></a>知识库问答（RAG）场景</h3><p>知识库问答（Retrieval-Augmented Generation）是 LlamaIndex 的传统强项。LlamaIndex 提供了多种<strong>索引机制</strong>（列表、向量、树、关键词、知识图谱等）来高效组织和检索知识库中的数据。在一个企业文档问答或数据库QA场景下，LlamaIndex 可先将资料构建索引，然后 Agent 查询时用<strong>Query Engine</strong>检索相关内容并交给 LLM 生成答案。由于算法优化和对向量数据库的深度集成，LlamaIndex 在<strong>查询速度和相关性</strong>上表现优异。当需要同时处理多文档时，LlamaIndex 比直接调用OpenAI API更稳定高效，在相似度评分和运行时方面都有更佳表现。开发体验上，LlamaIndex 提供高层API，让初学者用几行代码就能构建一个针对自有知识库的问答Agent；对于高级用户，还有底层接口可定制检索和融合逻辑。因此，在构建<strong>企业知识助手</strong>、<strong>文档问答</strong>类Agent时，LlamaIndex 往往是首选，因其专门针对检索增强做了大量优化和封装。反观 LangGraph，本身并不提供文档索引功能，但可以通过 LangChain 的 retriever 工具或将 LlamaIndex 作为子组件来实现RAG。例如，可在 LangGraph 图中增加一个节点，调用 LlamaIndex 的 QueryEngine 工具完成知识检索，然后将结果传递给后续LLM节点生成答案。实际上，有项目将 LlamaIndex 与 LangGraph、CrewAI 结合，利用 LlamaIndex 提供强大的检索，将其封装为工具嵌入 CrewAI 或 LangGraph 的多Agent流程中，从而兼具二者所长。这样的集成使 LangGraph 的Agent也能高效利用知识库。但相对来说，这需要开发者对两个框架都熟悉，集成工作略繁琐。总的结论是：<strong>纯知识库问答</strong>场景下，LlamaIndex <strong>开箱即用</strong>且算法成熟，能处理大规模数据并支持复杂查询，是开发体验和性能的上佳选择。LangGraph 则更适合在需要<strong>结合知识库与复杂流程</strong>的场景下，通过集成LlamaIndex来兼顾知识检索和流程控制。例如，一个法律助理Agent既要查询法规（用LlamaIndex）又要执行推理链（用LangGraph），这种复合需求下两者结合能达到最优效果。</p>
+<h3 id="任务规划与复杂任务管理"><a href="#任务规划与复杂任务管理" class="headerlink" title="任务规划与复杂任务管理"></a>任务规划与复杂任务管理</h3><p>在涉及<strong>任务规划</strong>和复杂任务管理的场景（例如子任务分解、流程生成）中，LangGraph 与 LlamaIndex 各有所长。</p>
+<p><strong>LangGraph</strong> 由于其图结构天生就是一种<strong>状态机</strong>和<strong>流程图</strong>，非常适合实现<strong>显式的任务规划</strong>。开发者可以预先根据任务需求，把整个任务拆解成子任务节点，并定义好执行先后关系。对于<strong>分步骤明确</strong>的问题，这种显式规划保证了每一步都被执行且不遗漏。例如，在项目管理Agent中，LangGraph可被用来创建一个“计划→执行→监控→总结”的固定流程，每个阶段由不同Agent负责。LangGraph 甚至支持<strong>层次化的规划</strong>：通过子图或子Agent的方式，将大任务再细分为内部流程。这类似将一个大Agent拆成多个小Agent，每个小Agent内部有自己的LangGraph流程，再由顶层Graph协调。利用这种<strong>层次结构</strong>，LangGraph 可以构建相当复杂的多级任务规划体系，并确保每一级流程都有监控和回滚机制。不过，这也意味着开发者需要对任务有深入理解并手工搭建层次结构，前期设计成本较高。LangGraph 在 2025 年的更新中引入了<strong>模板（Templates）</strong>功能，提供了一些预定义的流程模板（如常见的审核循环、决策树等），在一定程度上减轻了规划复杂流程的负担。但总体来说，LangGraph 更适合那些<strong>可以明确列出步骤的任务</strong>，由人来规划好，Agent严格按照规划执行，其优点是<strong>可靠性和可解释性</strong>极强。</p>
+<p><strong>LlamaIndex</strong> 在任务规划上则更强调<strong>动态决策</strong>和<strong>高层指引</strong>。通过 AgentWorkflow，开发者可以给定一个高层目标，让 LLM Agents 自行<strong>协商分工、分解任务</strong>。例如，在一个研究报告生成场景，开发者无需硬编码具体步骤，只需创建几个具有不同职责的Agent（如“研究Agent”、“撰写Agent”、“审校Agent”）并定义它们的角色和权限（谁可交接给谁）。然后，当用户提出撰写报告的请求时，AgentWorkflow 会让<strong>ResearchAgent</strong>先行动，收集资料后自动把草稿交接给<strong>WriteAgent</strong>撰写，写完再交给<strong>ReviewAgent</strong>检查，必要时ReviewAgent还会把问题打回给WriteAgent修改。整个流程<strong>无需显式列出</strong>，而是在运行时由各Agent依据上下文事件自动<strong>规划和调整</strong>。这种模式下，LLM不但负责执行，还在一定程度上负责<strong>计划下一步</strong>。为了保证这种自主规划的可靠性，LlamaIndex 提供了<strong>可观测性（Observability）</strong>工具，Workflow会将每一步的事件发送到日志或仪表板（如 Arize Phoenix）。开发者可以监视Agent如何决策、是否按预期流程进行，从而调优提示或策略。由于 AgentWorkflow <strong>预集成了常见的规划要素</strong>（如上下文传递、结果汇总、错误处理等），开发者不需要重复造轮子，可以更专注于定义任务本身和Agent能力。这带来了极佳的开发体验：正如业内评论所说，LlamaIndex 的设计高度注重开发者体验，致力于让开发者<strong>用更少的代码实现更多的功能</strong>。因此，在<strong>任务模糊或需要灵活调整</strong>的场景（如对话式任务管理、自动化助理），LlamaIndex 的AgentWorkflow往往更加灵活智能。它让系统具备一定的<strong>自适应规划</strong>能力，例如用户中途更改要求，AgentWorkflow 可以通过上下文调整后续步骤，而不必完全按照初始流程图死板执行。需要指出的是，这种动态规划对底层LLM的可靠性要求较高，实际应用中常结合<strong>人类反馈</strong>（Human-in-the-loop）机制：LlamaIndex Workflow 支持在关键决策点暂停，征询人工确认或指示，然后再继续执行。综合而言，如果项目需要<strong>严谨可控的流程</strong>，LangGraph 提供了类似流程引擎的强大能力；如果项目希望<strong>利用AI的自主性</strong>解决复杂任务规划，LlamaIndex 则通过其多Agent协调和事件机制，实现了更<strong>弹性</strong>的任务规划体验。</p>
+<h2 id="2025-年新特性对比"><a href="#2025-年新特性对比" class="headerlink" title="2025 年新特性对比"></a>2025 年新特性对比</h2><h3 id="LangGraph-2025-年新版特性"><a href="#LangGraph-2025-年新版特性" class="headerlink" title="LangGraph 2025 年新版特性"></a>LangGraph 2025 年新版特性</h3><p>进入 2025 年，LangGraph 围绕<strong>可扩展性、可控性和易用性</strong>推出了一系列重要更新：</p>
+<ul>
+<li><p><strong>Functional API 和模板</strong>：LangGraph 增加了函数式API接口，支持以代码方式快速定义图流程，而不必手动构建对象。同时推出的模板功能提供了常用 Agent 工作流的预设蓝图，降低了搭建复杂图的门槛。这两项改进使 LangGraph 对新手更加友好，让开发者可以更快地开始构建自己的 Agent 流程。</p>
+</li>
+<li><p><strong>强化记忆与状态</strong>：2024年底和2025年初的更新显著增强了 LangGraph 的记忆系统。新增<strong>长期记忆支持</strong>，包括跨线程的内存共享，以及对长期记忆进行<strong>语义搜索</strong>的能力。这意味着多个Agent（线程）之间可以共享全局记忆，Agent也能通过语义匹配从海量记忆中找到相关信息。此外，引入<strong>短期&amp;长期记忆结合</strong>的机制，官方描述为“短期-长期记忆、人类反馈、时间旅行”并存。其中“时间旅行”是一个有趣的特性，允许开发者检查或回滚Agent先前的状态，便于调试复杂的循环流程。这些增强使LangGraph在处理长对话和持续任务时更加游刃有余。</p>
+</li>
+<li><p><strong>人类参与（Human-in-the-loop）优化</strong>：LangGraph 新增了一个<code>interrupt</code>功能，专门用于简化人类中断介入场景。开发者可以在图中插入一个特殊节点，当Agent运行到此节点时会暂停并等待人工反馈，再根据人工输入决定后续路径。之前要实现类似功能需要较多定制代码，现在有了内置的interrupt节点，<strong>交互式Agent</strong>（如需要人工审核的流程）实现更加容易。</p>
+</li>
+<li><p><strong>动态流程控制</strong>：如前文所述，LangGraph 推出<code>Command</code>工具，允许在流程图中构建<strong>无固定边的动态流</strong>。使用 <code>Command</code>，节点本身可以根据运行时信息选择下一个节点，实现灵活的跳转。这实质上赋予了LangGraph类似状态机中<strong>条件跳转</strong>的能力，Agent 不再局限于编译期定好的拓扑。这对于非线性对话、不可预测流程是重大改进，让LangGraph 可以处理更开放的场景。</p>
+</li>
+<li><p><strong>工具与状态集成</strong>：2024 年末的更新允许<strong>工具直接修改全局状态</strong>。以往Agent调用工具函数只返回结果，现在工具可以将结果写回共享状态供其他节点使用。这在多个Agent协作或多轮循环中非常有用，实现了数据在工具和Agent逻辑间的实时交互。例如，搜索工具可以把搜索结果列表写入状态，下游总结节点立刻读取进行回答。</p>
+</li>
+<li><p><strong>开发者工具与性能</strong>：LangGraph 推出了<strong>LangGraph Studio v2</strong>，这是配套的开发者工作台升级版。Studio v2 支持本地运行和调试生产环境的执行轨迹，提供可视化界面查看每个节点输入输出，方便排查问题。此外，LangGraph 在性能上进行了优化（据官方Changelog，有多项性能增强和CI基准测试通过）。对于一些递归深、节点多的图流程，新版LangGraph的执行效率和稳定性都有提升。同时，LangGraph 推出了<strong>Agent Protocol</strong>，旨在标准化不同Agent之间的通信协议，让LangGraph可以更容易地与其他框架的Agent对接或远程调用。这预示着LangGraph 正朝着<strong>互操作性</strong>方向发展。</p>
+</li>
+</ul>
+<p>总的来说，2025 年的 LangGraph 变得<strong>更加强大且全面</strong>：既兼顾了企业级应用所需的长短期记忆、人类反馈机制，又提供了开发效率工具（模板、Studio）降低门槛。这些新特性巩固了 LangGraph 在构建<strong>复杂多Agent系统</strong>方面的领先地位。</p>
+<h3 id="LlamaIndex-2025-年新版特性"><a href="#LlamaIndex-2025-年新版特性" class="headerlink" title="LlamaIndex 2025 年新版特性"></a>LlamaIndex 2025 年新版特性</h3><p>作为快速演进的框架，LlamaIndex 在 2025 年也引入了许多引人注目的新功能：</p>
+<ul>
+<li><p><strong>AgentWorkflow 发布</strong>：2025 年年初，LlamaIndex 发布了重磅的 <strong>AgentWorkflow 系统</strong>，提供一种高层抽象来定义多智能体系统。AgentWorkflow 内置灵活的 Agent 类型、状态管理和实时监控，极大简化了复杂 Agent 的构建。开发者现在可以通过 <code>AgentWorkflow.from_tools_or_functions()</code> 一行代码创建单Agent流程，也可以用 <code>AgentWorkflow(agents=[...], root_agent=..., initial_state=...)</code> 快速组装多Agent协作。AgentWorkflow 推出后，官方也提供了<strong>入门教程</strong>和<strong>文档</strong>帮助用户上手。这一特性的发布，标志着 LlamaIndex 正式从主要关注检索的库扩展为完整的 <strong>多智能体编排框架</strong>。</p>
+</li>
+<li><p><strong>多模态 Agent 支持</strong>：2025 年4月，LlamaIndex 发布<strong>多模态 AgentWorkflow</strong>的重大更新。现在任何用 LlamaIndex 构建的多Agent系统都可以接受<strong>图文混合</strong>的对话历史，支持在上下文中交替包含文本和图像消息。这意味着 Agent 不仅能处理文字问答，还可以理解并生成对图像的描述或基于图像的信息。比如，一个多Agent客服系统可以解析用户上传的截图并据此回答问题。多模态支持大幅扩展了 LlamaIndex Agent 的应用范围，结合已有的文档解析能力，可以构建出能够理解文件、图片等多种媒介的<strong>通用智能助理</strong>。</p>
+</li>
+<li><p><strong>改进的记忆系统</strong>：如上文所述，2025 年5月 LlamaIndex 推出了全新的 Memory 组件。这实际是一次针对 Agent <strong>短期记忆</strong>和<strong>长期记忆</strong>的全面升级。新Memory默认将对话历史存入SQLite数据库管理，同时提供了静态记忆、事实记忆、向量记忆三种长期块可选。开发者可以根据应用需要组合，例如既保留最近N轮对话，又用向量存储长期对话以供关联检索。官方表示“引入了新的改进的Memory组件”，旨在让Agent能够保留用户、对话的背景信息，更连贯地互动。有了这个内置记忆，过去开发者需要手工实现的对话轮数限制、知识积累等，如今都由框架支持，Agent 开发更省心。</p>
+</li>
+<li><p><strong>LlamaCloud 与部署</strong>：2024年底至2025年，LlamaIndex 推出了自家的<strong>LlamaCloud</strong>平台和 <code>llama-deploy</code> 库，用于<strong>一键部署 Agent 应用</strong>。虽然这些属于框架周边，但大大改善了开发者将Agent从本地推向生产的体验。特别是 <code>llama-deploy</code> 开源库，可以将定义好的 Workflow 容器化，支持接入消息队列（如Kafka）和HTTP服务，用很少的改动就把Agent变成可扩展的服务端应用。这与 LangGraph Cloud 形成区别：LangGraph 提供的是商用闭源的云服务，而 LlamaIndex 选择开源部署框架，开发者可自主掌控部署方案。这种开放性获得了社区好评，也更适合对数据合规要求高的企业私有部署场景。</p>
+</li>
+<li><p><strong>人类反馈与评估</strong>：LlamaIndex 在 Workflow 中原生支持 <strong>Human-in-the-loop</strong> 操作。例如 Workflow 提供 <code>ctx.wait_for_event(HumanResponseEvent)</code> 方法，可以暂停等待人工确认，再继续执行。2025年初的版本在这一机制上也有所改进，使构建需要人工审批的Agent更方便。此外，LlamaIndex 通过与观察工具（如Arize Phoenix）的集成，实现了对 Agent 每步行为的可视化追踪。同时还发布了评估模块，可以自动衡量检索质量和LLM响应质量，帮助开发者发现Agent性能瓶颈。这些新特性表明，LlamaIndex 在致力于<strong>闭环优化</strong>Agent：不仅关注Agent本身实现，还提供从部署、监控到评估的全流程支持。</p>
+</li>
+<li><p><strong>其它改进</strong>：LlamaIndex 继续扩充其工具和集成功能。例如 2024-09 的更新中加入了<strong>动态RAG检索</strong>方案、<strong>自动文档检索</strong>等进阶指南。2025 年初也整合了对一些新模型的支持（如 Cerebras 的LLM，提升对高性能推理的支持）。在跨语言方面，LlamaIndex 拥有 Python 和 TypeScript 双SDK，社区也提供了 ChatGPT 插件、Spark集成等多种用法，使其成为一个高度灵活的 Agent 平台。</p>
+</li>
+</ul>
+<p>总体而言，2025年的 LlamaIndex 焕发出<strong>全面进化</strong>的态势，从单一的RAG库成长为集 <strong>多Agent编排、记忆存储、多模态交互、部署运维</strong> 于一体的解决方案。新特性体现出其<strong>以开发者为中心</strong>的理念：降低构建复杂Agent系统的难度，同时在性能和功能上不断追赶最前沿技术。</p>
+<h2 id="官方和社区-Agent-实现示例"><a href="#官方和社区-Agent-实现示例" class="headerlink" title="官方和社区 Agent 实现示例"></a>官方和社区 Agent 实现示例</h2><p>为了更直观地了解 LangGraph 与 LlamaIndex 在 Agent 实现上的应用差异，下面汇总一些 <strong>官方或社区的示例项目</strong>，涵盖不同场景的实践：</p>
+<ul>
+<li><p><strong>LangGraph 示例 1：代码生成与自动调试</strong> – LangChain 官方博客展示了如何用 LangGraph 实现一个带<strong>单元测试反馈循环</strong>的代码生成Agent。该 Agent 首先让 LLM 根据问题生成代码，然后自动执行代码检测错误；如果发现错误，就将错误信息反馈给 LLM 进行修改，循环此过程最多3次。实验结果表明，相比不使用循环的基线（正确率 55%），加入LangGraph循环反思的Agent正确率提升到 81%。这一案例充分发挥了 LangGraph 的<strong>循环图</strong>特性，使 Agent 能模拟人类程序员 “写代码-跑测试-看错误-改代码” 的迭代过程，提高了解决复杂编程任务的性能。</p>
+</li>
+<li><p><strong>LangGraph 示例 2：企业多Agent数据助手</strong> – 大型企业也将 LangGraph 应用于内部工具。例如 <strong>LinkedIn</strong> 公司开发了一款内置于内部的 <strong>SQL Bot</strong>，利用 LangGraph 构建。这个Agent能将员工提出的自然语言问题自动转换为 SQL 查询并执行，帮助员工直接获取所需数据。据报道，LinkedIn 的 SQL Bot 由 LangGraph 和 LangChain 提供支持，是一个多Agent系统，极大改善了不同团队查询数据的效率和体验。又如 <strong>Uber</strong> 的开发平台团队使用 LangGraph 开发了<strong>大规模代码迁移Agent</strong>，用于自动化地将旧代码库迁移到新框架上。Uber 的案例表明，定制的LangGraph Agent可以成为企业内部<strong>开发者工具</strong>，处理大规模、复杂且公司特定的流程，实现传统脚本难以企及的自动化。</p>
+</li>
+<li><p><strong>LangGraph 示例 3：领域垂直应用</strong> – LangGraph 也被SaaS厂商用来打造面向特定领域的AI助理。比如物业管理软件公司 AppFolio 开发了AI助手 <strong>Realm-X</strong> 来帮助物业经理日常工作。Realm-X 基于 LangGraph 构建，可协助安排日程、查询信息、发送通知等事务，将繁琐的多任务处理自动化。据介绍，该助理每周为物业经理节省数小时时间。Realm-X 的架构中，每项功能由不同Agent节点承担，通过LangGraph实现<strong>多任务并行和可控</strong>。再如 Replit 的编程助手引入了 <strong>人类审阅环节</strong>，采用LangGraph的多Agent+人类协作模式，实现既自动又可控的代码生成服务。这些实战表明，LangGraph 已有众多成功应用，涵盖 IT、数据、地产等领域，展现出<strong>企业级可靠性</strong>。</p>
+</li>
+<li><p><strong>LlamaIndex 示例 1：多Agent研究与写作助手</strong> – 官方博客提供了一个 <strong>Research-Write-Review</strong> 三智能体协作生成报告的示例。它定义了三个Agent：</p>
+<ul>
+<li><em>ResearchAgent</em> 执行资料搜索和笔记整理（可调用搜索工具，记录笔记）。</li>
+<li><em>WriteAgent</em> 负责根据笔记撰写报告草稿。</li>
+<li><em>ReviewAgent</em> 审核报告并指出需要改进的地方。<br>利用 AgentWorkflow，这三个Agent被组织在一起：ResearchAgent 完成后通过 <code>handoff</code> 将内容传递给 WriteAgent，写完后再交给 ReviewAgent。如果 ReviewAgent 发现问题，还能将任务交回 WriteAgent 修改，形成一个<strong>封闭循环</strong>。整个流程通过定义各 Agent 的 <code>can_handoff_to</code> 列表和 AgentWorkflow 的 <code>root_agent</code> 实现协调。这个案例体现了 LlamaIndex 在<strong>复杂文稿生成</strong>场景的威力：多个专长不同的Agent各司其职，自动合作完成一个复杂任务。从开发角度看，只需定义好每个Agent的工具和权限，Workflow即可处理交接逻辑，大大降低了实现难度。</li>
+</ul>
+</li>
+<li><p><strong>LlamaIndex 示例 2：智能幻灯片生成器（Presenter）</strong> – LlamaIndex 官方在2025年初推出了一个“Presenter”多Agent工作流。这是一个能根据用户输入主题自动生成<strong>图文并茂演示文稿</strong>的Agent系统。它包含Agent负责不同职责：如有的Agent从主题生成大纲和脚本，有的Agent根据脚本生成流程图（使用 Mermaid 图表工具），还有的Agent将脚本转换为语音旁白（调用 ElevenLabs 的语音API）。最终这些内容组合成HTML或视频形式的演示文稿输出。该示例的参考实现开源在官方仓库中，让开发者学习如何用 LlamaIndex Workflow 调用多种工具（绘图、语音、多媒体渲染）并<strong>串联复杂流程</strong>。这个 Presenter 项目充分展示了 LlamaIndex 在<strong>多模态内容生成</strong>上的探索，也说明通过 AgentWorkflow 可以比较容易地让多个子任务串联起来服务一个宏大目标。</p>
+</li>
+<li><p><strong>LlamaIndex 示例 3：客户服务多Agent系统</strong> – 数据科技博主 Peng Qian 在 2025 年初发表了一篇文章，演示如何利用 LlamaIndex Workflow 实现一个类似 OpenAI <em>Swarm</em> 功能的<strong>客户服务聊天机器人</strong>。这个项目模拟了电商客服的场景，设计了三个 Agent：总机FrontDeskAgent、售前PreSalesAgent、售后AfterSalesAgent。通过 Workflow 的事件路由，用户提问先到 FrontDesk，由其判断属于售前还是售后咨询，然后<strong>将对话无缝移交</strong>给对应专员Agent直接回答。这样用户感觉就像直接和正确的客服对话，而不是层层转接。由于 OpenAI 官方的 Swarm 框架尚不成熟且不支持生产，这个示例展示了如何用 LlamaIndex 自行实现类似架构，并能够投入实际应用。项目提供了完整的代码，包括使用 Chainlit 构建聊天界面、定义 Workflow 逻辑等。这一案例凸显了 LlamaIndex 在<strong>多Agent对话系统</strong>方面的实用性：通过Agent交接和上下文共享，大幅减少了传统多机器人串联的冗余，提升了响应效率和智能程度。</p>
+</li>
+<li><p><strong>LlamaIndex 示例 4：知识图谱问答与RAG增强</strong> – 社区开发者也基于 LlamaIndex 打造了许多强大的知识问答系统。例如有结合 <strong>MemGraph</strong> 图数据库的案例，利用 LlamaIndex 的 Knowledge Graph Index，将企业知识以图谱形式存储并检索，然后由Agent回答复杂业务查询。在官方的 Webinar 中，也展示了如何用 LlamaIndex 结合 Azure AI Search、Arize等工具，实现对企业文档问答的<strong>检索可观测性和评估</strong>。另一位开发者 Sulaiman 编写了教程，用 Workflow 构建一个<strong>PDF 文档的 Agentic RAG</strong>系统，从路由、工具调用、多步推理逐步扩展到完整Agent。这些示例显示，借助 LlamaIndex 强大的索引和 Workflow，自定义的知识库Agent可以实现<strong>精准检索</strong>与<strong>多轮推理</strong>的有机结合。例如系统可先分析用户问题涉及哪部分知识（routing），再选对的检索方法（向量搜索或结构化查询），最后Agent根据检索内容和上下文多轮作答。这种端到端解决方案在 LlamaIndex 社区中非常受欢迎，也是其区别于其它框架的优势所在。</p>
+</li>
+</ul>
+<p><em>(以上仅列举了部分典型示例。在Github、Medium等平台还有许多开发者分享了LangGraph和LlamaIndex的实战项目，涵盖从学术研究辅助、财务分析，到Slack机器人、日程助理等各种应用。)</em></p>
+<h2 id="优劣势总结与适用建议"><a href="#优劣势总结与适用建议" class="headerlink" title="优劣势总结与适用建议"></a>优劣势总结与适用建议</h2><p>综合前文分析，我们可以归纳 LangGraph 与 LlamaIndex 各自在 Agent 实现方面的优劣势，并给出选择哪种框架的建议：</p>
+<h3 id="LangGraph-的优势与劣势"><a href="#LangGraph-的优势与劣势" class="headerlink" title="LangGraph 的优势与劣势"></a>LangGraph 的优势与劣势</h3><p><strong>优势：</strong></p>
+<ul>
+<li><p><strong>精细的流程控制</strong>：LangGraph 通过节点和边提供了对Agent行为的细粒度控制。复杂任务可以被明确划分步骤，Agent严格按设计执行。这种<strong>可控性</strong>在高要求场景下保障了可靠性。循环图、条件分支等功能使LangGraph能处理复杂逻辑，例如反复自我检查、不同条件调用不同Agent等，确保<strong>决策过程透明可监控</strong>。</p>
+</li>
+<li><p><strong>多Agent协调能力强</strong>：LangGraph 天生支持多智能体协作，可在图中配置多个Agent节点协同完成一项任务。它提供了Supervisor/调度机制来管理Agent间信息交换和执行次序，防止冲突和竞争。在需要团队型Agent的应用（如一个Agent团队各有角色）中，LangGraph 提供了<strong>现成的框架</strong>来实现同步与通信。</p>
+</li>
+<li><p><strong>LangChain 生态互通</strong>：作为LangChain生态的一部分，LangGraph 可以直接使用LangChain丰富的连接器、工具和模型库。比如快速集成不同LLM提供商的模型（OpenAI、Anthropic、Google等）、各种外部知识源和API。这种生态优势意味着<strong>扩展性极高</strong>，且能随着LangChain本身的更新迅速获得新功能。</p>
+</li>
+<li><p><strong>高可定制性</strong>：LangGraph 提供大量定制选项。开发者能够插入自定义逻辑，在节点切换时触发特定动作（如UI提示）等。例如，有用户希望在LangGraph节点切换时发送“正在思考…”，“查询数据…”等打字提示，LangGraph 提供了易用的钩子实现这一需求。总体而言，你几乎可以调整LangGraph工作流的各个方面，让Agent行为符合精确需求，不像某些封闭框架限制较多。</p>
+</li>
+<li><p><strong>企业级应用验证</strong>：许多大型公司（LinkedIn、Uber、Elastic等）已成功将LangGraph用于生产。这些案例证明了LangGraph在<strong>大规模、严苛环境</strong>下的可行性。例如LinkedIn SQL Bot改善了全公司数据查询流程，Uber用其执行代码库迁移。这些成功经验也反哺社区，为新用户提供了范例和信心。</p>
+</li>
+</ul>
+<p><strong>劣势：</strong></p>
+<ul>
+<li><p><strong>学习曲线陡峭</strong>：LangGraph 功能强大但也复杂，对初学者并不友好。理解节点、边、状态对象等概念并设计一套有效的图需要相当的经验。尤其一开始容易陷入“怎样划分节点/连接边”的困惑。官方文档起初也较简略（这一点随时间有所改进，但仍需翻看Changelog和示例）。相较之下，同期的一些轻量框架强调简洁直观，而 LangGraph 属于**“重型”框架**，上手成本较高。</p>
+</li>
+<li><p><strong>版本更新不兼容</strong>：由于开发活跃，LangGraph/LangChain 经常更新接口。这导致升级版本时代码可能破裂，需要及时修改适配。在产品环境中频繁追踪升级是一项负担。一些用户反馈LangChain/LangGraph包升级偶尔会出现Breaking Changes，需要阅读release note并小心测试。</p>
+</li>
+<li><p><strong>文档和支持欠缺</strong>：LangChain/LangGraph 的文档在2023年曾被诟病不够完善。虽然官方在改善，但相比于LlamaIndex倾向于写教程、范例，LangGraph的资料略显零散。此外，其社区不如LangChain核心社区活跃，遇到疑难问题时寻求帮助可能较困难（不过随着应用增多，这种情况在改善）。</p>
+</li>
+<li><p><strong>性能潜在开销</strong>：LangGraph 为实现可控性，引入了较多封装和中间步骤。如果滥用，可能带来<strong>额外延迟</strong>。有讨论指出LangChain某些情况下有性能和效率问题。LangGraph 在大图流程下，对每步进行管理也有一定开销（例如supervisor不停在消息间路由）。不过新版已有性能优化和异步支持缓解这一问题。</p>
+</li>
+<li><p><strong>存储依赖外部</strong>：LangGraph 本身不存储长久数据，需要配合向量数据库、外部缓存等实现长期记忆。虽然它提供接口，但相比LlamaIndex内置数据库，LangGraph在数据管理上<strong>并不开箱即用</strong>。对于不熟悉数据库的开发者，这部分需要自行架构。</p>
+</li>
+</ul>
+<h3 id="LlamaIndex-的优势与劣势"><a href="#LlamaIndex-的优势与劣势" class="headerlink" title="LlamaIndex 的优势与劣势"></a>LlamaIndex 的优势与劣势</h3><p><strong>优势：</strong></p>
+<ul>
+<li><p><strong>数据检索集成度高</strong>：LlamaIndex 源于对接数据的初衷，内置强大的<strong>索引和检索</strong>模块。它支持<strong>文档解析、结构化抽取、索引构建、向量数据库连接</strong>等完整管线。这使其在知识库问答、资料助理类Agent中表现卓越，能够将企业海量非结构化数据转化为LLM可用的知识源。相比其他框架需要外部组合，LlamaIndex <strong>一站式</strong>解决了“数据-知识-对话”全流程，避免了开发者自己造轮子。</p>
+</li>
+<li><p><strong>开发者友好，快速上手</strong>：LlamaIndex 强调简洁易用，从API设计到文档都有清晰指引。初学者可以通过几行代码搭建基本Agent，并逐步深入自定义。其Workflow/AgentWorkflow采用声明式配置，隐藏了大量底层复杂性。相较LangGraph需要手绘流程图，LlamaIndex 更像写故事——定义角色和工具，剩下的交给框架处理。社区评价其“专注开发者效率，最大化每行代码价值”，可见上手难度低是普遍共识。</p>
+</li>
+<li><p><strong>多Agent协作与自主性</strong>：LlamaIndex 内置多智能体协调机制（AgentWorkflow），让不同Agent间交接、协同变得顺畅。Agent可以基于对话内容自动决定由谁来处理（类似Swarm的handoff）。这种<strong>自主协作</strong>极大提升了Agent系统的智能程度和响应速度，避免了不必要的串行等待。同时，框架支持异步事件和并行工具调用，使Agent能够并发处理，提高效率。LlamaIndex 的Agent能“自行计划和调度”，在需要灵活应变的任务中表现尤其出色。</p>
+</li>
+<li><p><strong>内置记忆与长期交互</strong>：新版LlamaIndex 提供了<strong>完善的记忆组件</strong>，支持对话历史存储和知识积累。Agent 可以记住所服务用户的偏好、上下文，不再受限于LLM的上下文窗口。这一点对于聊天机器人、个人助理等需要长时间连续交互的Agent至关重要。更棒的是，这些记忆功能几乎开箱即用，无需开发者额外操心实现底层存储。此外，人类反馈环节也已融入框架，当Agent不确定时可请求人工确认，再继续执行。这些都说明LlamaIndex更适合构建<strong>持续演进</strong>、<strong>以人为中心</strong>的AI助手。</p>
+</li>
+<li><p><strong>实时监控和调试</strong>：LlamaIndex 非常注重Observability，提供了事件流接口，可以实时获取Agent每一步的动作、工具使用结果、LLM输出。开发者可以将这些事件接入调试界面或日志，迅速定位问题。其开放的设计还支持与现有APM/观察工具集成（如Arize等）。此外，官方也提供了调试指南和LangSmith等工具帮助测试。这意味着在开发复杂Agent时，LlamaIndex 能让你<strong>看清Agent在想什么、做什么</strong>，大幅降低调试难度和试错成本。</p>
+</li>
+<li><p><strong>高度灵活和可扩展</strong>：LlamaIndex 从高阶API到低阶接口都提供了<strong>分层封装</strong>。对于一般用户，有大量<strong>模板、范例</strong>可循，比如“表格问答Agent”、“多Modal Agent”等视频教程。对于高级用户，可以深入覆写Agent决策、定制工具行为，甚至通过继承Base classes创造新的Agent类型。一些开发者称它具有“无限层次的可定制性”。并且LlamaIndex支持Python和TypeScript双语言，方便在不同技术栈中应用。其开放源代码和MIT许可也利于社区扩展，其插件库LlamaHub更汇聚了数百种第三方资源。总之，无论新手还是专家，都能在LlamaIndex中找到得心应手的用法。</p>
+</li>
+</ul>
+<p><strong>劣势：</strong></p>
+<ul>
+<li><p><strong>曾经聚焦单一，综合性稍逊</strong>：LlamaIndex 起家于RAG，使得早期版本对检索和知识方面着墨最多，而在复杂Agent流程、工具多样性上相对薄弱。虽然近来迅速补齐了Agent orchestrator等功能，但在某些精细控制环节仍可能不如LangGraph。例如，对<strong>强流程依赖</strong>的应用，需要确保每步严格执行顺序时，LlamaIndex 的事件驱动模式可能没有LangGraph那样让人放心，毕竟LangGraph可以固定死顺序，而LlamaIndex更多依赖LLM决策。不过这方面差距在缩小，框架也在增加如确保某些事件按序的配置。</p>
+</li>
+<li><p><strong>对LLM依赖更高</strong>：LlamaIndex 许多智能调度、handoff决策都是交给LLM依据Prompt完成的。这种<strong>隐式规划</strong>在模型强大时效果惊人，但模型薄弱或提示设计不佳时，可能出现错误决策。有时AgentWorkflow可能交给了错误的Agent或调用错误工具，需要通过加强提示和设置Constraints解决。这相比LangGraph纯规则式流程，对LLM行为的不可预测性更敏感。因此对<strong>模型能力和Prompt工程</strong>提出了更高要求，开发者需要具备一定的调参经验来使Agent稳定运行。</p>
+</li>
+<li><p><strong>性能开销与并发</strong>：LlamaIndex 由于在Agent执行上依赖LLM多轮交互，比如ReAct模式下一个工具调用可能需要几次LLM问答。虽然Workflow减少了不必要调用，但<strong>长链对话</strong>本身的速度瓶颈无法完全消除。此外，LlamaIndex 内部大量使用Python async和事件队列，对不熟悉异步编程的用户有一定门槛。极端高并发的场景下（如上千用户同时提问），需要仔细设计架构和扩容，否则可能出现队列积压。不过这是所有LLM应用的共性挑战，不单是LlamaIndex的问题。相对而言，LangGraph 因可以预先并行执行部分节点，某些场景下并发性能会更好一点。</p>
+</li>
+<li><p><strong>生态系统相对较新</strong>：相比LangChain在社区的知名度，LlamaIndex 虽也有不小影响力，但专门的社区资源相对少一些（不过增长很快）。有时候遇到AgentWorkflow的复杂问题，能参考的范例有限，需要直接阅读源码或请教官方Discord。不过随着2025年频繁的功能发布和Jerry Liu等在社交媒体的推广，这一状况在迅速改善中。此外，一些用户可能更习惯于LangChain风格，对切换到LlamaIndex需要适应过程。</p>
+</li>
+<li><p><strong>迭代过快文档滞后</strong>：LlamaIndex和LangChain类似，新功能频出，有时文档更新跟不上版本。比如Workflows刚推出时文档不够完整，用户需要通过Newsletter、博客、源码来了解细节。随着项目趋于稳定，这种情况会好转，但在2025上半年仍需注意与版本匹配的文档。</p>
+</li>
+</ul>
+<h3 id="适用场景与选择建议"><a href="#适用场景与选择建议" class="headerlink" title="适用场景与选择建议"></a>适用场景与选择建议</h3><p><strong>何时选择 LangGraph：</strong> 如果你的项目需要<strong>严谨可控的多步骤流程</strong>，对每一步的执行顺序、条件分支都需要明确保障，比如流程自动化、事务性任务（财务审批、多阶段算法等），LangGraph 是理想选择。它的<strong>图模型</strong>确保Agent不会偏离既定路线，可以精确复现人定义的逻辑。如果团队中已有LangChain使用经验，LangGraph上手也相对容易，可以无缝利用现有工具和模型库。另外，大型多Agent系统（超过几个Agent）需要复杂协调时，LangGraph的调度能力和企业验证让人更放心。综上，<strong>注重可靠性、可预期结果、多Agent复杂协作</strong>的场景适合采用LangGraph。例如：智能制造流水线控制、金融报告合规检查（每步必经审核）、需要人机混合决策的流程等。在这些场景下，LangGraph 提供了“编排引擎”般的作用，开发者可以牵引每个Agent动作，避免LLM随意发挥造成的不确定性。</p>
+<p><strong>何时选择 LlamaIndex：</strong> 如果你的应用以<strong>知识和数据驱动</strong>为主，比如企业知识问答、文档助手、BI分析助手，那么LlamaIndex绝对是首选。它能快速连接各种数据源并让LLM“看懂”你的数据，节省大量开发时间。当你需要<strong>构建聊天机器人或对话系统</strong>时，LlamaIndex 的内置记忆和多Agent交接能力能提供更加<strong>人性化</strong>、<strong>上下文连贯</strong>的体验。同时，如果项目需求经常变动，需要Agent具有一定灵活适应能力，LlamaIndex 的事件驱动和LLM自主决策能减少频繁修改流程的代价。对于<strong>开发资源有限</strong>、希望快速产出原型甚至上线产品的团队，LlamaIndex 的低门槛和全栈功能非常友好——你可以从简单问答做起，逐步添加Agent和工具，框架都能支持。此外，在需要<strong>多模态理解</strong>（如处理文本+图像）的场景，LlamaIndex 已经领先一步支持了这种能力。在创新应用、面向终端用户的智能助手领域，LlamaIndex 能更快迭代出成果。</p>
+<p><strong>综合考虑：</strong> 有些情况下，两种框架并非对立，而是可以互补。正如有些团队实践所示，将 LlamaIndex 用于数据接入和检索，把 LangGraph 用于复杂决策流程，可以构建功能非常强大的系统。例如，一个律师助手可以先用LlamaIndex从案例库检索相关判例，再用LangGraph按照法律推理步骤逐条分析。这种 <strong>“LlamaIndex+LangGraph”</strong> 模式结合了前者的数据优势和后者的流程控制优势。不过同时掌握两个框架需要更高的学习投入，适合已有一定经验的大型团队。</p>
+<p>在 2025 年这个 “AI Agents 元年”里，LangGraph 和 LlamaIndex 分别作为<strong>流程驱动</strong>和<strong>数据驱动</strong>的代表框架，各自蓬勃发展。选择哪一个，取决于项目的侧重点和团队背景。如果追求<strong>Agent行为的确定性</strong>、<strong>多Agent严密协作</strong>，偏向 LangGraph；如果侧重<strong>让Agent学会知识</strong>、<strong>快速构建对话应用</strong>，偏向 LlamaIndex。当然，你也可以先用LlamaIndex实现雏形验证思路，再在关键环节用LangGraph重构以增强可控性。两者都是优秀的开源项目，并且在不断融合彼此的理念（例如LangGraph也在加强记忆，LlamaIndex也提供了Agent控制选项）。可以预见的是，未来的Agent开发很可能结合多种框架之长。因此，与其说二选一，不如根据<strong>具体问题</strong>灵活运用工具。正如一篇行业分析所言：不同平台适合不同工作流，没有一种框架能通吃所有场景。理解各自优劣并选择最契合项目需求的，就是最明智的决策。</p>
+<p><strong>总结</strong>：LangGraph 与 LlamaIndex 分别在各自擅长的领域树立了标杆：一个提供了<strong>构建可控Agent流程</strong>的强健骨架，一个提供了<strong>赋予Agent知识与智能</strong>的便捷大脑。2025 年的新版更新又让它们各自补足了短板，性能和体验均有飞跃。对于开发者而言，这是一个幸运的局面——可以根据需求自由选择或组合使用，打造出前所未有强大的 AI Agents。期待在这些工具的帮助下，我们能看到更多创新的自治智能体应用落地，在各行各业释放生产力，实现“AI agents 无处不在”的愿景。</p>
+<p>引用：</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/AI/" rel="tag"># AI</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/06/06/Paul-Graham/" rel="prev" title="保罗·格雷厄姆的一些思考总结">
+      <i class="fa fa-chevron-left"></i> 保罗·格雷厄姆的一些思考总结
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/06/09/Hackers-and-Painters/" rel="next" title="《黑客与画家》：在代码与颜料之间发现未来的思维座标">
+      《黑客与画家》：在代码与颜料之间发现未来的思维座标 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86%E3%80%81%E8%AE%B0%E5%BF%86%E6%9C%BA%E5%88%B6%E3%80%81%E5%B7%A5%E5%85%B7%E9%9B%86%E6%88%90%E3%80%81%E6%8E%A8%E7%90%86%E7%AD%96%E7%95%A5%E5%B7%AE%E5%BC%82"><span class="nav-number">1.</span> <span class="nav-text">状态管理、记忆机制、工具集成、推理策略差异</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86%E4%B8%8E%E8%AE%B0%E5%BF%86%E6%9C%BA%E5%88%B6"><span class="nav-number">1.1.</span> <span class="nav-text">状态管理与记忆机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%EF%BC%88Tools%EF%BC%89%E9%9B%86%E6%88%90%E8%83%BD%E5%8A%9B"><span class="nav-number">1.2.</span> <span class="nav-text">工具（Tools）集成能力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A8%E7%90%86%E4%B8%8E%E4%BB%BB%E5%8A%A1%E8%A7%84%E5%88%92%E7%AD%96%E7%95%A5"><span class="nav-number">1.3.</span> <span class="nav-text">推理与任务规划策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E6%AD%A5%E6%8E%A8%E7%90%86%E3%80%81%E7%9F%A5%E8%AF%86%E5%BA%93%E9%97%AE%E7%AD%94%E3%80%81%E4%BB%BB%E5%8A%A1%E8%A7%84%E5%88%92%E7%AD%89%E5%9C%BA%E6%99%AF%E7%9A%84%E6%80%A7%E8%83%BD%E4%B8%8E%E5%BC%80%E5%8F%91%E4%BD%93%E9%AA%8C%E5%B7%AE%E5%BC%82"><span class="nav-number">2.</span> <span class="nav-text">多步推理、知识库问答、任务规划等场景的性能与开发体验差异</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E6%AD%A5%E6%8E%A8%E7%90%86%E5%9C%BA%E6%99%AF"><span class="nav-number">2.1.</span> <span class="nav-text">多步推理场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9F%A5%E8%AF%86%E5%BA%93%E9%97%AE%E7%AD%94%EF%BC%88RAG%EF%BC%89%E5%9C%BA%E6%99%AF"><span class="nav-number">2.2.</span> <span class="nav-text">知识库问答（RAG）场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%BB%E5%8A%A1%E8%A7%84%E5%88%92%E4%B8%8E%E5%A4%8D%E6%9D%82%E4%BB%BB%E5%8A%A1%E7%AE%A1%E7%90%86"><span class="nav-number">2.3.</span> <span class="nav-text">任务规划与复杂任务管理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2025-%E5%B9%B4%E6%96%B0%E7%89%B9%E6%80%A7%E5%AF%B9%E6%AF%94"><span class="nav-number">3.</span> <span class="nav-text">2025 年新特性对比</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LangGraph-2025-%E5%B9%B4%E6%96%B0%E7%89%88%E7%89%B9%E6%80%A7"><span class="nav-number">3.1.</span> <span class="nav-text">LangGraph 2025 年新版特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LlamaIndex-2025-%E5%B9%B4%E6%96%B0%E7%89%88%E7%89%B9%E6%80%A7"><span class="nav-number">3.2.</span> <span class="nav-text">LlamaIndex 2025 年新版特性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E5%92%8C%E7%A4%BE%E5%8C%BA-Agent-%E5%AE%9E%E7%8E%B0%E7%A4%BA%E4%BE%8B"><span class="nav-number">4.</span> <span class="nav-text">官方和社区 Agent 实现示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%98%E5%8A%A3%E5%8A%BF%E6%80%BB%E7%BB%93%E4%B8%8E%E9%80%82%E7%94%A8%E5%BB%BA%E8%AE%AE"><span class="nav-number">5.</span> <span class="nav-text">优劣势总结与适用建议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LangGraph-%E7%9A%84%E4%BC%98%E5%8A%BF%E4%B8%8E%E5%8A%A3%E5%8A%BF"><span class="nav-number">5.1.</span> <span class="nav-text">LangGraph 的优势与劣势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LlamaIndex-%E7%9A%84%E4%BC%98%E5%8A%BF%E4%B8%8E%E5%8A%A3%E5%8A%BF"><span class="nav-number">5.2.</span> <span class="nav-text">LlamaIndex 的优势与劣势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF%E4%B8%8E%E9%80%89%E6%8B%A9%E5%BB%BA%E8%AE%AE"><span class="nav-number">5.3.</span> <span class="nav-text">适用场景与选择建议</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在构建现代企业级系统的过程中，“架构”二字已不仅仅代表软件模块的堆叠或技术选型的权衡。真正成熟的架构设计，往往需要在业务目标、应用协作、数据支撑、技术实现之间，建立一种系统性、全局性的秩序。而TOGAF（The Open Group Architecture Framework），作为业界广泛认可的企业架构方法论，正是为了解决这一多层次复杂性的挑战而生。 TOGAF将企业架构拆解为四个核心维度：业">
+<meta property="og:type" content="article">
+<meta property="og:title" content="4种架构介绍">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/04/14/togaf-type/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="在构建现代企业级系统的过程中，“架构”二字已不仅仅代表软件模块的堆叠或技术选型的权衡。真正成熟的架构设计，往往需要在业务目标、应用协作、数据支撑、技术实现之间，建立一种系统性、全局性的秩序。而TOGAF（The Open Group Architecture Framework），作为业界广泛认可的企业架构方法论，正是为了解决这一多层次复杂性的挑战而生。 TOGAF将企业架构拆解为四个核心维度：业">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-04-14T12:33:31.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.377Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/04/14/togaf-type/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>4种架构介绍 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/04/14/togaf-type/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          4种架构介绍
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-04-14 20:33:31" itemprop="dateCreated datePublished" datetime="2025-04-14T20:33:31+08:00">2025-04-14</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在构建现代企业级系统的过程中，“架构”二字已不仅仅代表软件模块的堆叠或技术选型的权衡。真正成熟的架构设计，往往需要在<strong>业务目标、应用协作、数据支撑、技术实现</strong>之间，建立一种系统性、全局性的秩序。而TOGAF（The Open Group Architecture Framework），作为业界广泛认可的企业架构方法论，正是为了解决这一多层次复杂性的挑战而生。</p>
+<p>TOGAF将企业架构拆解为四个核心维度：<strong>业务架构、应用架构、数据架构、技术架构</strong>。这四个层次各自承担着不同的职责，彼此之间既有明确边界，又相互耦合、协同进化。</p>
+<span id="more"></span>
+
+
+
+<h3 id="业务架构：对齐战略与能力的桥梁"><a href="#业务架构：对齐战略与能力的桥梁" class="headerlink" title="业务架构：对齐战略与能力的桥梁"></a>业务架构：对齐战略与能力的桥梁</h3><h5 id="✦-定义与职责"><a href="#✦-定义与职责" class="headerlink" title="✦ 定义与职责"></a>✦ 定义与职责</h5><p>业务架构关注的是<strong>企业“做什么”以及“为什么这么做”</strong>。它负责梳理企业的核心业务能力、组织结构、流程流程、角色分工，以及它们之间的逻辑关联。</p>
+<p>换句话说，业务架构是从<strong>业务战略到系统需求</strong>之间的翻译器。没有清晰的业务架构，系统设计只能靠拍脑袋，而不会真正服务于企业目标。</p>
+<h5 id="✦-关注核心"><a href="#✦-关注核心" class="headerlink" title="✦ 关注核心"></a>✦ 关注核心</h5><ul>
+<li>企业愿景与战略目标</li>
+<li>关键业务流程与场景（如“下单-支付-发货-售后”）</li>
+<li>业务能力建模（例如“会员管理”、“积分体系”、“商品目录”等）</li>
+<li>用户角色与组织结构（角色权限、协同路径）</li>
+<li>关键业务场景的生命周期建模</li>
+</ul>
+<h5 id="✦-落地产出"><a href="#✦-落地产出" class="headerlink" title="✦ 落地产出"></a>✦ 落地产出</h5><ul>
+<li>业务能力地图（Business Capability Map）</li>
+<li>业务流程图（BPMN流程、活动图等）</li>
+<li>角色与责任矩阵（RACI图）</li>
+<li>战略目标对能力的映射关系</li>
+</ul>
+<h5 id="✦-实践建议"><a href="#✦-实践建议" class="headerlink" title="✦ 实践建议"></a>✦ 实践建议</h5><p>很多架构师跳过这一层，直接进入“技术架构”或“服务拆分”阶段，这往往是导致后续系统重构频繁的根源。</p>
+<p>优秀的业务架构，需要有产品视角的理解力，也需要有对组织政治、战略目标的洞察力。它并非纸上谈兵，而是为整个系统设计提供“方向性锚点”。</p>
+<h3 id="应用架构：组织系统协作的骨架"><a href="#应用架构：组织系统协作的骨架" class="headerlink" title="应用架构：组织系统协作的骨架"></a>应用架构：组织系统协作的骨架</h3><h5 id="✦-定义与职责-1"><a href="#✦-定义与职责-1" class="headerlink" title="✦ 定义与职责"></a>✦ 定义与职责</h5><p>应用架构关注的是<strong>企业中有哪些系统，这些系统之间如何协作，共同支撑业务目标的实现</strong>。</p>
+<p>它是承接业务架构与技术架构的中间层：上接业务流程与功能需求，下接系统设计与技术实现。好的应用架构不仅回答“要实现什么功能”，还要解决“这些功能应该由哪些系统来实现”、“系统间如何通信”、“数据如何在系统间流转”。</p>
+<h5 id="✦-关注核心-1"><a href="#✦-关注核心-1" class="headerlink" title="✦ 关注核心"></a>✦ 关注核心</h5><ul>
+<li>应用清单（系统视角）</li>
+<li>系统之间的集成关系（同步/异步，直连/API/消息等）</li>
+<li>应用责任边界与耦合度</li>
+<li>关键系统的接口协议、服务目录</li>
+<li>系统生命周期与演化策略（替换、整合、沉淀）</li>
+</ul>
+<h5 id="✦-落地产出-1"><a href="#✦-落地产出-1" class="headerlink" title="✦ 落地产出"></a>✦ 落地产出</h5><ul>
+<li>应用架构图（Application Landscape Diagram）</li>
+<li>系统边界图与集成图（Context Diagram、C4模型）</li>
+<li>接口定义文档（OpenAPI、异步消息契约）</li>
+<li>服务注册与发现机制设计</li>
+<li>应用治理机制（如系统分级、稳定性等级）</li>
+</ul>
+<h5 id="✦-实践建议-1"><a href="#✦-实践建议-1" class="headerlink" title="✦ 实践建议"></a>✦ 实践建议</h5><p>在微服务化、SaaS化趋势日益明显的今天，应用架构越来越不是“系统清单”，而是“系统网络”。</p>
+<p>现代应用架构关注的问题不再是“有没有系统支持”，而是“系统组合效率高不高”、“系统协作代价大不大”、“变更是否可控”。这要求架构师具备较强的横向协作建模能力，以及对服务划分原则（如 DDD）有深刻理解。</p>
+<h3 id="数据架构：支撑业务认知与决策的血液系统"><a href="#数据架构：支撑业务认知与决策的血液系统" class="headerlink" title="数据架构：支撑业务认知与决策的血液系统"></a>数据架构：支撑业务认知与决策的血液系统</h3><h5 id="✦-定义与职责-2"><a href="#✦-定义与职责-2" class="headerlink" title="✦ 定义与职责"></a>✦ 定义与职责</h5><p>数据架构关注的是<strong>企业的数据资产如何建模、存储、流动与治理</strong>。它承担着连接“业务实体”与“技术存储”的职责，是系统中最具“长期价值沉淀”的一层。</p>
+<p>在数字化浪潮中，企业数据已不仅仅是运行的副产物，而成为重要的战略资源。数据架构的好坏，直接影响企业数据质量、使用效率、以及后续的分析与AI能力。</p>
+<h5 id="✦-关注核心-2"><a href="#✦-关注核心-2" class="headerlink" title="✦ 关注核心"></a>✦ 关注核心</h5><ul>
+<li>关键业务对象的数据建模（如订单、用户、交易、商品）</li>
+<li>数据实体之间的关系与血缘</li>
+<li>数据分层（ODS、DWD、DWS、ADS等）</li>
+<li>数据主权与生命周期管理</li>
+<li>数据安全、脱敏、合规治理</li>
+</ul>
+<h5 id="✦-落地产出-2"><a href="#✦-落地产出-2" class="headerlink" title="✦ 落地产出"></a>✦ 落地产出</h5><ul>
+<li>数据实体关系图（ER模型、逻辑模型）</li>
+<li>数据血缘图、数据流图</li>
+<li>数据标准与命名规范</li>
+<li>数据字典、主数据管理模型</li>
+<li>数据访问与权限控制策略</li>
+</ul>
+<h5 id="✦-实践建议-2"><a href="#✦-实践建议-2" class="headerlink" title="✦ 实践建议"></a>✦ 实践建议</h5><p>很多系统只关注“接口”和“功能”，却忽略了数据模型的抽象与统一，导致数据冗余、命名混乱、难以沉淀与复用。一个系统生命周期越长，数据架构的重要性就越突出。</p>
+<p>现代数据架构不应只围绕数据库建模，而要融入<strong>数据仓库建设、流式处理、数据中台</strong>等理念，做到数据的“可用、可信、可控、可分析”。</p>
+<h3 id="技术架构：系统能力与非功能诉求的支点"><a href="#技术架构：系统能力与非功能诉求的支点" class="headerlink" title="技术架构：系统能力与非功能诉求的支点"></a>技术架构：系统能力与非功能诉求的支点</h3><h5 id="✦-定义与职责-3"><a href="#✦-定义与职责-3" class="headerlink" title="✦ 定义与职责"></a>✦ 定义与职责</h5><p>技术架构关注的是<strong>系统如何实现、部署、运行和演化的技术手段与基础设施选择</strong>。</p>
+<p>它是企业IT能力落地的核心所在，负责承接上层的应用与数据需求，并提供支撑性能力，如计算资源、网络通信、安全策略、开发框架等。</p>
+<h5 id="✦-关注核心-3"><a href="#✦-关注核心-3" class="headerlink" title="✦ 关注核心"></a>✦ 关注核心</h5><ul>
+<li>技术选型与栈结构（如Spring Boot、Vue、K8s、Redis、Kafka等）</li>
+<li>服务部署策略（多活、灰度、弹性伸缩）</li>
+<li>非功能需求设计（可用性、可扩展性、可维护性、安全性）</li>
+<li>中间件能力（缓存、MQ、网关、服务注册）</li>
+<li>自动化运维（CI/CD、监控、告警）</li>
+</ul>
+<h5 id="✦-落地产出-3"><a href="#✦-落地产出-3" class="headerlink" title="✦ 落地产出"></a>✦ 落地产出</h5><ul>
+<li>技术栈清单与框架规范</li>
+<li>系统部署架构图（如三层架构、微服务、Serverless）</li>
+<li>监控体系（如Prometheus + Grafana）</li>
+<li>灰度发布与容灾策略</li>
+<li>DevOps 工程流水线设计</li>
+</ul>
+<h5 id="✦-实践建议-3"><a href="#✦-实践建议-3" class="headerlink" title="✦ 实践建议"></a>✦ 实践建议</h5><p>技术架构往往是开发团队最熟悉、最常讨论的一层，但也最容易“脱离业务”、走向技术堆砌。</p>
+<p>优秀的技术架构并非“新潮”，而是能与上层应用、数据形成良性闭环，<strong>为业务演进提供稳定、敏捷、安全的支撑力</strong>。</p>
+<h3 id="架构不是分层，而是协作"><a href="#架构不是分层，而是协作" class="headerlink" title="架构不是分层，而是协作"></a>架构不是分层，而是协作</h3><p>TOGAF 提供了一个清晰的四层视角，帮助我们从战略到技术，从业务到代码，有序地搭建企业系统。然而，这四层架构并不是“谁在上谁在下”的分层结构，而是一种“多维协作、动态反馈”的机制。</p>
+<ul>
+<li><strong>业务架构</strong>提供方向与目标；</li>
+<li><strong>应用架构</strong>组织系统实现与协作；</li>
+<li><strong>数据架构</strong>打通信息流，支撑认知；</li>
+<li><strong>技术架构</strong>提供基础能力，确保落地可行。</li>
+</ul>
+<p>架构设计的终极目标，不是追求某种“完美模型”，而是<strong>持续地用最小成本驾驭最大复杂性</strong>，让系统在业务变化、技术演进、组织调整中保持韧性与秩序。</p>
+<p>在这个意义上，真正优秀的架构师，不仅能建图纸、定规则，更能在混沌中抽象出秩序，在演化中保留灵活的支点。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/04/14/knowledge-skill-gap/" rel="prev" title="知识与技能之间的鸿沟">
+      <i class="fa fa-chevron-left"></i> 知识与技能之间的鸿沟
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/04/15/report-high-availability-arch/" rel="next" title="电商平台高可用架构设计方法调研报告">
+      电商平台高可用架构设计方法调研报告 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%9A%E5%8A%A1%E6%9E%B6%E6%9E%84%EF%BC%9A%E5%AF%B9%E9%BD%90%E6%88%98%E7%95%A5%E4%B8%8E%E8%83%BD%E5%8A%9B%E7%9A%84%E6%A1%A5%E6%A2%81"><span class="nav-number">1.</span> <span class="nav-text">业务架构：对齐战略与能力的桥梁</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%9C%A6-%E5%AE%9A%E4%B9%89%E4%B8%8E%E8%81%8C%E8%B4%A3"><span class="nav-number">1.0.1.</span> <span class="nav-text">✦ 定义与职责</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%9C%A6-%E5%85%B3%E6%B3%A8%E6%A0%B8%E5%BF%83"><span class="nav-number">1.0.2.</span> <span class="nav-text">✦ 关注核心</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%9C%A6-%E8%90%BD%E5%9C%B0%E4%BA%A7%E5%87%BA"><span class="nav-number">1.0.3.</span> <span class="nav-text">✦ 落地产出</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%9C%A6-%E5%AE%9E%E8%B7%B5%E5%BB%BA%E8%AE%AE"><span class="nav-number">1.0.4.</span> <span class="nav-text">✦ 实践建议</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E6%9E%B6%E6%9E%84%EF%BC%9A%E7%BB%84%E7%BB%87%E7%B3%BB%E7%BB%9F%E5%8D%8F%E4%BD%9C%E7%9A%84%E9%AA%A8%E6%9E%B6"><span class="nav-number">2.</span> <span class="nav-text">应用架构：组织系统协作的骨架</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%9C%A6-%E5%AE%9A%E4%B9%89%E4%B8%8E%E8%81%8C%E8%B4%A3-1"><span class="nav-number">2.0.1.</span> <span class="nav-text">✦ 定义与职责</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%9C%A6-%E5%85%B3%E6%B3%A8%E6%A0%B8%E5%BF%83-1"><span class="nav-number">2.0.2.</span> <span class="nav-text">✦ 关注核心</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%9C%A6-%E8%90%BD%E5%9C%B0%E4%BA%A7%E5%87%BA-1"><span class="nav-number">2.0.3.</span> <span class="nav-text">✦ 落地产出</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%9C%A6-%E5%AE%9E%E8%B7%B5%E5%BB%BA%E8%AE%AE-1"><span class="nav-number">2.0.4.</span> <span class="nav-text">✦ 实践建议</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%9E%B6%E6%9E%84%EF%BC%9A%E6%94%AF%E6%92%91%E4%B8%9A%E5%8A%A1%E8%AE%A4%E7%9F%A5%E4%B8%8E%E5%86%B3%E7%AD%96%E7%9A%84%E8%A1%80%E6%B6%B2%E7%B3%BB%E7%BB%9F"><span class="nav-number">3.</span> <span class="nav-text">数据架构：支撑业务认知与决策的血液系统</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%9C%A6-%E5%AE%9A%E4%B9%89%E4%B8%8E%E8%81%8C%E8%B4%A3-2"><span class="nav-number">3.0.1.</span> <span class="nav-text">✦ 定义与职责</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%9C%A6-%E5%85%B3%E6%B3%A8%E6%A0%B8%E5%BF%83-2"><span class="nav-number">3.0.2.</span> <span class="nav-text">✦ 关注核心</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%9C%A6-%E8%90%BD%E5%9C%B0%E4%BA%A7%E5%87%BA-2"><span class="nav-number">3.0.3.</span> <span class="nav-text">✦ 落地产出</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%9C%A6-%E5%AE%9E%E8%B7%B5%E5%BB%BA%E8%AE%AE-2"><span class="nav-number">3.0.4.</span> <span class="nav-text">✦ 实践建议</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84%EF%BC%9A%E7%B3%BB%E7%BB%9F%E8%83%BD%E5%8A%9B%E4%B8%8E%E9%9D%9E%E5%8A%9F%E8%83%BD%E8%AF%89%E6%B1%82%E7%9A%84%E6%94%AF%E7%82%B9"><span class="nav-number">4.</span> <span class="nav-text">技术架构：系统能力与非功能诉求的支点</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%9C%A6-%E5%AE%9A%E4%B9%89%E4%B8%8E%E8%81%8C%E8%B4%A3-3"><span class="nav-number">4.0.1.</span> <span class="nav-text">✦ 定义与职责</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%9C%A6-%E5%85%B3%E6%B3%A8%E6%A0%B8%E5%BF%83-3"><span class="nav-number">4.0.2.</span> <span class="nav-text">✦ 关注核心</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%9C%A6-%E8%90%BD%E5%9C%B0%E4%BA%A7%E5%87%BA-3"><span class="nav-number">4.0.3.</span> <span class="nav-text">✦ 落地产出</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%9C%A6-%E5%AE%9E%E8%B7%B5%E5%BB%BA%E8%AE%AE-3"><span class="nav-number">4.0.4.</span> <span class="nav-text">✦ 实践建议</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E4%B8%8D%E6%98%AF%E5%88%86%E5%B1%82%EF%BC%8C%E8%80%8C%E6%98%AF%E5%8D%8F%E4%BD%9C"><span class="nav-number">5.</span> <span class="nav-text">架构不是分层，而是协作</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

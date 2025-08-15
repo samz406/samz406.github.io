@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="当我们说“我是技术出身”、“我们团队技术能力很强”，往往说的是一种自信。 但很多技术创业者忽视了一个残酷的现实：  技术能力不是护城河，技术只是工具，是可以复制的。  尤其是在一个开源泛滥、AI工具突飞猛进、工程能力高度商品化的时代——技术不再是门槛，它更像是一个杠杆。 那么问题来了：  真正的竞争力是什么？ 作为技术创业者，你的“不可替代性”究竟在哪里？ 什么样的技术，才能转化为商业的结构性优势">
+<meta property="og:type" content="article">
+<meta property="og:title" content="技术不是优势，是杠杆">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/04/13/product-thinking-08/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="当我们说“我是技术出身”、“我们团队技术能力很强”，往往说的是一种自信。 但很多技术创业者忽视了一个残酷的现实：  技术能力不是护城河，技术只是工具，是可以复制的。  尤其是在一个开源泛滥、AI工具突飞猛进、工程能力高度商品化的时代——技术不再是门槛，它更像是一个杠杆。 那么问题来了：  真正的竞争力是什么？ 作为技术创业者，你的“不可替代性”究竟在哪里？ 什么样的技术，才能转化为商业的结构性优势">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-04-13T06:38:47.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.372Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/04/13/product-thinking-08/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>技术不是优势，是杠杆 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/04/13/product-thinking-08/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          技术不是优势，是杠杆
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-04-13 14:38:47" itemprop="dateCreated datePublished" datetime="2025-04-13T14:38:47+08:00">2025-04-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%BA%A7%E5%93%81/" itemprop="url" rel="index"><span itemprop="name">产品</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>当我们说“我是技术出身”、“我们团队技术能力很强”，往往说的是一种自信。<br> 但很多技术创业者忽视了一个残酷的现实：</p>
+<blockquote>
+<p><strong>技术能力不是护城河，技术只是工具，是可以复制的。</strong></p>
+</blockquote>
+<p>尤其是在一个开源泛滥、AI工具突飞猛进、工程能力高度商品化的时代——<strong>技术不再是门槛，它更像是一个杠杆。</strong></p>
+<p>那么问题来了：</p>
+<ul>
+<li><strong>真正的竞争力是什么？</strong></li>
+<li><strong>作为技术创业者，你的“不可替代性”究竟在哪里？</strong></li>
+<li><strong>什么样的技术，才能转化为商业的结构性优势？</strong></li>
+</ul>
+<p>这篇文章，我们就从这些问题出发，系统讲讲：<strong>技术是如何从“能力”转化为“价值”的。</strong></p>
+<span id="more"></span>
+
+<h2 id="一、技术-≠-护城河"><a href="#一、技术-≠-护城河" class="headerlink" title="一、技术 ≠ 护城河"></a>一、技术 ≠ 护城河</h2><blockquote>
+<p>技术难 ≠ 用户感知价值高<br> 技术强 ≠ 商业壁垒深</p>
+</blockquote>
+<p>这可能是很多技术人最难接受的一件事。</p>
+<p>你实现了一套复杂分布式系统，用到了超前的缓存架构，用AI自动生成内容，模型压缩还做了自研优化……结果呢？</p>
+<ul>
+<li>用户根本不知道；</li>
+<li>同行3个月就能模仿；</li>
+<li>市场压根不觉得你和别人有什么不同。</li>
+</ul>
+<p><strong>这不是技术不好，是技术“没有穿透到用户价值层”。</strong></p>
+<p><strong>真正的护城河，不是你用了什么技术，而是</strong>：</p>
+<ul>
+<li>用户是否能感知这项技术的结果；</li>
+<li>用户是否离不开你带来的价值；</li>
+<li>这项技术是否在结构上压低了你的边际成本，或者提升了你的规模效应。</li>
+</ul>
+<p>举个例子：</p>
+<ul>
+<li>抖音背后是世界级的推荐系统，但用户感知的是“总有内容打中我”；</li>
+<li>Figma的协同设计技术极强，但用户感知的是“多人一起改稿不卡顿”；</li>
+<li>GPT模型参数再多，用户感知的是“它居然能帮我写完作业”。</li>
+</ul>
+<p>所以我们说：<strong>技术不是优势，是价值的放大器。</strong></p>
+<hr>
+<h2 id="二、技术的“放大效应”来自哪？"><a href="#二、技术的“放大效应”来自哪？" class="headerlink" title="二、技术的“放大效应”来自哪？"></a>二、技术的“放大效应”来自哪？</h2><h3 id="1-是否放大了价值交付的速度？"><a href="#1-是否放大了价值交付的速度？" class="headerlink" title="1. 是否放大了价值交付的速度？"></a>1. <strong>是否放大了价值交付的速度？</strong></h3><ul>
+<li>是否能让用户“更快”获得结果？</li>
+<li>是否能显著缩短任务完成时间？</li>
+</ul>
+<p>→ 例如 Canva 的一键排版，技术实现不难，但极大压缩了内容生产门槛。</p>
+<h3 id="2-是否放大了用户行为的杠杆率？"><a href="#2-是否放大了用户行为的杠杆率？" class="headerlink" title="2. 是否放大了用户行为的杠杆率？"></a>2. <strong>是否放大了用户行为的杠杆率？</strong></h3><ul>
+<li>用户做一次动作，能否产生多重价值回报？</li>
+<li>是否形成复利机制（如用户行为训练模型）？</li>
+</ul>
+<p>→ 例如 Notion 的模板复用，或者 Midjourney 的提示词进化。</p>
+<h3 id="3-是否放大了你的商业边际效应？"><a href="#3-是否放大了你的商业边际效应？" class="headerlink" title="3. 是否放大了你的商业边际效应？"></a>3. <strong>是否放大了你的商业边际效应？</strong></h3><ul>
+<li>技术能不能压低成本？（自服务、自动化、无需人工客服）</li>
+<li>是否能随着用户规模扩大，单位成本反而下降？</li>
+</ul>
+<p>→ 例如 Slack 的“自我上手”、Airtable 的“无代码组合”。</p>
+<hr>
+<h2 id="三、技术创业者的真正护城河：认知系统-结构设计"><a href="#三、技术创业者的真正护城河：认知系统-结构设计" class="headerlink" title="三、技术创业者的真正护城河：认知系统 + 结构设计"></a>三、技术创业者的真正护城河：<strong>认知系统 + 结构设计</strong></h2><blockquote>
+<p>技术是工具，认知决定你如何用工具，结构决定你如何让价值持续产生。</p>
+</blockquote>
+<p>你真正的不可替代性，不是你写代码的速度，而是你思考系统的方式。</p>
+<p>你是否能：</p>
+<ul>
+<li>用工程的眼光识别系统中的低效环节？</li>
+<li>用数据的语言描述市场的真实行为？</li>
+<li>用技术的结构改造旧的供需关系？</li>
+</ul>
+<h3 id="举几个例子："><a href="#举几个例子：" class="headerlink" title="举几个例子："></a>举几个例子：</h3><ul>
+<li>Uber 本质上不是“叫车APP”，而是对“人-时间-地理”的实时调度优化；</li>
+<li>Airbnb 背后是房源分发系统、信任模型、定价算法和投诉仲裁系统；</li>
+<li>大量B端SaaS公司靠的不是功能，而是用底层架构提升交付效率和扩展能力；</li>
+</ul>
+<p>这些成功都不是“技术牛”，而是<strong>技术结构 + 商业模型之间的完美映射</strong>。</p>
+<hr>
+<h2 id="四、如何构建你的“不可替代性”"><a href="#四、如何构建你的“不可替代性”" class="headerlink" title="四、如何构建你的“不可替代性”"></a>四、如何构建你的“不可替代性”</h2><p>你可以用这三个问题自问：</p>
+<h3 id="1-如果别人也有我一样的技术，他做出来的产品和我一样吗？"><a href="#1-如果别人也有我一样的技术，他做出来的产品和我一样吗？" class="headerlink" title="1. 如果别人也有我一样的技术，他做出来的产品和我一样吗？"></a>1. <strong>如果别人也有我一样的技术，他做出来的产品和我一样吗？</strong></h3><ul>
+<li>如果答案是“差不多”，你要么没有聚焦对的场景，要么没有设计好结构。</li>
+</ul>
+<h3 id="2-我的产品越多人用，是不是体验越好-成本越低？"><a href="#2-我的产品越多人用，是不是体验越好-成本越低？" class="headerlink" title="2. 我的产品越多人用，是不是体验越好 / 成本越低？"></a>2. <strong>我的产品越多人用，是不是体验越好 / 成本越低？</strong></h3><ul>
+<li>如果是，那你有“结构放大效应”；</li>
+<li>如果不是，你可能只是用技术解决了一个线性问题。</li>
+</ul>
+<h3 id="3-有没有一个技术节点，是别人想模仿但难以做到的？"><a href="#3-有没有一个技术节点，是别人想模仿但难以做到的？" class="headerlink" title="3. 有没有一个技术节点，是别人想模仿但难以做到的？"></a>3. <strong>有没有一个技术节点，是别人想模仿但难以做到的？</strong></h3><ul>
+<li>比如模型微调、数据积累、产品闭环、服务链路；</li>
+<li>找到一个“技术门槛 + 商业价值同时成立”的结合点，就是你真正的护城河。</li>
+</ul>
+<hr>
+<h2 id="五、写在最后：别以技术为自豪，要以技术所创造的价值为自豪"><a href="#五、写在最后：别以技术为自豪，要以技术所创造的价值为自豪" class="headerlink" title="五、写在最后：别以技术为自豪，要以技术所创造的价值为自豪"></a>五、写在最后：别以技术为自豪，要以技术所创造的价值为自豪</h2><blockquote>
+<p>技术只是你的起点，它不是你的标签，更不是你赖以生存的护甲。<br> 真正让你站得稳、走得远的，是你如何用技术看世界、改造世界。</p>
+</blockquote>
+<p>技术人要学会脱离“实现导向”的自我满足，建立“价值导向 + 结构思维”的产品哲学。</p>
+<p><strong>你不是代码的搬运工，你是价值系统的架构师。</strong></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/04/13/product-thinking-09/" rel="prev" title="产品早期别做加法，要做乘法">
+      <i class="fa fa-chevron-left"></i> 产品早期别做加法，要做乘法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/04/13/product-thinking-07/" rel="next" title="如何打造用户留存系统">
+      如何打造用户留存系统 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%8A%80%E6%9C%AF-%E2%89%A0-%E6%8A%A4%E5%9F%8E%E6%B2%B3"><span class="nav-number">1.</span> <span class="nav-text">一、技术 ≠ 护城河</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%8A%80%E6%9C%AF%E7%9A%84%E2%80%9C%E6%94%BE%E5%A4%A7%E6%95%88%E5%BA%94%E2%80%9D%E6%9D%A5%E8%87%AA%E5%93%AA%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">二、技术的“放大效应”来自哪？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%98%AF%E5%90%A6%E6%94%BE%E5%A4%A7%E4%BA%86%E4%BB%B7%E5%80%BC%E4%BA%A4%E4%BB%98%E7%9A%84%E9%80%9F%E5%BA%A6%EF%BC%9F"><span class="nav-number">2.1.</span> <span class="nav-text">1. 是否放大了价值交付的速度？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%98%AF%E5%90%A6%E6%94%BE%E5%A4%A7%E4%BA%86%E7%94%A8%E6%88%B7%E8%A1%8C%E4%B8%BA%E7%9A%84%E6%9D%A0%E6%9D%86%E7%8E%87%EF%BC%9F"><span class="nav-number">2.2.</span> <span class="nav-text">2. 是否放大了用户行为的杠杆率？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%98%AF%E5%90%A6%E6%94%BE%E5%A4%A7%E4%BA%86%E4%BD%A0%E7%9A%84%E5%95%86%E4%B8%9A%E8%BE%B9%E9%99%85%E6%95%88%E5%BA%94%EF%BC%9F"><span class="nav-number">2.3.</span> <span class="nav-text">3. 是否放大了你的商业边际效应？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%8A%80%E6%9C%AF%E5%88%9B%E4%B8%9A%E8%80%85%E7%9A%84%E7%9C%9F%E6%AD%A3%E6%8A%A4%E5%9F%8E%E6%B2%B3%EF%BC%9A%E8%AE%A4%E7%9F%A5%E7%B3%BB%E7%BB%9F-%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.</span> <span class="nav-text">三、技术创业者的真正护城河：认知系统 + 结构设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BE%E5%87%A0%E4%B8%AA%E4%BE%8B%E5%AD%90%EF%BC%9A"><span class="nav-number">3.1.</span> <span class="nav-text">举几个例子：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%A6%82%E4%BD%95%E6%9E%84%E5%BB%BA%E4%BD%A0%E7%9A%84%E2%80%9C%E4%B8%8D%E5%8F%AF%E6%9B%BF%E4%BB%A3%E6%80%A7%E2%80%9D"><span class="nav-number">4.</span> <span class="nav-text">四、如何构建你的“不可替代性”</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%A6%82%E6%9E%9C%E5%88%AB%E4%BA%BA%E4%B9%9F%E6%9C%89%E6%88%91%E4%B8%80%E6%A0%B7%E7%9A%84%E6%8A%80%E6%9C%AF%EF%BC%8C%E4%BB%96%E5%81%9A%E5%87%BA%E6%9D%A5%E7%9A%84%E4%BA%A7%E5%93%81%E5%92%8C%E6%88%91%E4%B8%80%E6%A0%B7%E5%90%97%EF%BC%9F"><span class="nav-number">4.1.</span> <span class="nav-text">1. 如果别人也有我一样的技术，他做出来的产品和我一样吗？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%88%91%E7%9A%84%E4%BA%A7%E5%93%81%E8%B6%8A%E5%A4%9A%E4%BA%BA%E7%94%A8%EF%BC%8C%E6%98%AF%E4%B8%8D%E6%98%AF%E4%BD%93%E9%AA%8C%E8%B6%8A%E5%A5%BD-%E6%88%90%E6%9C%AC%E8%B6%8A%E4%BD%8E%EF%BC%9F"><span class="nav-number">4.2.</span> <span class="nav-text">2. 我的产品越多人用，是不是体验越好 &#x2F; 成本越低？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%9C%89%E6%B2%A1%E6%9C%89%E4%B8%80%E4%B8%AA%E6%8A%80%E6%9C%AF%E8%8A%82%E7%82%B9%EF%BC%8C%E6%98%AF%E5%88%AB%E4%BA%BA%E6%83%B3%E6%A8%A1%E4%BB%BF%E4%BD%86%E9%9A%BE%E4%BB%A5%E5%81%9A%E5%88%B0%E7%9A%84%EF%BC%9F"><span class="nav-number">4.3.</span> <span class="nav-text">3. 有没有一个技术节点，是别人想模仿但难以做到的？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E%EF%BC%9A%E5%88%AB%E4%BB%A5%E6%8A%80%E6%9C%AF%E4%B8%BA%E8%87%AA%E8%B1%AA%EF%BC%8C%E8%A6%81%E4%BB%A5%E6%8A%80%E6%9C%AF%E6%89%80%E5%88%9B%E9%80%A0%E7%9A%84%E4%BB%B7%E5%80%BC%E4%B8%BA%E8%87%AA%E8%B1%AA"><span class="nav-number">5.</span> <span class="nav-text">五、写在最后：别以技术为自豪，要以技术所创造的价值为自豪</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="先看一个列子 Producer 12345678910111213141516171819202122232425262728293031323334353637public class OrderMessage &amp;#123;    public static void main(String[] args) throws MQBrokerException, RemotingException,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RocketMQ消息重试">
+<meta property="og:url" content="http://www.sanmuzi.com/2022/05/26/rocketmq-retry/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="先看一个列子 Producer 12345678910111213141516171819202122232425262728293031323334353637public class OrderMessage &amp;#123;    public static void main(String[] args) throws MQBrokerException, RemotingException,">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://www.sanmuzi.com/.com//P1.png">
+<meta property="og:image" content="http://www.sanmuzi.com/.com//P2.png">
+<meta property="article:published_time" content="2022-05-26T07:28:16.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.375Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://www.sanmuzi.com/.com//P1.png">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2022/05/26/rocketmq-retry/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>RocketMQ消息重试 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2022/05/26/rocketmq-retry/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          RocketMQ消息重试
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-26 15:28:16" itemprop="dateCreated datePublished" datetime="2022-05-26T15:28:16+08:00">2022-05-26</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>先看一个列子</p>
+<p><strong>Producer</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderMessage</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> MQBrokerException, RemotingException, InterruptedException, MQClientException </span>&#123;</span><br><span class="line"></span><br><span class="line">        TransactionMQProducer producer = <span class="keyword">new</span> TransactionMQProducer(<span class="string">&quot;testOrderMsgGroup&quot;</span>);</span><br><span class="line"></span><br><span class="line">        producer.setNamesrvAddr(<span class="string">&quot;192.192.192.61:9876&quot;</span>);</span><br><span class="line">        producer.start();</span><br><span class="line">        MsgSelector msgSelector = <span class="keyword">new</span> MsgSelector();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1</span>; i++) &#123;</span><br><span class="line">            <span class="keyword">int</span> orderId = i % <span class="number">10</span>;</span><br><span class="line">            String msg = <span class="string">&quot;Hello RocketMQ&quot;</span> + i;</span><br><span class="line">            Message message = <span class="keyword">new</span> Message(<span class="string">&quot;testOrderMsg&quot;</span>, msg.getBytes());</span><br><span class="line">            <span class="keyword">final</span> SendResult send = producer.send(message, msgSelector, orderId);</span><br><span class="line"></span><br><span class="line">            System.out.println(send);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 发送队列选择器</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MsgSelector</span> <span class="keyword">implements</span> <span class="title">MessageQueueSelector</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> MessageQueue <span class="title">select</span><span class="params">(List&lt;MessageQueue&gt; mqs, Message msg, Object arg)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">            Integer id = (Integer) arg;</span><br><span class="line">            <span class="keyword">int</span> index = id % mqs.size();</span><br><span class="line">            <span class="keyword">return</span> mqs.get(index);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>Consumer</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">public class OrderMsgConsumer &#123;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws MQClientException &#123;</span><br><span class="line"></span><br><span class="line">        DefaultMQPushConsumer defaultMQPushConsumer = new DefaultMQPushConsumer(&quot;ProducerGroup&quot;);</span><br><span class="line"></span><br><span class="line">        defaultMQPushConsumer.setNamesrvAddr(&quot;192.192.192.61:9876&quot;);</span><br><span class="line">        defaultMQPushConsumer.subscribe(&quot;testOrderMsg&quot;, &quot;*&quot;);</span><br><span class="line">        defaultMQPushConsumer.setMessageModel(MessageModel.CLUSTERING);</span><br><span class="line">        defaultMQPushConsumer.registerMessageListener(new MessageListenerConcurrently() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public ConsumeConcurrentlyStatus consumeMessage(List&lt;MessageExt&gt; msgs, ConsumeConcurrentlyContext context) &#123;</span><br><span class="line"></span><br><span class="line">                System.out.printf(&quot;%s 获取的消息 %s \n&quot;, LocalDateTime.now(), msgs);</span><br><span class="line">				//返回消费不成功	</span><br><span class="line">                return ConsumeConcurrentlyStatus.RECONSUME_LATER;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        defaultMQPushConsumer.start();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>上面例子是测试消息顺序</p>
+</blockquote>
+<p>在消费端，消息消费返回的是非成功ConsumeConcurrentlyStatus.RECONSUME_LATER;</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">ConsumeConcurrentlyStatus</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Success consumption</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    CONSUME_SUCCESS,</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Failure consumption,later try to consume</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    RECONSUME_LATER;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">2022-05-26T15:02:58.780 获取的消息 [MessageExt [brokerName=broker-a, queueId=0, storeSize=170, queueOffset=10, sysFlag=0, bornTimestamp=1653548578737, bornHost=/172.16.5.115:55999, storeTimestamp=1653548486443, storeHost=/192.192.192.61:10911, msgId=C0C0C03D00002A9F00000000053A5FFD, commitLogOffset=87711741, bodyCRC=705268097, reconsumeTimes=0, preparedTransactionOffset=0, toString()=Message&#123;topic=&#x27;testOrderMsg&#x27;, flag=0, properties=&#123;MIN_OFFSET=0, MAX_OFFSET=11, CONSUME_START_TIME=1653548578780, UNIQ_KEY=AC100573068818B4AAC283F9AFB00000, WAIT=true&#125;, body=[72, 101, 108, 108, 111, 32, 82, 111, 99, 107, 101, 116, 77, 81, 48], transactionId=&#x27;null&#x27;&#125;]] </span><br><span class="line">2022-05-26T15:03:09.182 获取的消息 [MessageExt [brokerName=broker-a, queueId=0, storeSize=306, queueOffset=0, sysFlag=0, bornTimestamp=1653548578737, bornHost=/172.16.5.115:55999, storeTimestamp=1653548496853, storeHost=/192.192.192.61:10911, msgId=C0C0C03D00002A9F00000000053A61D8, commitLogOffset=87712216, bodyCRC=705268097, reconsumeTimes=1, preparedTransactionOffset=0, toString()=Message&#123;topic=&#x27;testOrderMsg&#x27;, flag=0, properties=&#123;MIN_OFFSET=0, REAL_TOPIC=%RETRY%ProducerGroup, ORIGIN_MESSAGE_ID=C0C0C03D00002A9F00000000053A5FFD, RETRY_TOPIC=testOrderMsg, MAX_OFFSET=1, CONSUME_START_TIME=1653548589182, UNIQ_KEY=AC100573068818B4AAC283F9AFB00000, WAIT=false, DELAY=3, REAL_QID=0&#125;, body=[72, 101, 108, 108, 111, 32, 82, 111, 99, 107, 101, 116, 77, 81, 48], transactionId=&#x27;null&#x27;&#125;]] </span><br><span class="line">2022-05-26T15:03:39.189 获取的消息 [MessageExt [brokerName=broker-a, queueId=0, storeSize=306, queueOffset=1, sysFlag=0, bornTimestamp=1653548578737, bornHost=/172.16.5.115:55999, storeTimestamp=1653548526888, storeHost=/192.192.192.61:10911, msgId=C0C0C03D00002A9F00000000053A643B, commitLogOffset=87712827, bodyCRC=705268097, reconsumeTimes=2, preparedTransactionOffset=0, toString()=Message&#123;topic=&#x27;testOrderMsg&#x27;, flag=0, properties=&#123;MIN_OFFSET=0, REAL_TOPIC=%RETRY%ProducerGroup, ORIGIN_MESSAGE_ID=C0C0C03D00002A9F00000000053A5FFD, RETRY_TOPIC=testOrderMsg, MAX_OFFSET=2, CONSUME_START_TIME=1653548619188, UNIQ_KEY=AC100573068818B4AAC283F9AFB00000, WAIT=false, DELAY=4, REAL_QID=0&#125;, body=[72, 101, 108, 108, 111, 32, 82, 111, 99, 107, 101, 116, 77, 81, 48], transactionId=&#x27;null&#x27;&#125;]] </span><br><span class="line">2022-05-26T15:04:39.194 获取的消息 [MessageExt [brokerName=broker-a, queueId=0, storeSize=306, queueOffset=2, sysFlag=0, bornTimestamp=1653548578737, bornHost=/172.16.5.115:55999, storeTimestamp=1653548586892, storeHost=/192.192.192.61:10911, msgId=C0C0C03D00002A9F00000000053A669E, commitLogOffset=87713438, bodyCRC=705268097, reconsumeTimes=3, preparedTransactionOffset=0, toString()=Message&#123;topic=&#x27;testOrderMsg&#x27;, flag=0, properties=&#123;MIN_OFFSET=0, REAL_TOPIC=%RETRY%ProducerGroup, ORIGIN_MESSAGE_ID=C0C0C03D00002A9F00000000053A5FFD, RETRY_TOPIC=testOrderMsg, MAX_OFFSET=3, CONSUME_START_TIME=1653548679194, UNIQ_KEY=AC100573068818B4AAC283F9AFB00000, WAIT=false, DELAY=5, REAL_QID=0&#125;, body=[72, 101, 108, 108, 111, 32, 82, 111, 99, 107, 101, 116, 77, 81, 48], transactionId=&#x27;null&#x27;&#125;]] </span><br><span class="line">2022-05-26T15:06:39.202 获取的消息 [MessageExt [brokerName=broker-a, queueId=0, storeSize=306, queueOffset=3, sysFlag=0, bornTimestamp=1653548578737, bornHost=/172.16.5.115:55999, storeTimestamp=1653548706897, storeHost=/192.192.192.61:10911, msgId=C0C0C03D00002A9F00000000053A6901, commitLogOffset=87714049, bodyCRC=705268097, reconsumeTimes=4, preparedTransactionOffset=0, toString()=Message&#123;topic=&#x27;testOrderMsg&#x27;, flag=0, properties=&#123;MIN_OFFSET=0, REAL_TOPIC=%RETRY%ProducerGroup, ORIGIN_MESSAGE_ID=C0C0C03D00002A9F00000000053A5FFD, RETRY_TOPIC=testOrderMsg, MAX_OFFSET=4, CONSUME_START_TIME=1653548799202, UNIQ_KEY=AC100573068818B4AAC283F9AFB00000, WAIT=false, DELAY=6, REAL_QID=0&#125;, body=[72, 101, 108, 108, 111, 32, 82, 111, 99, 107, 101, 116, 77, 81, 48], transactionId=&#x27;null&#x27;&#125;]] </span><br><span class="line">2022-05-26T15:09:39.207 获取的消息 [MessageExt [brokerName=broker-a, queueId=0, storeSize=306, queueOffset=4, sysFlag=0, bornTimestamp=1653548578737, bornHost=/172.16.5.115:55999, storeTimestamp=1653548886902, storeHost=/192.192.192.61:10911, msgId=C0C0C03D00002A9F00000000053A6B64, commitLogOffset=87714660, bodyCRC=705268097, reconsumeTimes=5, preparedTransactionOffset=0, toString()=Message&#123;topic=&#x27;testOrderMsg&#x27;, flag=0, properties=&#123;MIN_OFFSET=0, REAL_TOPIC=%RETRY%ProducerGroup, ORIGIN_MESSAGE_ID=C0C0C03D00002A9F00000000053A5FFD, RETRY_TOPIC=testOrderMsg, MAX_OFFSET=5, CONSUME_START_TIME=1653548979207, UNIQ_KEY=AC100573068818B4AAC283F9AFB00000, WAIT=false, DELAY=7, REAL_QID=0&#125;, body=[72, 101, 108, 108, 111, 32, 82, 111, 99, 107, 101, 116, 77, 81, 48], transactionId=&#x27;null&#x27;&#125;]] </span><br><span class="line">2022-05-26T15:13:39.214 获取的消息 [MessageExt [brokerName=broker-a, queueId=0, storeSize=306, queueOffset=5, sysFlag=0, bornTimestamp=1653548578737, bornHost=/172.16.5.115:55999, storeTimestamp=1653549126905, storeHost=/192.192.192.61:10911, msgId=C0C0C03D00002A9F00000000053A6DC7, commitLogOffset=87715271, bodyCRC=705268097, reconsumeTimes=6, preparedTransactionOffset=0, toString()=Message&#123;topic=&#x27;testOrderMsg&#x27;, flag=0, properties=&#123;MIN_OFFSET=0, REAL_TOPIC=%RETRY%ProducerGroup, ORIGIN_MESSAGE_ID=C0C0C03D00002A9F00000000053A5FFD, RETRY_TOPIC=testOrderMsg, MAX_OFFSET=6, CONSUME_START_TIME=1653549219214, UNIQ_KEY=AC100573068818B4AAC283F9AFB00000, WAIT=false, DELAY=8, REAL_QID=0&#125;, body=[72, 101, 108, 108, 111, 32, 82, 111, 99, 107, 101, 116, 77, 81, 48], transactionId=&#x27;null&#x27;&#125;]] </span><br><span class="line">2022-05-26T15:18:39.224 获取的消息 [MessageExt [brokerName=broker-a, queueId=0, storeSize=306, queueOffset=6, sysFlag=0, bornTimestamp=1653548578737, bornHost=/172.16.5.115:55999, storeTimestamp=1653549426909, storeHost=/192.192.192.61:10911, msgId=C0C0C03D00002A9F00000000053A702A, commitLogOffset=87715882, bodyCRC=705268097, reconsumeTimes=7, preparedTransactionOffset=0, toString()=Message&#123;topic=&#x27;testOrderMsg&#x27;, flag=0, properties=&#123;MIN_OFFSET=0, REAL_TOPIC=%RETRY%ProducerGroup, ORIGIN_MESSAGE_ID=C0C0C03D00002A9F00000000053A5FFD, RETRY_TOPIC=testOrderMsg, MAX_OFFSET=7, CONSUME_START_TIME=1653549519223, UNIQ_KEY=AC100573068818B4AAC283F9AFB00000, WAIT=false, DELAY=9, REAL_QID=0&#125;, body=[72, 101, 108, 108, 111, 32, 82, 111, 99, 107, 101, 116, 77, 81, 48], transactionId=&#x27;null&#x27;&#125;]] </span><br><span class="line">2022-05-26T15:24:39.232 获取的消息 [MessageExt [brokerName=broker-a, queueId=0, storeSize=307, queueOffset=7, sysFlag=0, bornTimestamp=1653548578737, bornHost=/172.16.5.115:55999, storeTimestamp=1653549786912, storeHost=/192.192.192.61:10911, msgId=C0C0C03D00002A9F00000000053A728E, commitLogOffset=87716494, bodyCRC=705268097, reconsumeTimes=8, preparedTransactionOffset=0, toString()=Message&#123;topic=&#x27;testOrderMsg&#x27;, flag=0, properties=&#123;MIN_OFFSET=0, REAL_TOPIC=%RETRY%ProducerGroup, ORIGIN_MESSAGE_ID=C0C0C03D00002A9F00000000053A5FFD, RETRY_TOPIC=testOrderMsg, MAX_OFFSET=8, CONSUME_START_TIME=1653549879232, UNIQ_KEY=AC100573068818B4AAC283F9AFB00000, WAIT=false, DELAY=10, REAL_QID=0&#125;, body=[72, 101, 108, 108, 111, 32, 82, 111, 99, 107, 101, 116, 77, 81, 48], transactionId=&#x27;null&#x27;&#125;]] </span><br><span class="line">2022-05-26T15:31:39.244 获取的消息 [MessageExt [brokerName=broker-a, queueId=0, storeSize=307, queueOffset=8, sysFlag=0, bornTimestamp=1653548578737, bornHost=/172.16.5.115:55999, storeTimestamp=1653550206916, storeHost=/192.192.192.61:10911, msgId=C0C0C03D00002A9F00000000053A74F3, commitLogOffset=87717107, bodyCRC=705268097, reconsumeTimes=9, preparedTransactionOffset=0, toString()=Message&#123;topic=&#x27;testOrderMsg&#x27;, flag=0, properties=&#123;MIN_OFFSET=0, REAL_TOPIC=%RETRY%ProducerGroup, ORIGIN_MESSAGE_ID=C0C0C03D00002A9F00000000053A5FFD, RETRY_TOPIC=testOrderMsg, MAX_OFFSET=9, CONSUME_START_TIME=1653550299244, UNIQ_KEY=AC100573068818B4AAC283F9AFB00000, WAIT=false, DELAY=11, REAL_QID=0&#125;, body=[72, 101, 108, 108, 111, 32, 82, 111, 99, 107, 101, 116, 77, 81, 48], transactionId=&#x27;null&#x27;&#125;]] </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>通过关键字“获取的消息”，发现已经重试了10次了。这里的重试逻辑是如下</p>
+<p>消费端消息没有消费成功，RocketMQ会放到重试队列。重试topic的名字是%RETRY%+consumergroup名字（这里需要注意的是，这个Topic的重试队列是针对消费组，而不是针对每个Topic设置的）;上面的消费组名称是ProducerGroup，那么对应的重试队列是%RETRY%ProducerGroup； 用于暂时保存因为各种异常而导致Consumer端无法消费的消息。考虑到异常恢复起来需要一些时间，会为重试队列设置多个重试级别，每个重试级别都有与之对应的重新投递延时，重试次数越多投递延时就越大。RocketMQ对于重试消息的处理是先保存至Topic名称为“SCHEDULE_TOPIC_XXXX”的延迟队列中，后台定时任务按照对应的时间进行Delay后重新保存至“%RETRY%+consumerGroup”的重试队列中。如果重复消费都失败并且到达一定次数（默认16次），就会投递到DLQ死信队列；</p>
+<p><img src="/.com//P1.png" alt="封面"></p>
+<p>​    重试队列</p>
+<p><img src="/.com//P2.png" alt="封面"></p>
+<p>​    队列配置</p>
+<h3 id="消息重试"><a href="#消息重试" class="headerlink" title="消息重试"></a>消息重试</h3><p>Consumer消费消息失败后，要提供一种重试机制，让消息再消费一次。Consumer消费消息失败通常可以认为有以下几种情况：</p>
+<ul>
+<li>由于消息本身的原因，例如反序列化失败、消息数据本身无法处理（例如话费充值，当前消息的手机号被注销，无法充值）等。这种错误通常需要跳过这条消息，再消费其它消息，而这条失败的消息即使立刻重试消费，99%也不成功，所以最好提供一种定时重试机制，即过10秒后再重试。</li>
+<li>由于依赖的下游应用服务不可用，例如db连接不可用，外系统网络不可达等。遇到这种错误，即使跳过当前失败的消息，消费其他消息同样也会报错。这种情况建议应用sleep 30s，再消费下一条消息，这样可以减轻Broker重试消息的压力。</li>
+</ul>
+<p>参考资料：</p>
+<p>​    RocketMQ官网</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/05/14/jvm-exception/" rel="prev" title="JVM 异常处理">
+      <i class="fa fa-chevron-left"></i> JVM 异常处理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/05/26/rocket-mq-order-msg/" rel="next" title="RocketMQ保证消息顺序">
+      RocketMQ保证消息顺序 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E9%87%8D%E8%AF%95"><span class="nav-number">1.</span> <span class="nav-text">消息重试</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

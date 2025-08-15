@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="RPC（远程过程调用）是分布式系统中一种基础而关键的技术，它能够简化跨进程、跨服务器的通信，并提供一种类似于本地调用的方式。RPC 的核心原理贯穿了客户端与服务端之间的通信过程，涉及多个重要的技术环节和原理。为了全面了解 RPC 的整体通信模型，本章将深入解析其工作原理，逐步揭示每个环节背后的技术细节和实现方式，帮助读者掌握 RPC 的核心概念与设计思路。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RPC 核心原理详解——整体通信模型">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/01/03/rpc-4/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="RPC（远程过程调用）是分布式系统中一种基础而关键的技术，它能够简化跨进程、跨服务器的通信，并提供一种类似于本地调用的方式。RPC 的核心原理贯穿了客户端与服务端之间的通信过程，涉及多个重要的技术环节和原理。为了全面了解 RPC 的整体通信模型，本章将深入解析其工作原理，逐步揭示每个环节背后的技术细节和实现方式，帮助读者掌握 RPC 的核心概念与设计思路。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-01-03T07:28:16.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.376Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/01/03/rpc-4/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>RPC 核心原理详解——整体通信模型 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/01/03/rpc-4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          RPC 核心原理详解——整体通信模型
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-01-03 15:28:16" itemprop="dateCreated datePublished" datetime="2025-01-03T15:28:16+08:00">2025-01-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>RPC（远程过程调用）是分布式系统中一种基础而关键的技术，它能够简化跨进程、跨服务器的通信，并提供一种类似于本地调用的方式。RPC 的核心原理贯穿了客户端与服务端之间的通信过程，涉及多个重要的技术环节和原理。为了全面了解 RPC 的整体通信模型，本章将深入解析其工作原理，逐步揭示每个环节背后的技术细节和实现方式，帮助读者掌握 RPC 的核心概念与设计思路。</p>
+<span id="more"></span>
+
+<h2 id="4-1-RPC-整体通信模型概述"><a href="#4-1-RPC-整体通信模型概述" class="headerlink" title="4.1 RPC 整体通信模型概述"></a>4.1 RPC 整体通信模型概述</h2><p>RPC 的通信模型涵盖了客户端和服务端之间的信息传递过程，包括数据的序列化、网络的传输、协议的选择、错误处理机制等多个方面。在 RPC 的通信流程中，客户端发起请求，服务端处理请求并返回响应。尽管这些步骤看似简单，但每个环节都涉及到多个复杂的技术点。</p>
+<p>RPC 的整体通信模型一般可以分为以下几个主要步骤：</p>
+<ol>
+<li><strong>客户端发起远程调用请求</strong><br> 客户端通过调用本地代理对象（Stub）上的方法来发起 RPC 调用。这一步骤在客户端代码中表现得和调用本地方法一样，而实际执行时，Stub 会将该调用请求封装成可以通过网络传输的消息格式。</li>
+<li><strong>请求数据的序列化</strong><br> 客户端将调用方法的参数及其他附加信息进行序列化。序列化的目的是将数据转换为一种网络可以传输的字节流格式。不同的 RPC 框架可能会使用不同的序列化协议，常见的有 JSON、Protobuf、Thrift、Hessian 等。</li>
+<li><strong>网络传输</strong><br> 一旦数据被序列化，客户端将数据通过底层的网络传输协议发送给服务端。常见的传输协议有 TCP、HTTP、WebSocket 等。每种协议的选择会影响 RPC 的效率、延迟和可扩展性。</li>
+<li><strong>服务端接收请求并反序列化</strong><br> 服务端通过监听指定端口接收客户端发送的请求数据。一旦数据到达，服务端会进行反序列化，将字节流恢复成原始的数据结构，提取出方法名称、参数等信息。</li>
+<li><strong>方法调度与业务处理</strong><br> 服务端根据请求的内容，查找并执行相应的业务逻辑方法。这一过程中，RPC 框架会进行方法调度，根据方法名称和参数类型匹配相应的处理函数。</li>
+<li><strong>响应的序列化与返回</strong><br> 服务端执行完毕后，将结果数据序列化并通过网络传输返回给客户端。序列化后的响应消息将携带结果数据、执行状态以及任何错误信息。</li>
+<li><strong>客户端接收响应并反序列化</strong><br> 客户端接收到响应后，进行反序列化，提取出最终的调用结果或异常信息。</li>
+</ol>
+<p>这一通信过程实际上并非单纯的“请求—响应”模式。在实际系统中，RPC 的实现还涉及许多其他的辅助功能，如负载均衡、服务发现、超时控制、重试机制等。这些功能使得 RPC 调用能够在分布式环境中可靠、高效地执行。</p>
+<hr>
+<h2 id="4-2-客户端与服务端的角色与职责"><a href="#4-2-客户端与服务端的角色与职责" class="headerlink" title="4.2 客户端与服务端的角色与职责"></a>4.2 客户端与服务端的角色与职责</h2><p>在 RPC 的整体通信模型中，客户端和服务端扮演了不可或缺的角色。客户端负责发起请求并获取响应，而服务端则负责处理请求并返回结果。在许多分布式框架中，这两个角色都通过代理对象（Stub 和 Skeleton）来实现。</p>
+<h3 id="4-2-1-客户端的职责"><a href="#4-2-1-客户端的职责" class="headerlink" title="4.2.1 客户端的职责"></a>4.2.1 客户端的职责</h3><p>在 RPC 通信中，客户端的任务主要集中在请求发起、数据序列化、响应接收等几个方面。客户端首先通过本地的代理对象发起一个方法调用，代理对象会将这个调用转化为一个远程请求，并通过网络传输给服务端。</p>
+<h4 id="1-调用代理对象（Stub）"><a href="#1-调用代理对象（Stub）" class="headerlink" title="1. 调用代理对象（Stub）"></a>1. <strong>调用代理对象（Stub）</strong></h4><p>客户端通过调用代理对象上的方法，发起一个 RPC 请求。代理对象（Stub）是客户端与服务端之间的代理，它的作用是将客户端的本地调用转化为远程调用。客户端的应用程序通过调用这些代理方法，就像调用本地方法一样，不需要知道底层的网络和协议细节。</p>
+<h4 id="2-请求序列化"><a href="#2-请求序列化" class="headerlink" title="2. 请求序列化"></a>2. <strong>请求序列化</strong></h4><p>一旦客户端发起调用，代理对象需要将方法的参数及其他相关数据序列化成字节流。序列化是将数据结构转换为一种可以通过网络传输的格式。常见的序列化协议包括 JSON、Protobuf、Thrift、Hessian 等，它们的选择会影响请求的大小、序列化和反序列化的性能。</p>
+<h4 id="3-网络传输"><a href="#3-网络传输" class="headerlink" title="3. 网络传输"></a>3. <strong>网络传输</strong></h4><p>客户端将序列化后的数据通过底层的网络协议（如 TCP 或 HTTP）发送到服务端。在这一过程中，RPC 框架负责处理网络的连接、传输、协议的封装和解封装。</p>
+<h4 id="4-等待响应"><a href="#4-等待响应" class="headerlink" title="4. 等待响应"></a>4. <strong>等待响应</strong></h4><p>客户端发送请求后，通常会有一定的等待时间，等待服务端处理并返回响应。为了保证系统的健壮性，客户端一般会设置请求超时和重试策略。如果服务端没有及时响应，客户端会根据超时策略采取重试或抛出异常。</p>
+<h4 id="5-结果反序列化"><a href="#5-结果反序列化" class="headerlink" title="5. 结果反序列化"></a>5. <strong>结果反序列化</strong></h4><p>一旦客户端接收到服务端返回的响应数据，它需要对这些数据进行反序列化，以恢复成应用程序可以理解的数据结构。反序列化的过程涉及将字节流转换回原始数据类型，并将其返回给调用者。</p>
+<h3 id="4-2-2-服务端的职责"><a href="#4-2-2-服务端的职责" class="headerlink" title="4.2.2 服务端的职责"></a>4.2.2 服务端的职责</h3><p>服务端的任务主要集中在接收请求、反序列化请求数据、执行业务逻辑、序列化响应结果以及处理异常等方面。服务端通常会通过一个代理对象（Skeleton）来接收和处理客户端的请求。</p>
+<h4 id="1-接收请求"><a href="#1-接收请求" class="headerlink" title="1. 接收请求"></a>1. <strong>接收请求</strong></h4><p>服务端通过监听特定端口或协议接收来自客户端的请求。通常，RPC 服务端会持续在后台监听请求，并根据接收到的数据处理不同的调用。</p>
+<h4 id="2-请求反序列化"><a href="#2-请求反序列化" class="headerlink" title="2. 请求反序列化"></a>2. <strong>请求反序列化</strong></h4><p>当服务端接收到客户端的请求后，首先需要将数据反序列化，恢复成客户端发送时的原始数据结构。反序列化的过程涉及将字节流转换为对象，这一过程中可能会出现版本不兼容、数据格式错误等问题。</p>
+<h4 id="3-方法调度与业务逻辑处理"><a href="#3-方法调度与业务逻辑处理" class="headerlink" title="3. 方法调度与业务逻辑处理"></a>3. <strong>方法调度与业务逻辑处理</strong></h4><p>服务端会根据反序列化后的请求数据，找到对应的业务逻辑方法并执行。方法调度的过程通常涉及到反射机制，通过请求中携带的方法名称和参数信息，动态地调用对应的业务方法。</p>
+<h4 id="4-响应的序列化"><a href="#4-响应的序列化" class="headerlink" title="4. 响应的序列化"></a>4. <strong>响应的序列化</strong></h4><p>执行完毕后，服务端将业务处理的结果进行序列化，生成响应数据。响应数据通常包括方法执行的结果、异常信息以及执行状态等。</p>
+<h4 id="5-返回响应"><a href="#5-返回响应" class="headerlink" title="5. 返回响应"></a>5. <strong>返回响应</strong></h4><p>序列化后的响应数据通过底层的网络传输机制返回给客户端。服务端的网络层需要负责协议的封装、数据的发送和连接的管理。</p>
+<hr>
+<h2 id="4-3-请求与响应的序列化与反序列化"><a href="#4-3-请求与响应的序列化与反序列化" class="headerlink" title="4.3 请求与响应的序列化与反序列化"></a>4.3 请求与响应的序列化与反序列化</h2><p>序列化和反序列化是 RPC 中最为基础但又至关重要的操作，它们确保了数据能够在客户端和服务端之间高效地传输。在这一过程中，RPC 框架会根据指定的协议将数据结构转换成字节流，然后再将字节流转换回数据结构。</p>
+<h3 id="4-3-1-序列化"><a href="#4-3-1-序列化" class="headerlink" title="4.3.1 序列化"></a>4.3.1 序列化</h3><p>序列化是将数据结构转换为字节流的过程，通常用于跨进程、跨机器的通信。RPC 系统中的序列化不仅需要保证数据的完整性，还要尽可能减少数据的传输开销。常见的序列化协议有：</p>
+<ul>
+<li><p><strong>JSON</strong><br> JSON 是一种轻量级的文本数据交换格式，具有可读性强、易于理解的特点。尽管 JSON 格式便于调试和人类阅读，但其序列化和反序列化性能较差，且数据传输较为冗长。</p>
+</li>
+<li><p><strong>Protobuf</strong><br> Protobuf（Protocol Buffers）是一种高效的二进制序列化协议，Google 开发并广泛应用。Protobuf 的最大优点是高效、紧凑，适合大规模数据传输，支持跨语言的开发。但它的调试性较差，需要提前定义好消息格式。</p>
+</li>
+<li><p><strong>Thrift</strong><br> Thrift 是由 Facebook 开发的一种多语言的序列化协议，具有高度的可扩展性，支持多种编</p>
+</li>
+<li><p>理解了！由于字数限制，我将继续扩展并分段输出完整的内容。接下来是第二部分，涵盖 RPC 核心原理的详细说明，包括序列化、网络传输协议、服务端与客户端的工作细节等。</p>
+<p><strong>Hessian</strong><br> Hessian 是一种由 Caucho Technology 提供的二进制协议，具有高效、紧凑的特点，适合用于高效的 RPC 调用。它支持跨语言的开发，特别是在 Java 环境中应用广泛。Hessian 的一个特点是能够自动序列化 Java 对象，避免了开发人员手动指定序列化方式。</p>
+<p><strong>Avro</strong><br> Avro 是一种由 Apache 提供的序列化协议，专为大数据处理设计，具有高效、易于压缩的特点。它与 Thrift 和 Protobuf 类似，主要应用于大规模数据处理和分布式系统。Avro 的最大特点是它的序列化格式与接口描述文件（schema）相结合，提供强类型支持。</p>
+<h3 id="4-3-2-反序列化"><a href="#4-3-2-反序列化" class="headerlink" title="4.3.2 反序列化"></a>4.3.2 反序列化</h3><p>反序列化是序列化的逆过程，它将字节流转化为对象或数据结构。在反序列化的过程中，RPC 框架不仅要处理数据的转换，还要确保正确的错误处理机制，以应对潜在的兼容性问题。例如，当接收到的字节流与当前版本的接口不兼容时，系统需要有合适的容错机制，以避免因反序列化失败导致应用崩溃。</p>
+<p>常见的反序列化流程如下：</p>
+<ol>
+<li><strong>数据的格式校验</strong><br> 服务端首先会检查接收到的数据是否符合预定的格式。不同的协议（如 Protobuf、Thrift 等）有不同的格式约束。如果接收到的数据格式不正确，RPC 框架会抛出异常或返回错误信息。</li>
+<li><strong>对象映射与类型匹配</strong><br> 服务端会根据反序列化协议将字节流映射为相应的对象或数据结构。这一过程可能涉及到类型转换、字段名称匹配等操作。例如，在使用 Protobuf 时，数据被反序列化为预先定义好的消息对象，这个过程通常是由框架自动处理的。</li>
+<li><strong>错误处理</strong><br> 反序列化过程中可能会遇到字段缺失、数据不匹配等问题。因此，RPC 框架需要提供错误处理机制。例如，Protobuf 在遇到未知字段时会自动忽略，而 Thrift 和 JSON 在遇到不匹配的字段时会抛出异常。</li>
+</ol>
+<hr>
+<h2 id="4-4-网络传输：底层通信协议的选择"><a href="#4-4-网络传输：底层通信协议的选择" class="headerlink" title="4.4 网络传输：底层通信协议的选择"></a>4.4 网络传输：底层通信协议的选择</h2><p>RPC 的网络传输机制是实现高效、可靠远程调用的基础。RPC 系统通过选择合适的网络传输协议来满足不同场景下的性能和可靠性要求。常见的传输协议有 TCP 和 HTTP，其中 TCP 适用于高效的点对点连接，而 HTTP 则更适用于跨平台、跨语言的场景。</p>
+<h3 id="4-4-1-TCP-协议"><a href="#4-4-1-TCP-协议" class="headerlink" title="4.4.1 TCP 协议"></a>4.4.1 TCP 协议</h3><p>TCP（Transmission Control Protocol）是面向连接的、可靠的传输协议。与 UDP 不同，TCP 保证数据的完整性和顺序性，因此，它非常适合需要高可靠性的 RPC 系统。</p>
+<h4 id="1-可靠性"><a href="#1-可靠性" class="headerlink" title="1. 可靠性"></a>1. <strong>可靠性</strong></h4><p>TCP 连接通过三次握手建立连接，确保双方能够正常通信。在数据传输过程中，TCP 协议会进行数据包的校验和确认，确保数据能够准确无误地传输到目标机器。</p>
+<h4 id="2-流量控制与拥塞控制"><a href="#2-流量控制与拥塞控制" class="headerlink" title="2. 流量控制与拥塞控制"></a>2. <strong>流量控制与拥塞控制</strong></h4><p>TCP 协议内置流量控制和拥塞控制机制，可以有效避免网络拥堵的情况。对于高频率的 RPC 调用，TCP 的流量控制能够避免服务端或网络过载。</p>
+<h4 id="3-高效性"><a href="#3-高效性" class="headerlink" title="3. 高效性"></a>3. <strong>高效性</strong></h4><p>TCP 提供了较低的延迟和较高的吞吐量，适合大规模的分布式系统和高性能计算场景。由于其可靠性和流量控制机制，TCP 经常被选择为 RPC 系统中的主要传输协议。</p>
+<h3 id="4-4-2-HTTP-协议"><a href="#4-4-2-HTTP-协议" class="headerlink" title="4.4.2 HTTP 协议"></a>4.4.2 HTTP 协议</h3><p>HTTP（HyperText Transfer Protocol）是 Web 应用中广泛使用的协议，最初用于浏览器与服务器之间的通信。随着技术的发展，HTTP 协议逐渐被应用于 RPC 系统，尤其是基于 HTTP/2 和 HTTP/3 的高效协议。</p>
+<h4 id="1-跨平台与跨语言支持"><a href="#1-跨平台与跨语言支持" class="headerlink" title="1. 跨平台与跨语言支持"></a>1. <strong>跨平台与跨语言支持</strong></h4><p>HTTP 协议的最大优点在于它的跨平台和跨语言特性。由于 HTTP 是全球通用的网络协议，几乎所有操作系统、编程语言和平台都支持它。因此，基于 HTTP 的 RPC 框架可以轻松实现不同平台之间的通信。</p>
+<h4 id="2-适应-RESTful-API"><a href="#2-适应-RESTful-API" class="headerlink" title="2. 适应 RESTful API"></a>2. <strong>适应 RESTful API</strong></h4><p>HTTP 协议的另一个特点是其与 RESTful 风格的接口兼容。在基于 HTTP 的 RPC 框架中，通常使用 RESTful API 来组织远程方法调用。通过 HTTP 请求的不同类型（GET、POST、PUT、DELETE 等），可以实现 CRUD 操作，从而进行远程调用。</p>
+<h4 id="3-WebSocket-与持久连接"><a href="#3-WebSocket-与持久连接" class="headerlink" title="3. WebSocket 与持久连接"></a>3. <strong>WebSocket 与持久连接</strong></h4><p>HTTP/2 和 HTTP/3 提供了更加高效的多路复用机制，可以在一个连接中同时传输多个请求/响应，极大提高了性能。此外，WebSocket 作为一种双向通信协议，也可以在 RPC 中使用，特别适用于需要高频率实时通信的应用场景。</p>
+<h4 id="4-性能问题"><a href="#4-性能问题" class="headerlink" title="4. 性能问题"></a>4. <strong>性能问题</strong></h4><p>尽管 HTTP 协议在跨平台和跨语言的支持上有显著优势，但它的性能相较于 TCP 协议稍逊一筹。特别是在高并发、大规模请求的场景中，HTTP 请求的开销可能导致延迟增加。为此，许多现代的 RPC 框架（如 gRPC）基于 HTTP/2 协议，提供了更好的性能和更低的延迟。</p>
+<h2 id="4-5-异常与超时处理"><a href="#4-5-异常与超时处理" class="headerlink" title="4.5 异常与超时处理"></a>4.5 异常与超时处理</h2><p>在分布式系统中，网络的不稳定性和服务端的负载波动可能导致 RPC 请求失败。因此，RPC 框架需要提供强大的异常处理和超时控制机制，确保即使在不稳定的网络环境下，系统也能保持较高的可靠性。</p>
+<h3 id="4-5-1-异常处理"><a href="#4-5-1-异常处理" class="headerlink" title="4.5.1 异常处理"></a>4.5.1 异常处理</h3><p>异常处理是 RPC 系统的关键组成部分，它能够确保系统在发生错误时不至于崩溃，并能够提供适当的反馈信息。RPC 框架在发生错误时，通常会通过以下几种方式进行处理：</p>
+<h4 id="1-服务端异常处理"><a href="#1-服务端异常处理" class="headerlink" title="1. 服务端异常处理"></a>1. <strong>服务端异常处理</strong></h4><p>服务端在执行方法时，如果发生了异常（如业务逻辑错误、数据库连接失败等），RPC 框架会捕获该异常并将其序列化成一个标准格式的错误信息，返回给客户端。这种异常信息通常包含错误码、错误描述和可能的错误细节，帮助客户端理解发生了什么错误。</p>
+<h4 id="2-客户端异常处理"><a href="#2-客户端异常处理" class="headerlink" title="2. 客户端异常处理"></a>2. <strong>客户端异常处理</strong></h4><p>客户端在发起 RPC 请求时，也可能会遇到网络错误、超时等异常情况。RPC 框架通常会为客户端提供丰富的异常类型，开发者可以根据异常类型做出相应的处理（例如重试、记录日志或返回默认值等）。</p>
+<h4 id="3-透明化异常处理"><a href="#3-透明化异常处理" class="headerlink" title="3. 透明化异常处理"></a>3. <strong>透明化异常处理</strong></h4><p>一些 RPC 框架（如 gRPC）提供了透明化异常处理的功能，使得异常能够被自动捕获并转换为可识别的状态码。例如，gRPC 会将 HTTP 状态码和异常类型映射到自定义的错误码上，客户端可以根据这些错误码做出相应的处理。</p>
+<h3 id="4-5-2-超时控制"><a href="#4-5-2-超时控制" class="headerlink" title="4.5.2 超时控制"></a>4.5.2 超时控制</h3><p>超时控制在 RPC 中扮演着重要角色，特别是在高并发、网络质量差的场景下。合理的超时策略可以防止请求长时间挂起，避免对服务端或客户端的资源造成不必要的浪费。</p>
+<h4 id="1-请求超时"><a href="#1-请求超时" class="headerlink" title="1. 请求超时"></a>1. <strong>请求超时</strong></h4><p>RPC 框架通常会为每个请求设置一个超时时间。如果在规定的时间内没有收到响应，框架会自动终止请求并抛出超时异常。客户端可以根据不同的业务场景决定是否需要重试请求，或者直接返回错误信息给用户。</p>
+<h4 id="2-连接超时"><a href="#2-连接超时" class="headerlink" title="2. 连接超时"></a>2. <strong>连接超时</strong></h4><p>除了请求超时外，连接超时也是 RPC 中常见的一种情况。它指的是客户端在尝试连接服务端时，未能在规定的时间内建立连接。连接超时通常发生在网络不稳定或者服务端负载过高时。</p>
+<h4 id="3-超时策略"><a href="#3-超时策略" class="headerlink" title="3. 超时策略"></a>3. <strong>超时策略</strong></h4><p>为了确保系统的稳定性和高可用性，RPC 框架通常会提供灵活的超时控制策略，以应对各种异常场景。常见的超时策略包括：</p>
+<ul>
+<li><strong>短期重试机制</strong><br> 在请求超时的情况下，客户端可以通过重试机制尝试重新发送请求，尤其是在遇到网络波动或暂时性故障时。短期重试通常会设置重试次数和重试间隔，避免过度的重试给系统带来压力。</li>
+<li><strong>指数退避</strong><br> 一种常见的重试策略是指数退避（Exponential Backoff）。在每次重试失败后，客户端等待的时间会按指数增长。这可以有效地减少系统的负担，并避免短时间内过多的请求冲击服务端。</li>
+<li><strong>故障转移</strong><br> 如果某个服务实例不可用，RPC 框架可以配置故障转移机制，自动切换到其他健康的服务实例。这样，客户端就不需要等待不可用的服务响应，从而提高系统的可用性。</li>
+<li><strong>请求超时与服务超时分离</strong><br> 一些 RPC 框架支持请求超时与服务超时的分离管理。请求超时通常是客户端发起请求时设定的超时，而服务超时则是在服务端处理请求时设定的超时。通过这种方式，可以更精细地控制请求的超时行为。</li>
+</ul>
+<h3 id="4-6-重试机制与容错"><a href="#4-6-重试机制与容错" class="headerlink" title="4.6 重试机制与容错"></a>4.6 重试机制与容错</h3><p>在分布式系统中，由于网络不稳定、服务宕机等因素，RPC 调用可能会失败。因此，重试机制是保证系统鲁棒性的一个重要手段。通常，重试机制与超时控制密切配合，旨在减少因临时故障导致的影响。</p>
+<h4 id="1-简单重试"><a href="#1-简单重试" class="headerlink" title="1. 简单重试"></a>1. <strong>简单重试</strong></h4><p>最简单的重试机制是基于固定间隔进行重试。比如，客户端在第一次请求失败后，会立刻重试该请求，直到最大重试次数用尽。这种方式适合于处理一些偶发的临时问题，如短暂的网络延迟或服务端压力过大。</p>
+<h4 id="2-指数退避重试"><a href="#2-指数退避重试" class="headerlink" title="2. 指数退避重试"></a>2. <strong>指数退避重试</strong></h4><p>指数退避是一种常用的重试策略，它能有效地减少高负载情况下的请求重试频率。具体做法是，在每次重试失败后，客户端会等待一个逐渐增加的时间间隔再进行下一次尝试。典型的间隔时间是指数增长，比如初始等待时间为 1 秒，第一次重试等待 2 秒，第二次重试等待 4 秒，依此类推。</p>
+<p>这种策略有助于避免系统过载，并能更高效地恢复服务。</p>
+<h4 id="3-重试与错误分类"><a href="#3-重试与错误分类" class="headerlink" title="3. 重试与错误分类"></a>3. <strong>重试与错误分类</strong></h4><p>一些高级 RPC 框架会根据不同类型的错误进行分类，并根据错误类型来决定是否进行重试。例如，网络错误（如连接超时）通常可以进行重试，而逻辑错误（如服务端无法处理某种请求）则不适合重试。通过这种方式，RPC 系统能够智能地控制重试的范围和频率，减少不必要的资源消耗。</p>
+<h4 id="4-断路器（Circuit-Breaker）"><a href="#4-断路器（Circuit-Breaker）" class="headerlink" title="4. 断路器（Circuit Breaker）"></a>4. <strong>断路器（Circuit Breaker）</strong></h4><p>断路器模式是分布式系统中常见的一种容错设计，它帮助系统在遇到一段时间内的失败时，不再继续尝试请求，从而避免过度的负载和响应延迟。断路器通常会根据失败的请求数和时间，动态调整请求的行为。当请求失败达到一定阈值时，断路器会“打开”，所有进一步的请求会被拒绝，直到服务恢复正常。</p>
+<p>断路器机制通常与重试和超时控制相结合，进一步增强了系统的容错性。</p>
+<h2 id="4-7-负载均衡与服务发现"><a href="#4-7-负载均衡与服务发现" class="headerlink" title="4.7 负载均衡与服务发现"></a>4.7 负载均衡与服务发现</h2><p>在分布式系统中，服务可能会在多个节点上部署以提高可用性和扩展性。负载均衡和服务发现是确保请求能够被正确路由到健康服务实例的关键技术。</p>
+<h3 id="4-7-1-负载均衡"><a href="#4-7-1-负载均衡" class="headerlink" title="4.7.1 负载均衡"></a>4.7.1 负载均衡</h3><p>负载均衡（Load Balancing）是一种分配请求的技术，旨在根据不同的策略将客户端的请求均匀地分配到多个服务端实例上。这样可以提高系统的可用性和性能，并避免某一单点故障。</p>
+<p>负载均衡的策略有多种，常见的包括：</p>
+<ul>
+<li><strong>轮询（Round Robin）</strong><br> 轮询是最简单的负载均衡策略，它将请求依次分发到各个服务实例上。尽管轮询算法简单易懂，但它并不能考虑每个服务实例的负载情况，因此在某些情况下可能导致某些实例过载。</li>
+<li><strong>加权轮询</strong><br> 为了优化负载均衡，可以给每个服务实例分配一个权重值，权重高的实例会被分配到更多的请求。这种方法适合于服务实例硬件性能差异较大的场景。</li>
+<li><strong>最少连接数</strong><br> 该策略将请求分配给当前连接数最少的服务实例。它的目的是避免过载，同时尽量保证每个实例的负载相对均衡。</li>
+<li><strong>随机负载均衡</strong><br> 随机负载均衡则是通过随机选择一个服务实例来处理请求，虽然这种方法不保证完全均衡，但在某些场景下可以提供较好的鲁棒性。</li>
+<li><strong>基于内容的负载均衡</strong><br> 在一些复杂的场景中，负载均衡可能会根据请求的内容来决定请求的路由。例如，可以根据请求的 IP 地址、请求路径或者请求的类型等因素来决定将请求路由到哪一个服务实例。</li>
+</ul>
+<h3 id="4-7-2-服务发现"><a href="#4-7-2-服务发现" class="headerlink" title="4.7.2 服务发现"></a>4.7.2 服务发现</h3><p>服务发现是指系统能够自动识别并路由到可用的服务实例。由于服务实例的动态变化（如扩展、故障恢复等），静态配置的负载均衡策略很难适应分布式环境的变化。因此，服务发现机制成为分布式 RPC 系统中不可或缺的一部分。</p>
+<p>常见的服务发现方案有：</p>
+<ul>
+<li><strong>DNS 解析</strong><br> 使用 DNS 来进行服务发现，客户端通过查询 DNS 服务器获取服务实例的 IP 地址。虽然这种方式简单易用，但它无法实时反映服务的健康状态，因此适用于服务变化较少的场景。</li>
+<li><strong>基于 Zookeeper 的服务发现</strong><br> Zookeeper 是一个分布式协调服务，能够提供高效的服务注册与发现功能。在这种模式下，服务实例会在 Zookeeper 中注册自己的信息，客户端通过 Zookeeper 获取服务实例的最新地址。Zookeeper 还提供了节点监听机制，当服务实例上线或下线时，客户端能够及时感知到变化。</li>
+<li><strong>Consul</strong><br> Consul 是 HashiCorp 提供的一款服务发现工具，它通过 HTTP API 提供服务注册与发现的功能。Consul 支持健康检查，能够在服务不可用时自动将其剔除出负载均衡池，从而提高系统的可靠性。</li>
+<li><strong>Eureka</strong><br> Eureka 是 Netflix 提供的服务发现框架，主要用于微服务架构中的服务发现和负载均衡。Eureka 支持服务实例的动态注册与注销，且具有高可用性，常与 Spring Cloud 等框架结合使用。</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/01/02/rpc-2/" rel="prev" title="什么是 RPC">
+      <i class="fa fa-chevron-left"></i> 什么是 RPC
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/01/03/rpc-3/" rel="next" title="RPC 的起源与发展背景">
+      RPC 的起源与发展背景 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-RPC-%E6%95%B4%E4%BD%93%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9E%8B%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">4.1 RPC 整体通信模型概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%B8%8E%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%9A%84%E8%A7%92%E8%89%B2%E4%B8%8E%E8%81%8C%E8%B4%A3"><span class="nav-number">2.</span> <span class="nav-text">4.2 客户端与服务端的角色与职责</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-1-%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%9A%84%E8%81%8C%E8%B4%A3"><span class="nav-number">2.1.</span> <span class="nav-text">4.2.1 客户端的职责</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E8%B0%83%E7%94%A8%E4%BB%A3%E7%90%86%E5%AF%B9%E8%B1%A1%EF%BC%88Stub%EF%BC%89"><span class="nav-number">2.1.1.</span> <span class="nav-text">1. 调用代理对象（Stub）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E8%AF%B7%E6%B1%82%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">2.1.2.</span> <span class="nav-text">2. 请求序列化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E7%BD%91%E7%BB%9C%E4%BC%A0%E8%BE%93"><span class="nav-number">2.1.3.</span> <span class="nav-text">3. 网络传输</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E7%AD%89%E5%BE%85%E5%93%8D%E5%BA%94"><span class="nav-number">2.1.4.</span> <span class="nav-text">4. 等待响应</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-%E7%BB%93%E6%9E%9C%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">2.1.5.</span> <span class="nav-text">5. 结果反序列化</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-2-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%9A%84%E8%81%8C%E8%B4%A3"><span class="nav-number">2.2.</span> <span class="nav-text">4.2.2 服务端的职责</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E6%8E%A5%E6%94%B6%E8%AF%B7%E6%B1%82"><span class="nav-number">2.2.1.</span> <span class="nav-text">1. 接收请求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E8%AF%B7%E6%B1%82%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">2.2.2.</span> <span class="nav-text">2. 请求反序列化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E6%96%B9%E6%B3%95%E8%B0%83%E5%BA%A6%E4%B8%8E%E4%B8%9A%E5%8A%A1%E9%80%BB%E8%BE%91%E5%A4%84%E7%90%86"><span class="nav-number">2.2.3.</span> <span class="nav-text">3. 方法调度与业务逻辑处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E5%93%8D%E5%BA%94%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">2.2.4.</span> <span class="nav-text">4. 响应的序列化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-%E8%BF%94%E5%9B%9E%E5%93%8D%E5%BA%94"><span class="nav-number">2.2.5.</span> <span class="nav-text">5. 返回响应</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-%E8%AF%B7%E6%B1%82%E4%B8%8E%E5%93%8D%E5%BA%94%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96%E4%B8%8E%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">4.3 请求与响应的序列化与反序列化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-1-%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">3.1.</span> <span class="nav-text">4.3.1 序列化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-2-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">3.2.</span> <span class="nav-text">4.3.2 反序列化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-4-%E7%BD%91%E7%BB%9C%E4%BC%A0%E8%BE%93%EF%BC%9A%E5%BA%95%E5%B1%82%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE%E7%9A%84%E9%80%89%E6%8B%A9"><span class="nav-number">4.</span> <span class="nav-text">4.4 网络传输：底层通信协议的选择</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4-1-TCP-%E5%8D%8F%E8%AE%AE"><span class="nav-number">4.1.</span> <span class="nav-text">4.4.1 TCP 协议</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%8F%AF%E9%9D%A0%E6%80%A7"><span class="nav-number">4.1.1.</span> <span class="nav-text">1. 可靠性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6%E4%B8%8E%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6"><span class="nav-number">4.1.2.</span> <span class="nav-text">2. 流量控制与拥塞控制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E9%AB%98%E6%95%88%E6%80%A7"><span class="nav-number">4.1.3.</span> <span class="nav-text">3. 高效性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4-2-HTTP-%E5%8D%8F%E8%AE%AE"><span class="nav-number">4.2.</span> <span class="nav-text">4.4.2 HTTP 协议</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E8%B7%A8%E5%B9%B3%E5%8F%B0%E4%B8%8E%E8%B7%A8%E8%AF%AD%E8%A8%80%E6%94%AF%E6%8C%81"><span class="nav-number">4.2.1.</span> <span class="nav-text">1. 跨平台与跨语言支持</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E9%80%82%E5%BA%94-RESTful-API"><span class="nav-number">4.2.2.</span> <span class="nav-text">2. 适应 RESTful API</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-WebSocket-%E4%B8%8E%E6%8C%81%E4%B9%85%E8%BF%9E%E6%8E%A5"><span class="nav-number">4.2.3.</span> <span class="nav-text">3. WebSocket 与持久连接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98"><span class="nav-number">4.2.4.</span> <span class="nav-text">4. 性能问题</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-5-%E5%BC%82%E5%B8%B8%E4%B8%8E%E8%B6%85%E6%97%B6%E5%A4%84%E7%90%86"><span class="nav-number">5.</span> <span class="nav-text">4.5 异常与超时处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-5-1-%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="nav-number">5.1.</span> <span class="nav-text">4.5.1 异常处理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="nav-number">5.1.1.</span> <span class="nav-text">1. 服务端异常处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="nav-number">5.1.2.</span> <span class="nav-text">2. 客户端异常处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E9%80%8F%E6%98%8E%E5%8C%96%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="nav-number">5.1.3.</span> <span class="nav-text">3. 透明化异常处理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-5-2-%E8%B6%85%E6%97%B6%E6%8E%A7%E5%88%B6"><span class="nav-number">5.2.</span> <span class="nav-text">4.5.2 超时控制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E8%AF%B7%E6%B1%82%E8%B6%85%E6%97%B6"><span class="nav-number">5.2.1.</span> <span class="nav-text">1. 请求超时</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E8%BF%9E%E6%8E%A5%E8%B6%85%E6%97%B6"><span class="nav-number">5.2.2.</span> <span class="nav-text">2. 连接超时</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E8%B6%85%E6%97%B6%E7%AD%96%E7%95%A5"><span class="nav-number">5.2.3.</span> <span class="nav-text">3. 超时策略</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-6-%E9%87%8D%E8%AF%95%E6%9C%BA%E5%88%B6%E4%B8%8E%E5%AE%B9%E9%94%99"><span class="nav-number">5.3.</span> <span class="nav-text">4.6 重试机制与容错</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E7%AE%80%E5%8D%95%E9%87%8D%E8%AF%95"><span class="nav-number">5.3.1.</span> <span class="nav-text">1. 简单重试</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E6%8C%87%E6%95%B0%E9%80%80%E9%81%BF%E9%87%8D%E8%AF%95"><span class="nav-number">5.3.2.</span> <span class="nav-text">2. 指数退避重试</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E9%87%8D%E8%AF%95%E4%B8%8E%E9%94%99%E8%AF%AF%E5%88%86%E7%B1%BB"><span class="nav-number">5.3.3.</span> <span class="nav-text">3. 重试与错误分类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E6%96%AD%E8%B7%AF%E5%99%A8%EF%BC%88Circuit-Breaker%EF%BC%89"><span class="nav-number">5.3.4.</span> <span class="nav-text">4. 断路器（Circuit Breaker）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-7-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E4%B8%8E%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0"><span class="nav-number">6.</span> <span class="nav-text">4.7 负载均衡与服务发现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-7-1-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1"><span class="nav-number">6.1.</span> <span class="nav-text">4.7.1 负载均衡</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-7-2-%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0"><span class="nav-number">6.2.</span> <span class="nav-text">4.7.2 服务发现</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

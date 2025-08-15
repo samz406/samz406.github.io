@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="复制算法管理年轻代的短生命周期对象，Mark-Sweep算法管理老年代长生命周期对象">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mark-Sweep GC 算法">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/02/27/mark-sweep-gc/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="复制算法管理年轻代的短生命周期对象，Mark-Sweep算法管理老年代长生命周期对象">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-02-27T13:56:47.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.363Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/02/27/mark-sweep-gc/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Mark-Sweep GC 算法 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/02/27/mark-sweep-gc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Mark-Sweep GC 算法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-02-27 21:56:47" itemprop="dateCreated datePublished" datetime="2025-02-27T21:56:47+08:00">2025-02-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>复制算法管理年轻代的短生命周期对象，Mark-Sweep算法管理老年代长生命周期对象</p>
+<span id="more"></span>
+
+<h2 id="分代垃圾回收的工作机制"><a href="#分代垃圾回收的工作机制" class="headerlink" title="分代垃圾回收的工作机制"></a>分代垃圾回收的工作机制</h2><h3 id="年轻代的内部结构"><a href="#年轻代的内部结构" class="headerlink" title="年轻代的内部结构"></a>年轻代的内部结构</h3><p>年轻代通常进一步细分为三个区域：</p>
+<ul>
+<li><strong>Eden区</strong>：绝大多数新对象初始都分配在这里</li>
+<li><strong>两个Survivor区</strong>(通常称为S0和S1或From和To)：存放经过垃圾回收后依然存活的年轻对象</li>
+</ul>
+<h3 id="对象生命周期的转移过程"><a href="#对象生命周期的转移过程" class="headerlink" title="对象生命周期的转移过程"></a>对象生命周期的转移过程</h3><ol>
+<li>新对象首先在Eden区分配</li>
+<li>当Eden区满时，触发Minor GC(年轻代垃圾回收)</li>
+<li>Minor GC后，Eden区中存活的对象被移动到一个空的Survivor区</li>
+<li>下一次Minor GC时，Eden区和当前使用的Survivor区中存活的对象会被移动到另一个Survivor区</li>
+<li>对象在Survivor区之间经历多次GC后，如果仍然存活(达到一定年龄)，会被晋升到老年代</li>
+<li>当老年代空间不足时，会触发Major GC或Full GC</li>
+</ol>
+<h3 id="跨代引用的处理"><a href="#跨代引用的处理" class="headerlink" title="跨代引用的处理"></a>跨代引用的处理</h3><p>分代垃圾回收面临一个重要挑战：老年代对象可能引用年轻代对象。如果每次Minor GC都扫描整个老年代，会显著降低效率。为解决这个问题，常见实现采用以下技术：</p>
+<ul>
+<li><p><strong>记忆集</strong>(Remembered Set)：</p>
+<p>记忆集（Remembered Set）是一个数据结构，用于记录<strong>老年代</strong>中哪些对象引用了<strong>年轻代</strong>中的对象。由于老年代和年轻代是分开回收的，垃圾回收器需要知道哪些老年代对象引用了年轻代的对象，以防止它们在垃圾回收时被错误地清除或移动。</p>
+<p>在每次进行年轻代垃圾回收时，垃圾回收器需要遍历记忆集，确保引用了年轻代对象的老年代对象得以保留。同时，回收器还会更新记忆集，确保它始终反映正确的引用关系。每次老年代中的对象引用了年轻代对象时，都会将这个引用记录到记忆集中。这样，记忆集就充当了一个索引，帮助垃圾回收器找到老年代中与年轻代有引用关系的对象。在进行年轻代垃圾回收时，垃圾回收器会检查记忆集中记录的引用。如果发现某些老年代对象仍然引用年轻代对象，它们将继续存活，垃圾回收器不会回收这些老年代对象。记忆集的维护通常是局部的，针对每个老年代区域（或者按对象类别）。这种局部维护可以减少全堆扫描的开销，确保垃圾回收更为高效。</p>
+</li>
+<li><p><strong>卡表</strong>(Card Table)：</p>
+<p>卡表（Card Table）是一种内存优化技术，用于高效追踪老年代与年轻代之间的跨代引用。它将老年代内存划分为小的内存块（通常为 512 字节或 1KB），每个小块称为“卡”（Card）。卡表维护了一个“标志位”，指示某个卡块是否包含对年轻代对象的引用。卡表将老年代内存划分为若干小块，每个小块都对应一个卡表的项。如果某个老年代的对象引用了年轻代的对象，垃圾回收器会在对应的卡表项中设置标记。当老年代对象引用年轻代对象时，垃圾回收器会更新卡表中的相关项。如果老年代中的对象移动了，或者该对象不再引用年轻代对象，垃圾回收器会相应地更新卡表。卡表通过标记哪些卡块包含跨代引用，避免了每次垃圾回收时扫描整个老年代内存。这样，垃圾回收器只需要关注那些有引用的卡块，从而大大减少了需要检查的内存区域，提高了回收效率。</p>
+<h4 id><a href="#" class="headerlink" title></a></h4></li>
+<li><p><strong>写屏障</strong>(Write Barrier)：</p>
+<p>写屏障是指在内存写入时，自动插入的一段额外代码，用于处理内存中对象引用的更新。它的主要作用是在程序执行过程中跟踪引用的变化，并在需要时及时更新卡表或记忆集，从而确保跨代引用始终处于一致的状态。每当应用程序写入一个对象引用（即修改一个变量的值，使其指向另一个对象），写屏障会触发。写屏障会检查该引用是否为跨代引用，即该引用是否涉及老年代与年轻代之间的对象。如果是，写屏障会更新记忆集或卡表，确保垃圾回收器能够在后续的回收中正确处理跨代引用。通过写屏障，垃圾回收器可以在程序执行的过程中不断维护跨代引用的正确性，无需在每次垃圾回收时扫描整个堆。这大大提高了垃圾回收的效率。</p>
+</li>
+</ul>
+<h2 id="Mark-Sweep-标记-清除-算法详解"><a href="#Mark-Sweep-标记-清除-算法详解" class="headerlink" title="Mark-Sweep(标记-清除)算法详解"></a>Mark-Sweep(标记-清除)算法详解</h2><p>复制回收算法比较适合管理短生命周期对象。Mark-Sweep 算法适合管理长生命周期对。Mark-Sweep算法由 Mark 和 Sweep 两个阶段组成。在 Mark 阶段，垃圾回收器遍历活跃对象，将它们标记为存活。在 Sweep 阶段，回收器遍历整个堆，再对未被标记区域进行回收。Mark-Sweep 用一个链表将所有的空闲空间维护起来。当内存管理器需要申请内存空间时，便向这个链表查询，如果找到了合适大小的空闲块，就把空闲块分配出去，同时将它从空闲链表中移除。当一个空闲块分配给一个新对象后，如果剩余空间大于 24 字节，便将剩余的空间加入到空闲链表，当剩余空间不足 24 字节，就做为碎片空间填充一些无效值。</p>
+<p>它包含两个主要阶段：</p>
+<h3 id="1-标记阶段-Mark"><a href="#1-标记阶段-Mark" class="headerlink" title="1. 标记阶段(Mark)"></a>1. 标记阶段(Mark)</h3><p>标记阶段的目标是识别所有”活跃”(仍在使用)的对象。具体步骤如下：</p>
+<ol>
+<li><p><strong>根集合识别</strong>：首先识别所有的GC Roots，包括：</p>
+<ul>
+<li>方法栈中的局部变量</li>
+<li>静态变量</li>
+<li>JNI引用</li>
+<li>寄存器中的引用</li>
+</ul>
+</li>
+<li><p><strong>可达性分析</strong>：从GC Roots开始，通过引用关系递归遍历整个对象图</p>
+</li>
+<li><p><strong>标记位设置</strong>：为每个可达对象设置标记位(通常在对象头中)</p>
+</li>
+</ol>
+<h3 id="2-清除阶段-Sweep"><a href="#2-清除阶段-Sweep" class="headerlink" title="2. 清除阶段(Sweep)"></a>2. 清除阶段(Sweep)</h3><p>清除阶段要做的事情就是把非活跃（垃圾）对象的空间回收起来，重新将它们放回空闲链表中。按照空间顺序，从头至尾扫描整个空间里的所有对象，如果一个对象没有被标记，这个对象所占用内存就会被添加回空闲链表。这个阶段的操作是比较简单的，只涉及了链表的添加操作。</p>
+<h3 id="Mark-Sweep算法的优缺点"><a href="#Mark-Sweep算法的优缺点" class="headerlink" title="Mark-Sweep算法的优缺点"></a>Mark-Sweep算法的优缺点</h3><p><strong>优点</strong>：</p>
+<ul>
+<li>实现相对简单直观</li>
+<li>不移动对象，对某些特定场景友好(如C++中的对象指针)</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>会产生内存碎片，可能导致内存利用率下降</li>
+<li>清除阶段的效率与堆大小成正比，而非与垃圾数量成正比</li>
+<li>标记和清除两个阶段都需要遍历整个堆</li>
+</ul>
+<h2 id="CMS（Concurrent-Mark-Sweep）"><a href="#CMS（Concurrent-Mark-Sweep）" class="headerlink" title="CMS（Concurrent Mark-Sweep）"></a>CMS（Concurrent Mark-Sweep）</h2><p>CMS（Concurrent Mark-Sweep）垃圾回收器是一种基于标记-清除（Mark-Sweep）算法的改进型垃圾回收器。它的目标是减少垃圾回收过程中应用程序的停顿时间，尤其是在大规模应用中，垃圾回收的停顿时间往往对用户体验造成较大影响。CMS 的核心思路是将垃圾回收的标记和清除过程与应用程序线程并发执行，最大化减少回收过程中的停顿。在 CMS 的设计中，垃圾回收的工作被拆分为多个阶段，其中一些阶段会与应用程序线程并行执行，从而减少了垃圾回收带来的停顿时间。</p>
+<p>CMS 的工作流程主要包括以下几个阶段：</p>
+<h4 id="CMS-垃圾回收的工作流程"><a href="#CMS-垃圾回收的工作流程" class="headerlink" title="CMS 垃圾回收的工作流程"></a>CMS 垃圾回收的工作流程</h4><h5 id="1-初始标记阶段"><a href="#1-初始标记阶段" class="headerlink" title="1. 初始标记阶段"></a>1. 初始标记阶段</h5><p>在初始标记阶段，CMS 垃圾回收器会首先标记所有直接可达的对象（即从根对象开始遍历）。这个阶段会停顿应用程序线程，但停顿时间相对较短。因为在这一步，只有根对象（如栈上的局部变量、静态对象等）会被扫描，工作量比较小。</p>
+<h5 id="2-并发标记阶段"><a href="#2-并发标记阶段" class="headerlink" title="2. 并发标记阶段"></a>2. 并发标记阶段</h5><p>在并发标记阶段，垃圾回收器开始并发地扫描整个堆内存，标记所有从根对象可达的对象。与初始标记阶段不同，这一阶段是与应用程序线程并行执行的。也就是说，在这个阶段，应用程序线程仍然可以继续执行，而垃圾回收器则在后台扫描对象并标记它们为存活对象。</p>
+<h5 id="3-重新标记阶段"><a href="#3-重新标记阶段" class="headerlink" title="3. 重新标记阶段"></a>3. 重新标记阶段</h5><p>在并发标记过程中，由于应用程序线程可能会修改对象的引用，因此有一些对象的状态可能会发生变化。重新标记阶段的作用就是为了确保所有存活对象都被正确地标记。这个阶段需要暂停应用程序线程，但由于只有部分对象的状态会发生变化，因此停顿时间相对较短。</p>
+<h5 id="4-并发清除阶段"><a href="#4-并发清除阶段" class="headerlink" title="4. 并发清除阶段"></a>4. 并发清除阶段</h5><p>在并发清除阶段，垃圾回收器开始清除所有未标记的对象（即不再使用的对象）。这个阶段是与应用程序线程并行进行的，因此应用程序可以继续执行，而垃圾回收器则在后台释放那些不再使用的内存空间。</p>
+<h5 id="5-最终清理阶段"><a href="#5-最终清理阶段" class="headerlink" title="5. 最终清理阶段"></a>5. 最终清理阶段</h5><p>在这个阶段，垃圾回收器会进行一些内部的重置操作，为下一次垃圾回收做好准备。这个阶段的工作量相对较小，也可以与应用程序线程并行执行。</p>
+<p>在CMS垃圾回收器的工作流程中，初始标记和 重新标记阶段需要STW（Stop-The-World）。初始标记阶段标记GC Roots直接可达的对象，而重新标记阶段则处理并发标记期间对象引用关系的变化，确保标记的准确性。这两个阶段暂停所有应用线程以保证一致性。</p>
+<h4 id="CMS-垃圾回收的优缺点"><a href="#CMS-垃圾回收的优缺点" class="headerlink" title="CMS 垃圾回收的优缺点"></a>CMS 垃圾回收的优缺点</h4><h4 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h4><ol>
+<li>低停顿时间：CMS 的最大优势就是能够显著减少应用程序的停顿时间。通过并发执行标记和清除阶段，CMS 可以避免长时间的停顿，特别适合对响应时间要求较高的应用程序。</li>
+<li>适用于大规模应用：对于内存较大的应用，CMS 可以有效减少垃圾回收的停顿时间，提高系统的响应性，避免因频繁 GC 导致系统卡顿。</li>
+<li>并发执行：通过并发标记和清除阶段，CMS 可以在垃圾回收的过程中不中断应用程序的执行，从而提升了系统的整体性能。</li>
+</ol>
+<h4 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h4><ol>
+<li>CPU 消耗较大：虽然 CMS 可以减少停顿时间，但它需要在后台与应用程序线程并行执行，这会导致更多的 CPU 资源被占用。对于 CPU 资源有限的系统，可能会导致性能下降。</li>
+<li>内存碎片问题：与传统的标记-清除算法类似，CMS 也存在内存碎片的问题。在长时间的运行过程中，由于清除阶段不进行整理，堆内存可能会变得碎片化，从而影响内存的利用效率。</li>
+<li>CMS 的停止时间不可预测：虽然 CMS 可以减少大部分停顿时间，但仍然会在某些阶段（如初始标记和重新标记阶段）发生停顿。这些停顿的时长是不可预测的，可能会影响到某些实时性要求极高的应用。</li>
+<li>容易发生 Full GC：在 CMS 的并发清除过程中，如果老年代内存使用过多，或者内存碎片过于严重，CMS 会触发 Full GC），这时会停止应用程序的执行，并进行完整的垃圾回收。Full GC 的停顿时间通常较长，因此应尽量避免触发。</li>
+</ol>
+<p>在较新的 JDK 版本中，CMS垃圾回收器已经被标记为<strong>废弃（Deprecated）</strong> ，并且从 <strong>JDK 14 开始被移除</strong> 。</p>
+<ul>
+<li><strong>JDK 9</strong> 中，CMS 被标记为废弃，官方建议用户迁移到更现代的垃圾回收器，例如 G1 GC。</li>
+<li><strong>JDK 14</strong> 中，CMS 垃圾回收器被完全移除（<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/363">JEP 363 </a>）。</li>
+</ul>
+<p>如果需要使用 CMS，只能停留在 JDK 14 之前的版本。对于新项目或升级现有项目，建议考虑使用 G1 GC、ZGC 或 Shenandoah 等更高效的垃圾回收器，它们提供了更好的性能和更低的停顿时间。</p>
+<p>如果你确实需要在旧版本 JDK 中启用 CMS，可以通过以下 JVM 参数显式指定：</p>
+<p>-XX:+UseConcMarkSweepGC</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/02/25/scavenge-gc/" rel="prev" title="解析 Scavenge GC 算法">
+      <i class="fa fa-chevron-left"></i> 解析 Scavenge GC 算法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/03/01/pressure-book/" rel="next" title="最强身心：调控多巴胺与血清素笔记">
+      最强身心：调控多巴胺与血清素笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E4%BB%A3%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6"><span class="nav-number">1.</span> <span class="nav-text">分代垃圾回收的工作机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B4%E8%BD%BB%E4%BB%A3%E7%9A%84%E5%86%85%E9%83%A8%E7%BB%93%E6%9E%84"><span class="nav-number">1.1.</span> <span class="nav-text">年轻代的内部结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E7%9A%84%E8%BD%AC%E7%A7%BB%E8%BF%87%E7%A8%8B"><span class="nav-number">1.2.</span> <span class="nav-text">对象生命周期的转移过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%A8%E4%BB%A3%E5%BC%95%E7%94%A8%E7%9A%84%E5%A4%84%E7%90%86"><span class="nav-number">1.3.</span> <span class="nav-text">跨代引用的处理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">1.3.1.</span> <span class="nav-text"></span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mark-Sweep-%E6%A0%87%E8%AE%B0-%E6%B8%85%E9%99%A4-%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3"><span class="nav-number">2.</span> <span class="nav-text">Mark-Sweep(标记-清除)算法详解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%A0%87%E8%AE%B0%E9%98%B6%E6%AE%B5-Mark"><span class="nav-number">2.1.</span> <span class="nav-text">1. 标记阶段(Mark)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%B8%85%E9%99%A4%E9%98%B6%E6%AE%B5-Sweep"><span class="nav-number">2.2.</span> <span class="nav-text">2. 清除阶段(Sweep)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mark-Sweep%E7%AE%97%E6%B3%95%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">2.3.</span> <span class="nav-text">Mark-Sweep算法的优缺点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CMS%EF%BC%88Concurrent-Mark-Sweep%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">CMS（Concurrent Mark-Sweep）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CMS-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">3.0.1.</span> <span class="nav-text">CMS 垃圾回收的工作流程</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-%E5%88%9D%E5%A7%8B%E6%A0%87%E8%AE%B0%E9%98%B6%E6%AE%B5"><span class="nav-number">3.0.1.1.</span> <span class="nav-text">1. 初始标记阶段</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-%E5%B9%B6%E5%8F%91%E6%A0%87%E8%AE%B0%E9%98%B6%E6%AE%B5"><span class="nav-number">3.0.1.2.</span> <span class="nav-text">2. 并发标记阶段</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-%E9%87%8D%E6%96%B0%E6%A0%87%E8%AE%B0%E9%98%B6%E6%AE%B5"><span class="nav-number">3.0.1.3.</span> <span class="nav-text">3. 重新标记阶段</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-%E5%B9%B6%E5%8F%91%E6%B8%85%E9%99%A4%E9%98%B6%E6%AE%B5"><span class="nav-number">3.0.1.4.</span> <span class="nav-text">4. 并发清除阶段</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-%E6%9C%80%E7%BB%88%E6%B8%85%E7%90%86%E9%98%B6%E6%AE%B5"><span class="nav-number">3.0.1.5.</span> <span class="nav-text">5. 最终清理阶段</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CMS-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">3.0.2.</span> <span class="nav-text">CMS 垃圾回收的优缺点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E7%82%B9%EF%BC%9A"><span class="nav-number">3.0.3.</span> <span class="nav-text">优点：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9%EF%BC%9A"><span class="nav-number">3.0.4.</span> <span class="nav-text">缺点：</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

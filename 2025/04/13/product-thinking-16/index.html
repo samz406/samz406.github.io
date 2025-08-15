@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="有一天，你惊讶地发现： 明明是你先做的工具，功能也不差，体验还更极致，用户却越来越倾向于用另一个“看起来更复杂”的平台。 甚至有些用户反馈说：“虽然你的产品更轻巧，但那边连同事都在用，一起用方便。”你开始意识到：技术上的“优秀”，并不等于产品上的“不可替代”。这是技术产品最容易忽略但最残酷的一个现实： 产品早期靠的是效率，中后期比的是生态。****一个伟大的技术产品，早晚要完成一次演化：从工具，变">
+<meta property="og:type" content="article">
+<meta property="og:title" content="技术产品的演化曲线：从工具到生态">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/04/13/product-thinking-16/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="有一天，你惊讶地发现： 明明是你先做的工具，功能也不差，体验还更极致，用户却越来越倾向于用另一个“看起来更复杂”的平台。 甚至有些用户反馈说：“虽然你的产品更轻巧，但那边连同事都在用，一起用方便。”你开始意识到：技术上的“优秀”，并不等于产品上的“不可替代”。这是技术产品最容易忽略但最残酷的一个现实： 产品早期靠的是效率，中后期比的是生态。****一个伟大的技术产品，早晚要完成一次演化：从工具，变">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-04-13T06:38:47.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.372Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/04/13/product-thinking-16/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>技术产品的演化曲线：从工具到生态 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/04/13/product-thinking-16/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          技术产品的演化曲线：从工具到生态
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-04-13 14:38:47" itemprop="dateCreated datePublished" datetime="2025-04-13T14:38:47+08:00">2025-04-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%BA%A7%E5%93%81/" itemprop="url" rel="index"><span itemprop="name">产品</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>有一天，你惊讶地发现： 明明是你先做的工具，功能也不差，体验还更极致，用户却越来越倾向于用另一个“看起来更复杂”的平台。<br> 甚至有些用户反馈说：“虽然你的产品更轻巧，但那边连同事都在用，一起用方便。”你开始意识到：技术上的“优秀”，并不等于产品上的“不可替代”。这是技术产品最容易忽略但最残酷的一个现实： <strong>产品早期靠的是效率，中后期比的是生态。****一个伟大的技术产品，早晚要完成一次演化：从工具，变成生态。</strong></p>
+<span id="more"></span>
+
+<h2 id="🌀-一条典型的演化曲线"><a href="#🌀-一条典型的演化曲线" class="headerlink" title="🌀 一条典型的演化曲线"></a>🌀 一条典型的演化曲线</h2><p>技术产品的生命周期，大致可以拆成四个阶段：</p>
+<ol>
+<li><strong>工具阶段</strong>：单点价值突出，解决一个具体任务，使用门槛低，反馈快。</li>
+<li><strong>系统阶段</strong>：打通上下游流程，串联多个功能，形成“闭环体验”。</li>
+<li><strong>平台阶段</strong>：提供能力，承接更多人上来“搭建”或“集成”，形成双边网络。</li>
+<li><strong>生态阶段</strong>：围绕产品形成多角色参与、多方向流动的“生长型结构”。</li>
+</ol>
+<p>这是一条从线性增长转向指数增长的路径，<br> 也是从“我做得好”转向“别人愿意参与”甚至“愿意依赖你”的演变过程。</p>
+<hr>
+<h2 id="🔍-为什么这条曲线重要？因为「工具很难跑过时间」"><a href="#🔍-为什么这条曲线重要？因为「工具很难跑过时间」" class="headerlink" title="🔍 为什么这条曲线重要？因为「工具很难跑过时间」"></a>🔍 为什么这条曲线重要？因为「工具很难跑过时间」</h2><p>工具是一种<strong>用户和产品之间的交易关系</strong>，你提供一个能力，他用一次、用十次、付点钱、走了。</p>
+<p>生态是一种<strong>用户和用户之间的网络关系</strong>，你是连接器、平台方、价值锚点，使用行为是持续的、复合的、多向的。</p>
+<p>换句话说：</p>
+<ul>
+<li>工具靠“你给我”，生态靠“我在你这能做更多”。</li>
+<li>工具靠“解决一个问题”，生态靠“让无数人在你这里创造他们自己的价值”。</li>
+</ul>
+<p>你再牛的工具，如果不具备生态潜质，到后期都会出现边际衰减：用户流失加剧、价值天花板触顶、增长变得依赖外部渠道拉动。</p>
+<p><strong>但只要你撑住了生态这一跃，你就具备了“滚雪球”的能力。</strong></p>
+<hr>
+<h2 id="🛠️-工具做得再极致，它终究是一段“单行线”"><a href="#🛠️-工具做得再极致，它终究是一段“单行线”" class="headerlink" title="🛠️ 工具做得再极致，它终究是一段“单行线”"></a>🛠️ 工具做得再极致，它终究是一段“单行线”</h2><p>做工具其实很爽：</p>
+<ul>
+<li>只服务一个明确场景；</li>
+<li>产品逻辑清晰、开发可控；</li>
+<li>用户反馈也直接，做了就能看到效果。</li>
+</ul>
+<p>你可能会以为，“只要我做得够极致，用户就一定留下来”。<br> 但极致本身，不等于护城河。<br> 因为用户会变、场景会扩、需求会跳——工具跟不上这变化，就会被替代。</p>
+<p>更重要的是，<strong>工具是你给他东西，生态是用户在你这里自己生长东西。</strong></p>
+<hr>
+<h2 id="🌱-真正的生态，有三个特征"><a href="#🌱-真正的生态，有三个特征" class="headerlink" title="🌱 真正的生态，有三个特征"></a>🌱 真正的生态，有三个特征</h2><h3 id="1-用户不再是“终点”，而是“参与者”"><a href="#1-用户不再是“终点”，而是“参与者”" class="headerlink" title="1. 用户不再是“终点”，而是“参与者”"></a>1. <strong>用户不再是“终点”，而是“参与者”</strong></h3><p>他不只是用功能，而是在你这生产内容、贡献数据、推荐别人、创建规则。</p>
+<p>→ Notion 的模板分享、Figma 的社区文件、Github 的代码协作，都是这种参与。</p>
+<hr>
+<h3 id="2-你不再做完全部，而是提供“能力-结构”"><a href="#2-你不再做完全部，而是提供“能力-结构”" class="headerlink" title="2. 你不再做完全部，而是提供“能力 +结构”"></a>2. <strong>你不再做完全部，而是提供“能力 +结构”</strong></h3><p>你不需要什么都做了，而是让别人用你做“他们想要的东西”。</p>
+<p>→ 微信不是服务所有业务，而是让别人用它做公众号、小程序、直播电商。</p>
+<hr>
+<h3 id="3-用户来了不会走，因为“走了就断链”"><a href="#3-用户来了不会走，因为“走了就断链”" class="headerlink" title="3. 用户来了不会走，因为“走了就断链”"></a>3. <strong>用户来了不会走，因为“走了就断链”</strong></h3><p>工具是“拎包走人”，生态是“拆不走的关系”。</p>
+<p>→ 企业用了飞书，全公司工作流程、通讯录、权限、文档都绑定，不愿随便换；<br> → Github 上千颗星、上万个 fork，不可能轻易迁移。</p>
+<hr>
+<h2 id="🧭-那么，什么时候该开始思考生态？"><a href="#🧭-那么，什么时候该开始思考生态？" class="headerlink" title="🧭 那么，什么时候该开始思考生态？"></a>🧭 那么，什么时候该开始思考生态？</h2><p>并不是所有产品都一开始就能生态化，但你至少要知道：</p>
+<blockquote>
+<p><strong>什么时候你的产品增长进入了瓶颈，是因为缺“生态能力”而不是缺功能了。</strong></p>
+</blockquote>
+<p>下面是几个明显的信号：</p>
+<ol>
+<li>你发现复购率稳定，但新增用户越来越难拉；</li>
+<li>你发现用户用得很深，但推荐转化率始终不高；</li>
+<li>你发现有人开始“基于你的产品做运营/课程/培训”，但你没能力接住；</li>
+<li>你发现用户不是只用你，而是在你和其他工具之间频繁跳转。</li>
+</ol>
+<p>这些都是提醒：<strong>你的产品需要从“封闭的结构”向“开放的网络”演进了。</strong></p>
+<hr>
+<h2 id="🧠-工程师视角：从“造工具”转向“搭网络”"><a href="#🧠-工程师视角：从“造工具”转向“搭网络”" class="headerlink" title="🧠 工程师视角：从“造工具”转向“搭网络”"></a>🧠 工程师视角：从“造工具”转向“搭网络”</h2><p>你要从“做一个最优解”思维，升级为“提供多种解的共生平台”思维。</p>
+<p>要从：</p>
+<ul>
+<li>功能中心 → 用户中心 → 社群中心 → 开放协作中心；</li>
+<li>关注效率 → 关注连接 → 关注价值流动；</li>
+<li>自己写代码 → 让别人用你的代码 → 让别人写你用不到的代码但能产生价值；</li>
+</ul>
+<p>这才是<strong>产品“生态势能”建立的真正逻辑。</strong></p>
+<hr>
+<h2 id="🧰-怎么迈出第一步？从这3件事开始思考"><a href="#🧰-怎么迈出第一步？从这3件事开始思考" class="headerlink" title="🧰 怎么迈出第一步？从这3件事开始思考"></a>🧰 怎么迈出第一步？从这3件事开始思考</h2><h3 id="1-你产品里，有没有人会为别人创造价值？"><a href="#1-你产品里，有没有人会为别人创造价值？" class="headerlink" title="1. 你产品里，有没有人会为别人创造价值？"></a>1. <strong>你产品里，有没有人会为别人创造价值？</strong></h3><p>不是你自己提供所有功能，而是有人愿意做模板、做内容、做协作。</p>
+<p>→ 如果有，建立一个“可展示、可扩散、可收益”的机制让他留下。</p>
+<hr>
+<h3 id="2-你能不能把一部分能力“打包开放”出去？"><a href="#2-你能不能把一部分能力“打包开放”出去？" class="headerlink" title="2. 你能不能把一部分能力“打包开放”出去？"></a>2. <strong>你能不能把一部分能力“打包开放”出去？</strong></h3><p>例如 API、集成组件、Webhook、AI接口……让用户可以把你嵌入自己的系统。</p>
+<p>→ Zapier、Airtable、Notion，走平台之路全靠这招。</p>
+<hr>
+<h3 id="3-你有没有构建“角色系统”？"><a href="#3-你有没有构建“角色系统”？" class="headerlink" title="3. 你有没有构建“角色系统”？"></a>3. <strong>你有没有构建“角色系统”？</strong></h3><p>一个工具只有用户，生态里有：</p>
+<ul>
+<li>使用者、分享者、开发者、内容贡献者、商业变现者；</li>
+<li>有激励，有声誉，有收益结构，有协同规则。</li>
+</ul>
+<p>→ 没有“角色网络”，就不会有真正意义上的生态。</p>
+<hr>
+<h2 id="✍️-你做的是产品，还是场？"><a href="#✍️-你做的是产品，还是场？" class="headerlink" title="✍️ 你做的是产品，还是场？"></a>✍️ 你做的是产品，还是场？</h2><p>工具是“我提供价值”，生态是“我构建一个场，让价值自发生”。</p>
+<p>工具是“你来用我”，生态是“你留在这里”。</p>
+<p>这两者的底层心态差别是：</p>
+<blockquote>
+<p>工具思维是“我能提供什么”；<br> 生态思维是“我能让谁之间建立关系”；<br> 你不再是主角，而是结构设计师。</p>
+</blockquote>
+<p>你可能只想造个锤子，但时代会逼你去建个工具箱，甚至变成个工地。</p>
+<p>这不是妥协，是演化。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/04/13/product-thinking-17/" rel="prev" title="判断产品价值的四个维度：任务、频率、替代性、流动性">
+      <i class="fa fa-chevron-left"></i> 判断产品价值的四个维度：任务、频率、替代性、流动性
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/04/13/product-thinking-15/" rel="next" title="如何用用户反馈驱动产品迭代：别听用户怎么说，要看他们怎么做">
+      如何用用户反馈驱动产品迭代：别听用户怎么说，要看他们怎么做 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%8C%80-%E4%B8%80%E6%9D%A1%E5%85%B8%E5%9E%8B%E7%9A%84%E6%BC%94%E5%8C%96%E6%9B%B2%E7%BA%BF"><span class="nav-number">1.</span> <span class="nav-text">🌀 一条典型的演化曲线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%94%8D-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E6%9D%A1%E6%9B%B2%E7%BA%BF%E9%87%8D%E8%A6%81%EF%BC%9F%E5%9B%A0%E4%B8%BA%E3%80%8C%E5%B7%A5%E5%85%B7%E5%BE%88%E9%9A%BE%E8%B7%91%E8%BF%87%E6%97%B6%E9%97%B4%E3%80%8D"><span class="nav-number">2.</span> <span class="nav-text">🔍 为什么这条曲线重要？因为「工具很难跑过时间」</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%9B%A0%EF%B8%8F-%E5%B7%A5%E5%85%B7%E5%81%9A%E5%BE%97%E5%86%8D%E6%9E%81%E8%87%B4%EF%BC%8C%E5%AE%83%E7%BB%88%E7%A9%B6%E6%98%AF%E4%B8%80%E6%AE%B5%E2%80%9C%E5%8D%95%E8%A1%8C%E7%BA%BF%E2%80%9D"><span class="nav-number">3.</span> <span class="nav-text">🛠️ 工具做得再极致，它终究是一段“单行线”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%8C%B1-%E7%9C%9F%E6%AD%A3%E7%9A%84%E7%94%9F%E6%80%81%EF%BC%8C%E6%9C%89%E4%B8%89%E4%B8%AA%E7%89%B9%E5%BE%81"><span class="nav-number">4.</span> <span class="nav-text">🌱 真正的生态，有三个特征</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%94%A8%E6%88%B7%E4%B8%8D%E5%86%8D%E6%98%AF%E2%80%9C%E7%BB%88%E7%82%B9%E2%80%9D%EF%BC%8C%E8%80%8C%E6%98%AF%E2%80%9C%E5%8F%82%E4%B8%8E%E8%80%85%E2%80%9D"><span class="nav-number">4.1.</span> <span class="nav-text">1. 用户不再是“终点”，而是“参与者”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%BD%A0%E4%B8%8D%E5%86%8D%E5%81%9A%E5%AE%8C%E5%85%A8%E9%83%A8%EF%BC%8C%E8%80%8C%E6%98%AF%E6%8F%90%E4%BE%9B%E2%80%9C%E8%83%BD%E5%8A%9B-%E7%BB%93%E6%9E%84%E2%80%9D"><span class="nav-number">4.2.</span> <span class="nav-text">2. 你不再做完全部，而是提供“能力 +结构”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E7%94%A8%E6%88%B7%E6%9D%A5%E4%BA%86%E4%B8%8D%E4%BC%9A%E8%B5%B0%EF%BC%8C%E5%9B%A0%E4%B8%BA%E2%80%9C%E8%B5%B0%E4%BA%86%E5%B0%B1%E6%96%AD%E9%93%BE%E2%80%9D"><span class="nav-number">4.3.</span> <span class="nav-text">3. 用户来了不会走，因为“走了就断链”</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%A7%AD-%E9%82%A3%E4%B9%88%EF%BC%8C%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E8%AF%A5%E5%BC%80%E5%A7%8B%E6%80%9D%E8%80%83%E7%94%9F%E6%80%81%EF%BC%9F"><span class="nav-number">5.</span> <span class="nav-text">🧭 那么，什么时候该开始思考生态？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%A7%A0-%E5%B7%A5%E7%A8%8B%E5%B8%88%E8%A7%86%E8%A7%92%EF%BC%9A%E4%BB%8E%E2%80%9C%E9%80%A0%E5%B7%A5%E5%85%B7%E2%80%9D%E8%BD%AC%E5%90%91%E2%80%9C%E6%90%AD%E7%BD%91%E7%BB%9C%E2%80%9D"><span class="nav-number">6.</span> <span class="nav-text">🧠 工程师视角：从“造工具”转向“搭网络”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%A7%B0-%E6%80%8E%E4%B9%88%E8%BF%88%E5%87%BA%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9F%E4%BB%8E%E8%BF%993%E4%BB%B6%E4%BA%8B%E5%BC%80%E5%A7%8B%E6%80%9D%E8%80%83"><span class="nav-number">7.</span> <span class="nav-text">🧰 怎么迈出第一步？从这3件事开始思考</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%BD%A0%E4%BA%A7%E5%93%81%E9%87%8C%EF%BC%8C%E6%9C%89%E6%B2%A1%E6%9C%89%E4%BA%BA%E4%BC%9A%E4%B8%BA%E5%88%AB%E4%BA%BA%E5%88%9B%E9%80%A0%E4%BB%B7%E5%80%BC%EF%BC%9F"><span class="nav-number">7.1.</span> <span class="nav-text">1. 你产品里，有没有人会为别人创造价值？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%BD%A0%E8%83%BD%E4%B8%8D%E8%83%BD%E6%8A%8A%E4%B8%80%E9%83%A8%E5%88%86%E8%83%BD%E5%8A%9B%E2%80%9C%E6%89%93%E5%8C%85%E5%BC%80%E6%94%BE%E2%80%9D%E5%87%BA%E5%8E%BB%EF%BC%9F"><span class="nav-number">7.2.</span> <span class="nav-text">2. 你能不能把一部分能力“打包开放”出去？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E4%BD%A0%E6%9C%89%E6%B2%A1%E6%9C%89%E6%9E%84%E5%BB%BA%E2%80%9C%E8%A7%92%E8%89%B2%E7%B3%BB%E7%BB%9F%E2%80%9D%EF%BC%9F"><span class="nav-number">7.3.</span> <span class="nav-text">3. 你有没有构建“角色系统”？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E2%9C%8D%EF%B8%8F-%E4%BD%A0%E5%81%9A%E7%9A%84%E6%98%AF%E4%BA%A7%E5%93%81%EF%BC%8C%E8%BF%98%E6%98%AF%E5%9C%BA%EF%BC%9F"><span class="nav-number">8.</span> <span class="nav-text">✍️ 你做的是产品，还是场？</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

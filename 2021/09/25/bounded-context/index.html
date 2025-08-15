@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="限界上下文基本理论">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DDD之限界上下文">
+<meta property="og:url" content="http://www.sanmuzi.com/2021/09/25/bounded-context/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="限界上下文基本理论">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-09-25T14:55:01.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.349Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2021/09/25/bounded-context/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>DDD之限界上下文 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2021/09/25/bounded-context/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          DDD之限界上下文
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-09-25 22:55:01" itemprop="dateCreated datePublished" datetime="2021-09-25T22:55:01+08:00">2021-09-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/DDD/" itemprop="url" rel="index"><span itemprop="name">DDD</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>限界上下文基本理论</p>
+<span id="more"></span>
+
+<h4 id="限界上下文定义"><a href="#限界上下文定义" class="headerlink" title="限界上下文定义"></a>限界上下文定义</h4><p>  上下文表现了业务流程的场景片段，整个业务流程由诸多具有时序的活动组成，随着流程的进行，不同的活动需要不同的角色参与并导致上下文因为某个活动执行发生切换，形成场景的边界。也可以理解为上下文其实是动态的业务流被边界静态切分的产物。</p>
+<p>每个限界上下文提供了不同的业务能力，以满足当前上下文中各个角色的目标，这些角色只会执行满足当前限界上下文业务能力的活动，因为限界上下文划定了领域知识边界，不同限界上下文需要不同领域知识，形成了各自的知识语境，业务能力与领域知识存在业务相关性要提供该业务能力，就要具备对应的领域知识，领域知识由限界上下文的领域对象所拥有。或者说，这些领域对象共同提供了符合当前知识语境的业务能力，并被分散到对象扮演的各个角色上，由角色履行活动展现。</p>
+<p>  封装了领域知识的领域对象组成了领域模型，在知识语境的界定下，不同的领域知识扮演不同角色，执行不同的业务活动，并与限界上下文内的其他非领域模型队形一起对外提供完整的业务能力。</p>
+<p> 限界上下文之间的复用体现为对业务能力的复用，而非对知识语境边界内领域模型的复用。</p>
+<h4 id="限界上下问特征"><a href="#限界上下问特征" class="headerlink" title="限界上下问特征"></a>限界上下问特征</h4><h5 id="领域模型的知识语境"><a href="#领域模型的知识语境" class="headerlink" title="领域模型的知识语境"></a>领域模型的知识语境</h5><p>  限界上下文形成的知识语境就好似对领域对象指定了定语，没有限界上下文的边界保护，建立的领域模型就会面向整个系统乃至整个企业。要保证领域概念的一致性，就需要为哪些出现领域知识冲突的领域概念添加显示的定语修饰。    </p>
+<h5 id="业务能力的纵向切分"><a href="#业务能力的纵向切分" class="headerlink" title="业务能力的纵向切分"></a>业务能力的纵向切分</h5><p>  为何领域驱动设计不使用模块、服务、组件这些概念？是因为模块属于逻辑架构视图的软件元素，组件属于物理架构视图的软件元素，模块与组件区别体现了观察视图的不同，他们之间并不存在必然的映射关系。模块作为体现职责内聚性的设计概念，缺乏一套完成架构体系支撑，它的边界模糊不清，业务模块是从业务角度针对纯粹的业务逻辑归类与组织，它缺乏自顶向下端对端的架构，使得自身无法支撑业务能力实现。</p>
+<p>  现在流行的分层架构中，按照技术维度进行关注点切分，业务模块分散在各层中，分散在分层架构各个层领域维度切片说明了模块划分没有按照同一个业务方向进行，一旦该领域维度的业务逻辑变化，就需要更改整个系统的每一层。</p>
+<p>   限界上下文相反，按照目标系统架构纵向切分切分的依据是从业务进行考虑的领域维度，为了提供完整业务能力，根据领域维度进行切分时，还需要考虑支撑业务能力基础设施实现，如与该业务相关的数据访问逻辑，以及将领域知识持久化的数据库模型，形成纵向的逻辑边界。在内部按照关注点分离原则进行横向切分。</p>
+<h5 id="自洽的架构单元"><a href="#自洽的架构单元" class="headerlink" title="自洽的架构单元"></a>自洽的架构单元</h5><p>  限界上下文作为基本的架构单元，既要体现领域模型的知识语境，又要能独立提供业务能力，这就要求它具有自洽性。</p>
+<p>  自洽架构单元具备4个要素</p>
+<p>  <strong>1、最小完备性</strong></p>
+<p>​      最下完备是实现限界上下文自治的基本条件，这里完备是指限界上下文在履行属于自己的业务能力时，拥有的领域知识是完整的，无须针对自己的信息去求助别的限界上下文。就可以避免不必要领域模型依赖。一个大而全的领域模型必然是完备的，但为了避免领域模型不断扩大，就需要通过最小加以限制。最小完备性体现了限界上下文作为领域模型知识语境的特征。</p>
+<p>​        </p>
+<p>  <strong>2、自我履行</strong></p>
+<p>​      自我履行表示限界上下文自己决定要做什么。分配业务功能时，设计者就应该化身为限界上下文，模拟它灵魂发问“我拥有足够的领域知识来履行这一业务能力吗?”,”履行”是对能力的承担，而非对数据或信息单纯的拥有与传递，这就表明当一个限界上下文具有自我履行的意识时，它就不会轻易突破边界，企图复用别人的领域模型，甚至绕过限界上下文直接访问不属于它的数据，而会优先以业务能力协作进行复用，自我履行体现限界上下文纵向切分业务能力。</p>
+<p>  <strong>3、稳定空间</strong></p>
+<p>​    稳定空间要求限界上下文必须防止和减少外部变化带来影响，在满足最小完备与自我履行特征前提下，一个限界上下文已经拥有了必备的领域知识。这些领域知识戴白的逻辑即使发生了变化，也是可控的。只有面对发生在限界上下文外界的变化，限界上下文才力不从心。要保证内部空间的稳定性，就要减少对外部软件的元素的依赖。比如数DB、MQ、文件和其他的限界上下文或伴生系统。如果有依赖，最好是通过抽象方式降低耦合。只要保证访问接口稳定，外界的变化就不会产生影响。</p>
+<p>  <strong>4、独立进化</strong></p>
+<p>​       独立进化是指减少限界上下文内部变化对外界产生影响。对外提供稳定的接口，内部的领域模型变化封装在限界上下文内部， 抽象和封装要求限界上下文划分合理而清晰的内外层。</p>
+<h4 id="限界上下文识别"><a href="#限界上下文识别" class="headerlink" title="限界上下文识别"></a>限界上下文识别</h4><h5 id="业务维度"><a href="#业务维度" class="headerlink" title="业务维度"></a>业务维度</h5><p>​    识别限界上下文的过程，就是将问题空间的业务需求映射到解空间限界上下文的过程。全局分析阶段的业务需求分析工作流采取自顶向下的分析方法，将问题空间中的业务流程根据时间维度切分成各个相对独立的业务场景，再根据角色维度将业务场景分解为业务服务，然后架构映射阶段的业务级映射工作流又采取自底向上的求解方法，从业务服务逆行而上，通过逐步的归类与归纳获得体现业务能力的限界上下文。</p>
+<ul>
+<li><strong>业务知识归类</strong></li>
+</ul>
+<p>​     a) 语义相关性</p>
+<p>​      语义相关性意味着存在相同或相似的领域概念，对应于业务服务描述的名词，如果不同的业务服务操作了相同或相似的对象，那么他们存在语义相关性。</p>
+<p>​    b) 功能相关性</p>
+<p>​      功能相关性体现了领域行为的相关性，表明的是业务服务是否服务于同一个业务目标。</p>
+<ul>
+<li><strong>业务知识归纳</strong>  </li>
+</ul>
+<p>​    对业务服务进行归类，划定了业务的主体边界。那就需要对主体边界内的所有业务服务进行业务知识的归纳。归纳就是抽象的过程。需要概括所有业务服务所属主体特征，并使用准确的名称表达它们，形成业务主体，业务主体是候选限界上下文，因为它的主体边界还需要结合限界上下文的特征做进一步梳理。归纳的过程就是对业务主体命名的过程。业务主体命名遵循单一职责，也就是这个名称代表唯一的最能体现其特征的领域概念。</p>
+<ul>
+<li><strong>业务主体的边界梳理</strong></li>
+</ul>
+<p>​    假如在多个业务主体中存在相同或相近的概念，不要盲目从语义相关性对其进行归类，还要考虑它们在不用业务主体边界内，是否代表了不同的领域概念。限界上下问规定解空间领域模型边界的统一语言，两个相同或相似的概念如果代表了不同的领域概念，却存在同一个限界上下文，必然会带来领域概念冲突。</p>
+<p>​    位于同一个限界上下文的业务服务应提供统一的业务能力，要么是业务能力是核心功能，要么业务能力提供辅助能力支撑。分析业务能力的角度接近于功能相关性分析，服务于同一个业务目标。</p>
+<p><strong>呈现限界上下文</strong></p>
+<p>  业务服务图可以用来呈现业务维度的限界上下文。</p>
+<h5 id="验证原则"><a href="#验证原则" class="headerlink" title="验证原则"></a>验证原则</h5><ul>
+<li><strong>正交原则</strong></li>
+</ul>
+<p>​      正交是指：如果两个或多个事物中一个发生变化，不会影响其他事物，这些事物就是正交。变化影响主要体现在变化的传递性，即一个事务的变化会传递到另一个事物引起它的变化，但这个变化不会影响彼此正交点。限界上下文的正交性是指各自边界封装的业务知识不存在变化的传递性。</p>
+<p>​    要破除变化的传递性，就要保证每个限界上下文对外提供的业务能力不能出现相同，这就要求为了完成该业务能力需要的领域知识不能出现交叉，领域知识不交叉就要保证封装了领域知识的领域模型不能出现重叠。领域模型违背正交性，意味着各自定义的领域模型对象代表的领域概念出现了重复。领域知识违背了正交性，代表业务问题的解决方案出现了重复，通常是包含了领域行为与业务规则。业务能力违背了正交性，意味着业务服务出现了重复。</p>
+<ul>
+<li><strong>单一抽象层次原则</strong></li>
+</ul>
+<p>​      单一抽象层次原则是保证一个方法中的所有操作都在同一个抽象层次。识别限界上下文时，归纳业务知识的过程就是抽象的过程，限界上下文的名称代表一个抽象概念。抽象概念指代一类事事物，抽象实际上并非真正抽出这些具体特征，而是对一类具有共同特征的事物进行归纳，抹掉具体类之间差异。</p>
+<p>​    抽象层次与概念内涵有关，概念的内涵即事物的特征。内涵越小，意味着抽象特征越少，抽象的层次越高。外延也就越大。反之亦然。</p>
+<ul>
+<li><strong>奥卡姆剃刀</strong></li>
+</ul>
+<p>​       如无必要、勿增实体。意味着没有寻找到必须切分限界上下文的必要证据时，不要增加新的限界上下文</p>
+<h5 id="管理维度"><a href="#管理维度" class="headerlink" title="管理维度"></a>管理维度</h5><p>​     管理层次的同构系统实现了系统与管理系统映射，其中扮演关键的作用是限界上下文与团队之间映射，这里映射来之康威定律，如果团队的工作边界与限界上下文的业务边界不匹配，就需啊调整团队或限界上下文的边界，使得二者分配更加合理。降低沟通成本，提高开发效率。</p>
+<p>​    </p>
+<h5 id="技术维度"><a href="#技术维度" class="headerlink" title="技术维度"></a>技术维度</h5><ul>
+<li><strong>质量属性</strong></li>
+</ul>
+<p>​      识别限界上下文应该首先考虑业务需求对边界的影响，在限界上下文文章了业务需求之后，再考虑质量属性的影响。</p>
+<p>​      技术因素在影响限界上下文的边界时，任然要保证领域模型的完整性与一致性。</p>
+<ul>
+<li><strong>复用与变化</strong></li>
+</ul>
+<p>​      运用复用原则分离出来的限界上下文通常对应于支撑域，作为支撑功能可以同时服务于多个限界上下文。</p>
+<p>​      限界上下文应对变化体现单一职责原则，即对于一个限界上下文，不应该存在两个引起它变化的原因。</p>
+<ul>
+<li><strong>遗留系统</strong></li>
+</ul>
+<p>​    如果目标系统与遗留系统协作，通常需要为他单独建立一个限界上下文，</p>
+<p>​     </p>
+<h4 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h4><p>以上是看《解析领域驱动设计》笔记。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/09/24/REDIS-PERSISTENCE/" rel="prev" title="REDIS持久化机制">
+      <i class="fa fa-chevron-left"></i> REDIS持久化机制
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/09/29/redis-sentinel/" rel="next" title="Redis哨兵集群介绍">
+      Redis哨兵集群介绍 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%99%90%E7%95%8C%E4%B8%8A%E4%B8%8B%E6%96%87%E5%AE%9A%E4%B9%89"><span class="nav-number">1.</span> <span class="nav-text">限界上下文定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%99%90%E7%95%8C%E4%B8%8A%E4%B8%8B%E9%97%AE%E7%89%B9%E5%BE%81"><span class="nav-number">2.</span> <span class="nav-text">限界上下问特征</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%A2%86%E5%9F%9F%E6%A8%A1%E5%9E%8B%E7%9A%84%E7%9F%A5%E8%AF%86%E8%AF%AD%E5%A2%83"><span class="nav-number">2.1.</span> <span class="nav-text">领域模型的知识语境</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%9A%E5%8A%A1%E8%83%BD%E5%8A%9B%E7%9A%84%E7%BA%B5%E5%90%91%E5%88%87%E5%88%86"><span class="nav-number">2.2.</span> <span class="nav-text">业务能力的纵向切分</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%87%AA%E6%B4%BD%E7%9A%84%E6%9E%B6%E6%9E%84%E5%8D%95%E5%85%83"><span class="nav-number">2.3.</span> <span class="nav-text">自洽的架构单元</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%99%90%E7%95%8C%E4%B8%8A%E4%B8%8B%E6%96%87%E8%AF%86%E5%88%AB"><span class="nav-number">3.</span> <span class="nav-text">限界上下文识别</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%9A%E5%8A%A1%E7%BB%B4%E5%BA%A6"><span class="nav-number">3.1.</span> <span class="nav-text">业务维度</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81%E5%8E%9F%E5%88%99"><span class="nav-number">3.2.</span> <span class="nav-text">验证原则</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E7%BB%B4%E5%BA%A6"><span class="nav-number">3.3.</span> <span class="nav-text">管理维度</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E7%BB%B4%E5%BA%A6"><span class="nav-number">3.4.</span> <span class="nav-text">技术维度</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9A"><span class="nav-number">4.</span> <span class="nav-text">总结：</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

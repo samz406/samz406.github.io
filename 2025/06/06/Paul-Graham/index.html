@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Paul Graham（保罗·格雷厄姆）是一位计算机科学家、创业家和风险投资人，以共同创立Viaweb（后来被Yahoo收购）和创业加速器Y Combinator而闻名。此外，他还是一位多产的英文随笔作家。从上世纪90年代末起，Paul Graham在其个人博客（paulgraham.com）以及演讲、书籍《Hackers &amp; Painters（黑客与画家）》等平台发表了大量文章，内容横跨">
+<meta property="og:type" content="article">
+<meta property="og:title" content="保罗·格雷厄姆的一些思考总结">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/06/06/Paul-Graham/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="Paul Graham（保罗·格雷厄姆）是一位计算机科学家、创业家和风险投资人，以共同创立Viaweb（后来被Yahoo收购）和创业加速器Y Combinator而闻名。此外，他还是一位多产的英文随笔作家。从上世纪90年代末起，Paul Graham在其个人博客（paulgraham.com）以及演讲、书籍《Hackers &amp; Painters（黑客与画家）》等平台发表了大量文章，内容横跨">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-06-06T10:25:29.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.339Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="人物、创业、架构">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/06/06/Paul-Graham/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>保罗·格雷厄姆的一些思考总结 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/06/06/Paul-Graham/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          保罗·格雷厄姆的一些思考总结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-06-06 18:25:29" itemprop="dateCreated datePublished" datetime="2025-06-06T18:25:29+08:00">2025-06-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A0%94%E7%A9%B6%E6%8A%A5%E5%91%8A/" itemprop="url" rel="index"><span itemprop="name">研究报告</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Paul Graham（保罗·格雷厄姆）是一位计算机科学家、创业家和风险投资人，以共同创立Viaweb（后来被Yahoo收购）和创业加速器Y Combinator而闻名。此外，他还是一位多产的英文随笔作家。从上世纪90年代末起，Paul Graham在其个人博客（paulgraham.com）以及演讲、书籍《Hackers &amp; Painters（黑客与画家）》等平台发表了大量文章，内容横跨技术、创业、财富、社会、文化和人生哲理等领域。这些文章视角独特、思想深刻，被全球读者广泛阅读。这些随笔不仅记录了他个人思维的发展轨迹，也影响了一代创业者和黑客文化爱好者。</p>
+<span id="more"></span>
+
+
+<h2 id="创业与初创公司"><a href="#创业与初创公司" class="headerlink" title="创业与初创公司"></a>创业与初创公司</h2><p>创业（startup）是Paul Graham最重要也最知名的写作主题之一。自2005年参与创立Y Combinator后，他撰写了大量关于创业公司的文章，从宏观原则到具体操作都有涉猎，构成了一个系统的创业指导思想体系。这些文章的核心理念可以概括为：<strong>创业公司本质上不同于传统生意，增长是其生命线，创业者应专注于为用户创造价值并迅速迭代，同时保持节俭和专注</strong>。在这一主题下，他探讨了创业的定义、成功要素、常见误区，以及创业者和投资人的关系等。以下是该主题下一些代表性文章及核心思想：</p>
+<ul>
+<li><p><strong>《创业 = 增长》（Startup = Growth）</strong>：在这篇文章中，Paul Graham明确给出了他对初创公司的定义：<em>“创业公司是一种被设计用来快速增长的公司”</em>。他指出，*“增长”*才是判定一家新公司是否属于创业公司的关键因素，而非公司创立时间长短或是否采用高科技等表象。一家理发店即使新开张也算不上创业公司，因为它不具备大规模增长的潜力；而谷歌这样的科技公司从诞生开始DNA就不同于传统小生意，天然瞄准巨大的市场需求。<strong>增长是所有创业公司其它要素的根本</strong>：公司若能实现高速增长，融资、盈利等问题多半会随之解决，因此创业者需要始终将增长当作指南针，围绕如何扩张用户群和提升产品价值来做决策。文章强调创业过程中要不断试错迭代，以确保产品真正切中一个大市场的需求点，从而实现持续的用户增长。</p>
+</li>
+<li><p><strong>《如何创立创业公司》（How to Start a Startup）</strong>：这是一篇2005年根据哈佛计算机俱乐部演讲整理的长文，可谓Paul Graham创业理念的全面概括。文中涵盖了从组建团队、产品定位、获取用户到融资的诸多建议，被誉为创业指导“宝典”。其中一些关键要点后来被他浓缩为*《创业十三条》<em>（Startups in 13 Sentences）。这些原则包括：<strong>选对合伙人</strong>（团队对创业成败至关重要）、<strong>尽早发布产品</strong>（通过快速推出原型与用户交互来校准方向）、<strong>让想法不断演进</strong>（不要执着于最初的想法，在实现过程中不断根据用户反馈调整）、<strong>深刻理解用户</strong>（找到用户真正需要而市场又缺乏的东西）、以及<strong>专注让一部分用户极度满意</strong>。特别是最后一点，他引用Paul Buchheit的话说：与其让很多用户觉得你的产品“还行”，不如让一小部分用户</em>爱上*你的产品。<strong>“宁可让少数用户爱不释手，也不要多数用户不痛不痒”</strong>，这一观点成为创业圈的名言，强调了在创业初期获取种子用户热爱的价值——小规模的狂热用户可以带来口碑传播和宝贵反馈，胜过大规模但冷淡的用户群。此外文章还告诫创业者<strong>精益创业、控制开支</strong>的重要性：创业公司大多死于弹尽粮绝，在找到产品-市场契合之前保持低成本运行才能赢得时间。</p>
+</li>
+<li><p><strong>《不要做无意义的扩张》（Do Things that Don’t Scale）</strong>（译名直译为“做那些不会规模化的事”）：这篇2013年的文章切中很多创业者的迷思。Paul Graham颠覆性地指出，<strong>创业初期为了生存和找到方向，可以也应当做许多无法长期大规模复制的事情</strong>。例如，手工为最初的一批用户提供超乎寻常的个性化服务，甚至一对一地拉用户、了解用户需求，哪怕这些行为本身不能“扩展”到成千上万用户，但它们对于创业初期获取忠实用户、打磨产品非常必要。许多创业者一开始过于注重“可扩展性”，不愿意亲力亲为地服务早期用户，反而错失了改进产品、留住用户的机会。Graham举例解释道，小公司的优势就在于<strong>可以投入极大热情满足少数用户的需求</strong>，而大公司做不到这一点。因此创业者不要怕“麻烦”和“繁琐”，愿意投入大量人工和精力解决用户问题，即使这些努力看似不经济，也是值得的，因为它能带来口碑和宝贵的洞察。正如YC的座右铭所说，创业者要“<strong>做用户想要的东西</strong>”（Make something people want），哪怕为此要付出不惜代价的个人努力。</p>
+</li>
+<li><p><strong>《创业者常犯的错误》和《初创公司生存秘籍》</strong>：Paul Graham多篇文章总结了创业失败的常见原因，比如*《创业的18个致命错误》<em>（The 18 Mistakes that Kill Startups）和</em>《创业新手指南》*等。在这些文章中，<strong>轻率选择不合适的合伙人、产品没有市场需求、扩张过早、花钱太快</strong>等都被列为大忌。例如，他提醒创业者不要沉迷于写商业计划书或追求投资而忽视了真正应该关注的产品和用户；许多创业团队陷入“伪工作”，忙于参加大会、和大公司谈合作（即与所谓企业发展部门Corp Dev打交道），结果分散了精力。Graham直言“<strong>没有任何事像各种分心因素那样能扼杀创业公司</strong>”，其中最危险的一类分心事物恰恰是那些会带来短期收益的活动（如白天的工作、咨询项目等），因为它们看似合理却侵占了创业应投入的时间。他的建议是：创业公司要严格聚焦于产品和用户，尽可能避免与主业无关的干扰，把有限的资源用在刀刃上。另外，Graham也强调<strong>坚持的重要性</strong>：创业过程充满起伏，团队难免士气低落，但“不要放弃”本身就是创业成功的秘诀之一。他指出，与某些需要天赋的领域不同，大多数创业项目只要团队足够努力并不断调整方向，凭借韧性最终都有机会成功。由此可见，持续的执行力和毅力对创业者至关重要。</p>
+</li>
+<li><p><strong>创业者素质与心态</strong>：Paul Graham非常关注创业者个人的品质，在文章如*《无畏的坚持》（The Anatomy of Determination）<em>、</em>《一往无前》（Relentlessly Resourceful）<em>、</em>《好人可以走得更远》（Why It’s Safe for Founders to Be Nice）<em>和</em>《坏人注定失败》（Mean People Fail）<em>中反复谈到创业者性格对创业成败的影响。他主张<strong>优秀的创业者往往既有顽强的决心又保持善良正直</strong>。在《坏人注定失败》一文中，他分享了自己的观察：</em>“我认识的最成功的人里很少有刻薄刻毒之人”<em>。相反，在创业这一新型竞赛中，</em>“坏脾气和成功是反相关的”<em>。为什么？Graham分析道，<strong>刻薄的人难以招募和留住顶尖人才</strong>（因为优秀人才有更多选择，不愿为刻薄的老板效力），也更容易陷入与竞争对手或内部矛盾的“战斗”而非埋头创造价值。</em>“创业公司不是靠攻击对手赢得胜利，而是通过超越竞争来取胜”<em>。他认为，聚焦于攻击和斗争会让人思维狭隘、分散精力，而真正成功的创业公司靠的是<strong>跑在前面</strong>：快速前进、不断创新，甩开竞争对手，而不是陷入消耗战。此外，他提出<strong>善良本身对创业有积极作用</strong>：最富有成就的创业者往往并非一心逐利的人，他们往往有改善世界的理想驱动，金钱反而成了副产品。这些人有更强的使命感和长期视野，因此在拒绝收购诱惑、坚持长期打造伟大公司的过程中具备优势。Graham甚至从更广阔的历史视角指出，随着社会进入创新驱动的时代，</em>“赢得未来的将是那些拥有新想法并建设新事物的人”*，而不是靠零和竞争夺取存量资源的人。因此，怀有建设精神、乐于合作的创业者将引领时代，阴险刻薄的作风则越来越行不通。</p>
+</li>
+<li><p><strong>关于创业环境和地域</strong>：Paul Graham也讨论了创业与地理环境的关系，如*《为何要移居创业中心》<em>（Why to Move to a Startup Hub）、</em>《如何打造硅谷》（How to Be Silicon Valley）<em>等文。他指出，<strong>创业者受周围环境影响极大</strong>。在充满创业公司和雄心勃勃人才的城市（如旧金山湾区），创业想法和资源更容易涌现，创业文化鼓励大胆尝试和快速失败，这种氛围有利于催生“大项目”。相反，在保守或资源匮乏的环境中，好创意往往难以孵化壮大。这解释了</em>“创业中心”*（Startup Hub）存在的价值，也说明了<strong>硅谷为何诞生了 disproportionately 多的科技巨头</strong>。此外，针对一些试图复制硅谷的努力（如政府希望打造本地“硅XX”），Graham在文章《你能买来一个硅谷吗？也许吧》（Can You Buy a Silicon Valley? Maybe.）中分析了必要条件：顶尖大学、开放文化、充足风险投资等。他认为这不是简单砸钱就能促成的，更需要长期的人才累积和文化形成。</p>
+</li>
+<li><p><strong>关于融资和投资人的建议</strong>：Paul Graham自己作为YC创始人，帮助上千家创业公司拿到投资，也在多篇文章中谈到创业融资的话题，如*《如何融资》（How to Raise Money）<em>、</em>《与投资人博弈指南》<em>等。他的一贯建议是：<strong>尽量延后融资、少拿钱，保持主动权</strong>。创业者不应把融资当作最终目标，而要明白融资只是辅助增长的手段。他提出概念</em>“默认活着或默认死去”*（Default Alive or Default Dead）——意思是创业公司若靠自身收入能活下来就是“默认活着”，反之如果必须不断融资才能存续就是“默认死去”状态。Graham鼓励创业者迅速做到“<em>Ramen盈利</em>”（Ramen Profitable，即赚的钱刚好覆盖创始人的泡面生活费），这样即使没有新投资也能生存，从而在融资谈判中更有底气。他在文章中也提醒创业者小心大公司并购部门（Corp Dev）的接触，很多情况下这类交涉只是浪费时间甚至探听情报。他用YC公司的经历告诫道，不要轻易受制于投资人和收购方，<strong>保持独立思考和自主决策</strong>才能走得更远。</p>
+</li>
+</ul>
+<p>概而言之，在创业主题下Paul Graham构筑了一个相当完整的观点体系：创业公司以高速增长为导向，创始人应敏捷迭代、专注用户需求，哪怕采取非常规手段；团队要资源节约、避免分心，坚持不懈地前进；创业者个人应当善良正直、充满使命感；同时利用好创业生态优势但不依赖外部恩赐。这些思想从2005年以来影响了无数创业者，许多已成为“创业圣经”般的经典原则。随着时间推移，Paul Graham在创业领域的思考更加成熟，例如2010年代后他更多讨论“巨大的野心型创意”（如《令人畏惧的雄心创业想法》Frighteningly Ambitious Startup Ideas）以及如何扩大初创生态的多样性（如呼吁**“让另外95%的优秀程序员也参与创业”**），体现出他希望创业创新更广泛地发生，不要局限于已有圈子。他的创业思想既强调不变的本质（增长、用户、毅力），也与时俱进地响应了行业环境（例如科技泡沫、经济衰退等）的变化调整，形成了一个动态演化的体系。</p>
+<h2 id="技术与编程语言"><a href="#技术与编程语言" class="headerlink" title="技术与编程语言"></a>技术与编程语言</h2><p>在成为创业导师之前，Paul Graham首先是一位程序员和技术思想家。他在哈佛大学获得计算机科学博士，研究领域包括程序设计语言等。早期的许多文章聚焦于<strong>编程语言的威力、黑客文化和软件开发方法论</strong>，这些文章后来有不少收录在他2004年的著作《Hackers &amp; Painters（黑客与画家）》中。通过这些文章，我们可以看到他从程序员视角对技术趋势的洞察，以及他对Lisp等高阶语言的偏爱与思考。其核心观点包括：<strong>用优秀的工具（高级编程语言）能创造竞争优势、优秀黑客应善于利用抽象和力量强大的语言、软件行业的发展趋势将由技术创新驱动</strong>。以下是该主题的代表性文章和思想：</p>
+<ul>
+<li><p><strong>《超越平均》（Beating the Averages）</strong>：这是一篇具有里程碑意义的文章，讲述了Paul Graham和合伙人Robert Morris在1995年创业做网络应用Viaweb时，选择用冷门的Lisp语言编程，从而在竞争中胜出的故事。核心思想是：<strong>使用威力更强的编程语言，相当于拿到了“秘密武器”，可以打败只用平庸工具的竞争对手</strong>。文中提出了著名的“Blub悖论”（Blub Paradox）概念：一般的程序员只熟悉某种中等水平语言（文中虚构称为“Blub”），他们无法想象比自己所用语言更强大的特性，因此看不出高手用高级语言在做什么；而精通Lisp这样的高级语言的黑客，向下兼容理解那些普通语言，却能利用更高抽象层次快速实现难以企及的功能。Viaweb当年选择Lisp正是这种策略的体现：<strong>当竞争对手都用C++/Perl时，他坚持用Lisp，从而开发速度更快、功能更强</strong>。Graham在文中直言：“当选择技术时，必须忽略别人都在做什么，只考虑什么对自己最好”。在软件竞争中，<strong>谁能更快更好地写出软件，谁就能胜出</strong>。他认为创业公司尤其如此——大公司可以循规蹈矩，但小公司如果墨守成规、用“平均水平”的方法办事，结局多半是失败。因此必须*“做些不一样的事”*，包括在技术选择上出奇制胜。通过Lisp，Viaweb团队做到了以更少人力实现更复杂的功能，迭代速度惊人（服务器端软件可以即时更新），令竞争者难以企及。这篇文章不仅歌颂了Lisp的威力，也隐含传达了黑客精神：<strong>优秀的黑客勇于突破常规，追求真正有效率的工具，而非人云亦云</strong>。</p>
+</li>
+<li><p><strong>《编程语言的百年思考》（The Hundred-Year Language）</strong>：在这篇文章中，Paul Graham放眼长远未来，思考100年后的编程语言会是什么样子。他认为，尽管我们无法准确预测具体语言，但有一些演进趋势可以预见：语言将变得更高层次、更灵活，<strong>会不断消除程序员与问题域之间的鸿沟</strong>。例如，未来语言可能拥有更强大的抽象能力，动态类型和元编程特性更加普及，以适应日新月异的需求。文中他提出一个观点：<strong>与其试图去设计一种“完美未来语言”，不如努力让自己的语言更贴近未来的特性</strong>。这也是他后来设计自己的编程语言Arc的动机之一。百年语言的思考体现了Graham对语言演化的规律性认识：诸如垃圾回收、函数式编程等在以前被视为怪异前沿的特性，后来往往成为主流。因此优秀的黑客应该<strong>多学习不同范式的语言</strong>，以扩展思维，做好迎接未来的准备。可以说，他鼓励程序员摆脱对某一特定语言的迷恋，站在语言设计者的高度去理解编程的本质。</p>
+</li>
+<li><p><strong>《Lisp的秘密武器》系列</strong>：Paul Graham多次撰文阐释Lisp语言的精妙，如*《是什么让Lisp与众不同》<em>（What Made Lisp Different）、</em>《如果Lisp如此优秀，为什么没人用？》<em>（If Lisp is So Great, Why Don’t Everyone Use It?）等。这些文章从技术角度讨论了Lisp的特点：代码即数据的宏系统、即时编译、垃圾回收、高阶函数等，使其在表达力上远超同时代语言。他将学习Lisp比作</em>“顿悟的启蒙经验”<em>，认为即使不直接用Lisp编程，理解Lisp思想也会让程序员受益终生。但他也直面现实，承认Lisp没有广泛流行的原因在于一种“社会学”问题：大多数程序员满足于主流语言带来的工作机会和生态，宁愿用自己熟悉的工具而非追求威力最大。但这正是精英黑客与平庸码工的区别——高手愿意掌握像Lisp这样的</em>“长剑”*，哪怕需要学习成本，因为长远看它威力更大。</p>
+</li>
+<li><p><strong>《Python悖论》</strong>（The Python Paradox）：这篇短文讨论了招聘优秀程序员的一个有趣现象：<strong>最好的程序员往往倾向于使用较新的高级语言（如Python），而不是职业市场教条流行的语言（如Java）</strong>。因此，如果一家公司想招到顶尖的黑客，反而应考虑在内部使用那些优秀黑客喜欢的语言，因为这样的人才库质量更高。换言之，<strong>招聘语言本身就起到了筛选作用</strong>。Paul Graham观察到，在2000年前后，Java是企业界流行的语言，但许多出类拔萃的程序员更喜欢Python等当时相对小众却高效的语言。如果你用Python写代码，你的求职者几乎全是真正热爱编程、富于好奇心的人；而使用Java，你会得到良莠不齐的大批简历。这个“悖论”实际上折射出Paul Graham一贯的主张：<strong>优秀黑客钟爱的工具，往往代表着更高生产力和更好品味</strong>，不应盲从“大多数人用什么”。企业技术选择应考虑能否吸引并激发顶尖工程师，而不仅是追求传统安全牌。</p>
+</li>
+<li><p><strong>《设计与品味》</strong>：虽然标题上不直接显现，这类文章如*《创造者的品味》（Taste for Makers）<em>、</em>《设计与研究》（Design and Research）<em>等，也与技术创新相关。Paul Graham将<strong>设计视作一种解决问题的科学和艺术</strong>，无论是软件界面设计还是编程语言设计，都需要审美和洞察力相结合。他提出</em>“好品味是做好工作的必要条件”*，认为优秀的黑客在代码中也体现出美学品味——简洁、优雅、有巧思。这些文章将编程提升到艺术的高度来讨论，与他的著名文章《黑客与画家》一脉相承：<strong>优秀的程序员如同文艺复兴时期的艺术家，追求技术之美和创造力的发挥</strong>。例如，《Taste for Makers》借鉴艺术领域的经验，提出好的设计往往是大胆的（Good design is often daring），软件设计者应敢于打破陈规、追求创新。</p>
+</li>
+<li><p><strong>技术行业趋势评述</strong>：Paul Graham也会对一些技术行业热点发表看法，例如*《Web 2.0》<em>（讨论他对“Web2.0”的理解，认为不过是让用户参与的网站）、</em>《微软已死》（Microsoft is Dead）<em>（2007年文章，指出微软在互联网时代已丧失创新领导力）、</em>《为什么Twitter很重要》*（Why Twitter is a Big Deal，分析短消息社交平台的价值）等。通过这些评述，可以看出他对产业变化的敏锐。比如在《微软已死》中，他大胆断言微软由于错过互联网浪潮和受组织结构官僚所累，已无法主导未来。尽管当时微软仍富可敌国，但他预见了创新的中心已经转移到硅谷的新兴公司。同样，对于苹果，他在《苹果的错误》（Apple’s Mistake）中批评了苹果一度过于封闭等策略。这些洞见证明了他不仅关心编程本身，也关注<strong>技术与商业的结合</strong>。他常常能提前洞察一些苗头，例如在2000年代初预见互联网应用将取代桌面软件（Viaweb理念），2010年代初注意到硬件创业再度兴起（《硬件的复兴》Hardware Renaissance）。</p>
+</li>
+</ul>
+<p>总结来说，在技术与编程主题上，Paul Graham体现出典型的**“黑客哲学”<strong>：乐于采用强力工具、追求高效优雅的解决方案，不盲从主流；强调编程是一门创造性工作，需要不断提升抽象思维和品味；他相信编程语言和技术的演进会极大改变软件产业格局，敏锐地把握住了从桌面到Web、从PC软件到网络应用的趋势。这些思想在其早期文章中比较突出，后来随着他关注点转向创业，纯技术话题有所减少，但直到近年他仍会偶尔写及，例如2020年后发表的《我们需要奇特的新语言》（Weird Languages）重提对新编程语言的期待</strong>**。可以看到，他对技术本质和未来的思考一以贯之。尽管时代背景变迁，他崇尚的黑客精髓——独立思考、勇于创新、强调效率和美感——在他的技术类文章中始终如一。</p>
+<h2 id="写作与散文创作"><a href="#写作与散文创作" class="headerlink" title="写作与散文创作"></a>写作与散文创作</h2><p>除了创业和技术，Paul Graham本人也是一位深受认可的随笔（Essay）作家，对<strong>写作本身</strong>也多有探讨。他的文章以清晰简练著称，很多读者称赞他的文字“像他在与你交谈一样”。这种风格并非偶然，而是他刻意打磨的结果。Paul Graham在多篇文章中分享了他的写作哲学和技巧，主题涵盖如何组织文章、怎样写出有用的内容、以及写作在思考中的作用等。他认为写作不仅是表达想法的过程，更是<strong>产生和打磨想法</strong>的过程：“<strong>写作是你获得想法、发展想法并改进思考的方式</strong>”。以下介绍他的几篇代表性写作主题文章和理念：</p>
+<ul>
+<li><p><strong>《像说话一样写作》</strong>（Write Like You Talk）：这篇发表于2015年的文章开宗明义地提出一个简单却强大的写作技巧：<em>“写文章时使用口语化的语言，像你跟朋友交谈那样去写”</em>。Paul Graham指出，很多人一提笔写作就进入一种“正式写作模式”，用平时绝不会在对话中用的词汇和句式，结果让文章变得艰涩、生硬。他举例说，没有人在日常聊天中用“执笔”（pen）来表示“写”，也不会称毕加索为“那位善变的西班牙人”——这些典型的书面语让读者感到距离和不适。Graham认为，<strong>如果想让更多人愿意读并理解你的文字，就应尽量采用口语的风格</strong>：句子越通俗越好，复杂思想也可以用简单句表达。他强调，“<strong>表达复杂思想并不需要复杂的句子</strong>”。相反，堆砌华丽辞藻往往造成错觉，以为传达的信息比实际更多，而让作者自欺欺人。在实践层面，他建议一个可行方法：<strong>先写完初稿，然后逐句审视，问自己“如果与好友聊天时，我会怎么说这句话？”</strong>，把每一句都改写得更口语化。他本人也习惯在发表文章前大声朗读全文，修改那些听起来别扭、不像自然对话的部分。通过这种方法，新手写作者也能极大提升可读性。正如他所说，如果你能够做到写文章如同说话，那你已经胜过95%的作者了。这一主张影响了许多网络写作者，强调了<strong>清晰易懂</strong>在写作中的重要性。</p>
+</li>
+<li><p><strong>《好文章》</strong>（Good Writing）和**《简洁写作》<strong>（Write Simply）：Paul Graham多次谈到写作中的</strong>简洁<strong>之道。在这些文章中，他强调*“好文章就是说清楚一件别人不知道的事情”*，因此要尽量剔除一切冗余。</strong>写作即思考<strong>，清晰的文字背后是清晰的思路。他建议作者</strong>以推敲代码的态度推敲文字**，不断重写来去除混乱的表达。他引用著名作家观点指出：“<strong>好的写作即重写</strong>”，尤其要重写以使文字更简洁明了。例如在《简洁写作》中，他强调删除不必要的词句、避免过长段落，让读者能轻松抓住要点。这些技巧在他自己的文章中有充分体现——Paul Graham的随笔段落通常简短直接，很少废话。此外，他也谈到选词的重要：使用短小常用的词胜过生僻华丽的词，因为前者能迅速准确地传达意思，不给读者增加负担。这与前述“口语化”思路是一致的。</p>
+</li>
+<li><p><strong>《发现而非说服》（Persuade xor Discover）</strong>：这篇文章讨论了<strong>两种不同类型的随笔</strong>：一种是作者已有结论，写作只是为了说服读者接受这个结论；另一种是作者带着疑问开始写作，通过写作过程本身来探索和发现新的想法。Paul Graham明确表示他更推崇后者，即<strong>把随笔写作当作思考和发现工具</strong>。他认为如果一开始就确定立场、目标只是为了辩论，那么文章可能流于陈词滥调或论据堆砌，难有新意。而当作者以开放心态写作，让文章走势由思考的发展来决定，往往能产生出人意料的新观点。<strong>写作最好是一种探索，而非演讲</strong>。这在他的创作中也有所体现——许多Paul Graham的文章结构并非传统议论文“三段论”，而是从一个问题出发娓娓道来，过程中不断引入新的角度，最后给读者和作者自己都带来启发。这种风格让读者感觉像在跟随作者思路一起探险，而不是被说教。</p>
+</li>
+<li><p><strong>《N件事清单》（The List of N Things）</strong>：在此文中，Paul Graham分析了一种常见写作形式——“列出N条…的清单”（例如“十大秘诀”之类的文章）。他指出<strong>清单式文章虽然易写易传播，但往往深度不足</strong>。许多初学写作者喜欢用列举要点的方式，因为结构简单清晰，但这可能导致内容浅尝辄止，只是堆砌了若干独立的点而没有深入探讨背后的联系。Graham并不完全否定这种形式，但提醒不要滥用。他自己虽然也曾在《创业十三条》等文章中使用清单方式，但那更多是提纲挈领总结，主干仍有统一思想贯穿。他鼓励写作者<strong>努力挖掘主题的本质</strong>，而不是满足于列举一些表面的要点。这体现了他对文章质量和深度的追求。</p>
+</li>
+<li><p><strong>《随笔领域的形态》（The Shape of the Essay Field）</strong>：这是Paul Graham近年（2021年）的文章，讨论了当今随笔写作领域的新变化和可能的分类。他将随笔分成三类：一类是告诉读者他们不知道的信息（信息型），一类是通过逻辑论证改变读者想法（说服型），还有一类是提出崭新的观点视角（探索型）。他认为第三类也就是“探索型”随笔最少见但最有价值，因为它真正带来了知识增长。这篇文章相当于他对整个写作生态的反思，展示了他始终在关注<strong>写作这一元话题的演变</strong>。他鼓励更多人写有原创性的随笔，发掘未知领域的洞见，而不仅仅是重复已有观点或罗列事实。</p>
+</li>
+<li><p><strong>写作与思想演进</strong>：Paul Graham还在*《把想法化为文字》（Putting Ideas into Words）*等文中谈到，<strong>写作过程本身可以帮助我们理清模糊的思想</strong>。有时我们脑中有某种隐约想法，但不落笔就无法精确表述。通过写作，我们被迫将想法线性展开、具体化，这是一种检验和打磨思想的手段。因此他主张<strong>多写作，哪怕一开始想法不成熟，在写的过程中想法会逐渐清晰</strong>。他个人的经历印证了这一点：他的许多名篇（如《如何创立创业公司》）就是源自讲座讲稿再扩充，而在写作扩充时他产生了新例子和见解。可以说，<strong>对Paul Graham而言，写作是思考不可或缺的一部分</strong>。这种观念也激励了许多读者开始写博客、记录自己的思考。</p>
+</li>
+</ul>
+<p>综上，Paul Graham的写作类文章为读者提供了一套务实有效的写作方法论：<strong>使用清晰口语、追求简洁清楚、通过重写反复打磨</strong>，并以探索精神去写，从写作中获得新思想。这些理念对非英语母语的中文写作者也有借鉴意义，很多原则是相通的。此外，他的写作心态——把文章看作交流与思考的工具，而非炫耀文笔的炫技——也影响了网络时代的知识分享风气。在时间演进上，他早期并没有专门写“如何写作”这类文章，更多是以自己的实践默默树立风格；但进入2010年代中后期，他开始有意识地总结写作经验，对外分享（或许也是看到许多后来者写作的良莠，出于提点晚辈的心态）。这体现了他从个人创作者向社区前辈角色的转变。不过，即便不读这些元写作文章，从他几十年如一日高质量的随笔本身，读者也能体会到他所倡导的写作哲学：<strong>清晰思考，清晰表达</strong>。</p>
+<h2 id="财富、收入不平等与经济观点"><a href="#财富、收入不平等与经济观点" class="headerlink" title="财富、收入不平等与经济观点"></a>财富、收入不平等与经济观点</h2><p>作为一位既有技术背景又创办过公司的创业者，Paul Graham对<strong>财富的创造与分配</strong>有深刻思考。他的多篇文章讨论了如何创造财富、收入不平等的根源以及社会该如何看待这些问题。这一主题在他的写作中有一定争议性：他以直率的观点为科技创新导致的财富集中进行了辩护，引发过广泛讨论。概括而言，Paul Graham的核心观点是：<strong>财富并非固定不变的大饼，而是可以通过创业和技术创新新增的；因此，一些人在短时间内变得极富有，往往意味着他们创造了巨大的新价值，而不应简单视作社会弊病</strong>。同时，他也认为过往人们反感富人的一些理由在现代可能已不再成立，需要用理性数据而非情绪来看待不平等。以下具体介绍：</p>
+<ul>
+<li><p><strong>《如何致富》（How to Make Wealth）</strong>：这是Paul Graham在2004年写的一篇著名文章，直击许多人关心却又讳莫如深的话题：怎样才能赚很多钱？他开篇就指出，人们常把*“赚钱”<em>当成逐利或不高尚的动机，但如果视野拉大，<strong>创造财富实际上推动了社会进步</strong>。文中他将</em>*“财富”（Wealth）与“金钱”（Money）严格区分**：钱只是一种交换符号，而财富是真正的商品和服务。他解释说，在现代社会，大部分人通过为他人提供价值来换取金钱，再用金钱购买自己需要的价值。因此<strong>财富必须被创造</strong>，而创业公司正是创造新财富的机器。他以自己的创业经历说明，小公司通过技术和商业模式创新，可以把原本不存在的价值带到世界上，从而新生巨富。此文还谈及<strong>效用与报酬</strong>的关系：在自由市场里，一个人的收入在理想情况下反映了他为他人提供价值的大小。例如，一个顶级CEO年薪可能是一普通人工资的100倍以上，但那是因为他可能使公司市值增加了百倍；篮球明星收入远高于诗人，因为市场对篮球的偏好更强。这些论述支持了他的中心论点：<strong>巨大财富往往是巨大贡献的指标</strong>（至少在现代经济中），不应一概斥为不公。同时，文章也鼓励有志者去创业，因为那是个人在短时间内大幅提升财富的最佳途径——打工很难快速致富，但创业不同，因为创业是在用技术解题、创造全新价值。</p>
+</li>
+<li><p><strong>《注意差距》（Mind the Gap）</strong>：发表于2004年，这篇文章专门讨论收入不平等问题。Paul Graham以“Leonardo和普通画家”之间的差距类比引入，指出任何领域里顶尖人物和普通人之间都会有巨大差异。<strong>赚钱也是一项技能</strong>，既然我们能接受顶尖棋手、作家远胜常人的事实，那么顶尖赚钱者（企业家）远超他人是不是同样自然？他认为社会之所以对金钱差距反应强烈，是因为三个原因：一是人们幼年受的错误观念，以为财富是像父母给零花钱那样分配的（他称之为“爸爸模型”）；二是历史上大财富常带有不光彩手段（战争掠夺、垄断、贪腐），令人反感；三是担心巨大收入差距对社会有害。然后他逐一反驳：第一，<strong>财富不是固定蛋糕，而需创造</strong>，儿童时期以为财富由上级分发是误解；第二，过去暴富往往靠肮脏手段，但在现代民主社会，技术创业成为主要致富途径，这种致富是通过提供人们想要的东西实现的，和抢劫/行贿等路径有本质区别；第三，他声称并无证据表明合理的收入差距对社会有害，相反或可视作社会健康的标志。<strong>他甚至提出：“在现代民主社会，收入差距或许恰是社会健康的标志”</strong>。因为如果人人收入都一样，可能意味着缺乏创新驱动或通过强制手段平均。文中用了大量篇幅解释<strong>财富的创造机制</strong>：孩子以为财富是固定的，因为小孩不能自己创造财富，只能靠父母给，所以他们觉得应平分。但现实世界里，成人要获得财富只能自己做出东西或服务交换，因此能力不同自然结果不同。他引用身边例子，比如顶级工程师的产出可能是一般人的数十倍，市场回报差别也很正常。总之，《注意差距》这篇文章<strong>为经济不平等进行了辩护</strong>，认为我们应正视在价值创造上的巨大差异，而非出于直觉就觉得有钱人赚了一百倍就是“不应该”。需要说明的是，他并没有否认任何财富差距问题都不存在，只是强调那些靠创新正当获得的巨大财富不应被简单妖魔化。</p>
+</li>
+<li><p><strong>《经济不平等》（Economic Inequality）</strong>：这篇发表于2016年的文章可以看作《注意差距》的扩充和更新。当时关于美国收入不平等的讨论升温，Paul Graham再次发声。他进一步强调了<strong>创业公司与贫富差距的关系</strong>：技术创业加剧了高端的不平等（因为一夜暴富的创业者增多），但这恰恰是因为他们创造了巨大价值，普通公众其实也在享受这些价值（如苹果、谷歌的产品）。他担忧人们如果“矫正”不平等可能适得其反——<em>减少科技创业会使整体经济蛋糕变小，对穷人也无益</em>。相反，与其关注差距，不如直接想办法帮助穷人。他举例说，如果禁止谷歌/苹果创始人变得那么富有，那么那些智能手机和免费搜索引擎真的会出现吗？因此他呼吁政策制定者要<strong>谨慎区分“坏的”不平等和“好的”不平等</strong>：前者来自贪污、寻租，应该打击；后者来自创新和努力，应该庆贺。他还讨论<strong>税收和再分配</strong>问题，认为应该通过合理税制帮助弱者，但不能因此扼杀财富创造的动力。这篇文章在网上引发轩然大波，许多人撰文反驳或支持，成为他最具争议的作品之一。但无论评价如何，它清晰展现了Paul Graham在经济观上的基本立场：<strong>倾向自由市场和科技创新，认为创业者致富是价值创造的结果而非对穷人造成的伤害</strong>。</p>
+</li>
+<li><p><strong>《不平等与风险》（Inequality and Risk）</strong>：这篇文章进一步探讨<strong>风险报酬和不平等的关系</strong>。Paul Graham指出，高风险伴随高回报，如果社会试图极力压缩收入差距，无形中等于削弱了高回报的可能，也会打击人们承担风险的意愿。创业本身是高风险高回报的行为，如果限制创业成功者的收益，那么自然创业的动力就下降，最终整个社会创新速度减慢。因此<strong>要接受一定程度的不平等作为对冒风险者的回报</strong>。这和传统经济学观点相符，只是由他用通俗语言讲出。此外他还提出一个新颖观点：<strong>从生活品质角度看，不平等没有数字上看那么夸张</strong>。比如一个亿万富翁和中产阶级在享受许多事物（互联网、医药等）时差别并不如收入比那么巨大，因为科技让很多东西变得普惠。他用此来缓和人们对不平等的恐惧，认为专注提高底层生活品质比盯着最顶层收入更有意义。</p>
+</li>
+<li><p><strong>《亿万富翁之所为》（Billionaires Build）</strong>：这篇2020年的短文回应了公众对亿万富翁的质疑。Paul Graham标题即表明立场：<em>“亿万富翁之所以成为亿万富翁，是因为他们建设了东西”</em>。他说，几乎所有白手起家的超级富豪都是通过创建公司和产品累积财富，他们的财富正是那些资产的价值体现。他用贝索斯、盖茨等人为例——没有亚马逊和微软，就没有他们的财富。换言之，<strong>“亿万富翁建造东西”（Build）</strong>而不是抢夺，这在现代经济中是常态。因此他认为社会不应仇视因创新而致富的人，相反应该思考如何让更多人也有机会去“build”。当然，他也提到某些领域（如对冲基金经理）致富未必造福大众，但大多数科技富豪确实推动了社会进步。这篇文章延续了他一贯的逻辑，为创新型富豪正名。</p>
+</li>
+<li><p><strong>《对财富税的建模》（Modeling a Wealth Tax）</strong>：Paul Graham在2020年美国政治背景下还对<strong>财富税</strong>发表了看法。他理性建模分析财富税可能带来的影响，认为对富人每年征收资产百分比会导致资本转移和潜在的创新减缓。他计算了一些创业者如果财富税执行，十年后将少多少财富，并推测这会不会阻止下一个贝索斯出现。这类文章体现了他在公共政策上的经济自由主义倾向：<strong>警惕过度平均主义政策对创新动力的抑制</strong>。他的着重点始终是保持社会对创造新财富的支持，同时通过别的方式帮助不幸者，而非简单削富济贫。</p>
+</li>
+</ul>
+<p>综合看来，Paul Graham对待财富和不平等的态度可以用一句话概括：<strong>“让蛋糕做大”比“切分蛋糕”更重要</strong>。他相信创业和技术进步能够持续增大社会财富总量，尽管短期会造成收入分配不均，但长远看所有人都将受益于新财富。而试图机械地追求平等，很可能把大家都拖回平均水平的贫穷。这套观点与硅谷精英常见的思维相符，但也招致一些批评者认为他忽视了现实中的结构性问题。不过，即使不同意他的人，也不得不承认Paul Graham论述问题的清晰和坦诚：他敢于触及敏感话题，并给出基于逻辑的数据分析和类比。当他的这些文章随着时间推移，人们的评价也在演变。早期（2004年）他的观点还较为小众，随着2010年代贫富差距扩大的现实，他在2016年的再次发声受到更多质疑。但无论评价如何，这些文章为讨论提供了重要视角。例如Tim O’Reilly等业内人士也撰文回应，与之展开理性的辩论。Paul Graham的财富观反映了他一贯的思维方式：注重<strong>增量而非存量</strong>，强调<strong>个人努力和创造</strong>的价值。这种思想体系也是他创业哲学的延伸——创业本质上就是发现空白、创造新价值的过程，而他将这一逻辑应用到了社会整体层面去理解财富分配。他思维的演变在此也很明显：从最初聚焦创业者个人怎么致富，扩大到讨论全社会的公平与创新，视野越来越宏观。</p>
+<h2 id="社会与文化观察"><a href="#社会与文化观察" class="headerlink" title="社会与文化观察"></a>社会与文化观察</h2><p>Paul Graham的笔触不局限于商业和技术，他也对<strong>社会现象、人性和文化</strong>有独到的观察和评论。特别是随着年岁增长和身份转变（从程序员创业者到公众知识分子），他在2010年代发表了不少讨论社会文化议题的文章。这些文章的话题包括：青少年教育与成长、网络时代的舆论与沟通、政治正确与思想桎梏等。在这些方面，Paul Graham的观点依然带有“叛逆”色彩：他鼓励独立思考、挑战社会习俗中的不合理之处，同时提倡善意和理性讨论。他常常揭示一些被人忽视的角度，让读者重新审视司空见惯的现象。以下分几个子主题介绍：</p>
+<ul>
+<li><p><strong>教育与青少年成长</strong>：Paul Graham几篇经典文章以青少年时期的体验和观察为基础，分析学校和成长环境的问题。</p>
+<ul>
+<li><p><strong>《为什么书呆子不受欢迎》</strong>（Why Nerds are Unpopular）：这篇2003年的长文可以说是对美国中学社交结构的一次深刻剖析，颇有社会学意味。Paul Graham结合自己和朋友的经历，指出在美国典型中学里，<strong>聪明勤奋的“书呆子”（nerds）往往不受欢迎，并非因为他们不想受欢迎，而是因为他们有更关心的事情</strong>。他写道：<em>“书呆子不受欢迎的主要原因是他们有别的事情要想。他们的注意力被书本或自然世界吸引，而不是时尚和聚会。”</em>这句话可谓核心论点。通过文章详尽论述，他认为中学生的社交如同一个全职工作——<strong>流行（受欢迎）需要花费巨大精力去迎合群体规范</strong>。大部分青少年无时无刻不在“执勤”维护自己的形象，关注穿着、言行以符合同伴期望，这是一种隐性竞争。而<strong>书呆子则“服侍两位主人”</strong>：他们一方面也想有人缘，但另一方面更投入于学习、爱好等个人发展，无法也不愿投入全部精力在社交上。因此在残酷的校园受欢迎竞争中，他们自然处于劣势。他进一步指出，这种现象在小学和成人社会并不明显，是美国中学特有的，因为中学生把学校当作脱离成人世界的“社会小宇宙”，以同龄人评价为中心。文章最后一部分探讨了解决之道，虽然没有简单答案，但建议教育者给予聪明学生更多支持和多元环境。此文将一个困扰无数青少年的问题剖析得鞭辟入里，让很多读者（尤其是曾经的“书呆子”）深有共鸣，至今仍在网络上被经常引用讨论。</p>
+</li>
+<li><p><strong>《我们告诉孩子的谎言》</strong>（Lies We Tell Kids）：这篇2008年的文章聚焦成人对儿童的种种“善意谎言”和隐瞒。Paul Graham开门见山地说：<em>“成年人对孩子撒谎是经常性的。我并不是说我们该停止这样做，但至少应该审视我们说了哪些谎，为何而说。”</em>。他认为，一些谎言可能有保护意义，但也有很多谎言会导致孩子形成错误认知，甚至这些<strong>谎言的影响持续到我们成年</strong>。文章列举了几类典型谎言，比如对幼童营造安全美好的假象，回避社会阴暗面；对少年隐瞒性的真实情况和其他成人话题等。他把整个社会对孩子的隐瞒称为*“一个广泛的共谋”<em>，因为<strong>几乎所有成人都参与了对孩子的某种遮掩</strong>，学校和父母在许多议题上保持一致或者相互配合保持沉默。这种无所不在的“假世界”导致敏感的孩子往往通过发现成年人前后矛盾之处，进而猛然醒悟受到了长期欺骗，这个觉醒过程对孩子来说可能是剧烈且愤怒的（例如Einstein因为发现圣经故事不实而产生的被欺骗感）。Graham回忆自己15岁时也曾愤世嫉俗地感到世界充满虚伪。文章并不是要指责父母或老师，而是建议<strong>成年人有意识地区分哪些谎言是出于必要的保护，哪些已经变质</strong>。比如，他理解对幼儿隐瞒暴力和性是为了不让他们恐惧或过早涉入，这是善意的；但过度保护导致青少年在一个“泡泡”中长大，突然进入社会就会不适应，这就是不良后果。他特别提到郊区生活（suburbia）就是一个为孩子营造的假环境，到了青春期反而让少年感到无聊和压抑。总体而言，Paul Graham在这篇文章中鼓励成人<strong>反思对孩子撒的谎</strong>：有些谎言或许必要，但应该及时拆除，帮助孩子更平稳地认识真实世界；而且成人也要意识到自己小时候受的某些“谎言教育”可能至今还影响着思维，需要自我清理。该文在家长和教育者中引发了思考，正如作者所希望的，对哪些方面</em>“我们可以停止对孩子撒谎”*进行了探讨。</p>
+</li>
+<li><p><strong>《大学的无意识》（Undergraduation）</strong>：Paul Graham也批评了高等教育中的弊端。他分享自己在常春藤名校读本科时反而感到失望的经历，指出<strong>大学课程往往脱节于真实世界，过于强调安全求稳的路径</strong>。他鼓励年轻人不要把大学视为唯一成才道路，提倡自主学习、实践，或者进行创业这样“肄业也值得”的尝试。这些观点后来也体现在YC支持辍学生创业等举措上。</p>
+</li>
+<li><p><strong>《你不应有老板》</strong>（You Weren’t Meant to Have a Boss）：这篇文章从人类学角度出发，认为<strong>在远古进化环境中，人类生活在小部落里，几乎没有“老板-雇员”这样的严厉等级</strong>，现代公司上下级关系其实是一种不自然状态，难免让人压抑。Paul Graham藉此鼓励人们<strong>追求更自主的工作方式</strong>，比如创业或自由职业，因为那更符合人性的潜在偏好。这篇文章的观点也解释了为什么大公司里不少聪明人感觉压抑，而喜欢创业的氛围：因为创业团队往往扁平，个人掌控感强，更类似平等合作的部落。</p>
+</li>
+</ul>
+</li>
+<li><p><strong>思想自由与社会桎梏</strong>：Paul Graham十分推崇<strong>独立思考</strong>，他写了多篇文章谈论如何识别和打破社会对思想的限制。</p>
+<ul>
+<li><p><strong>《你不能说的事》</strong>（What You Can’t Say）：这是2004年的一篇著名文章，讨论<strong>社会禁忌与真理</strong>。他指出，在历史上每个时代，人们都深信一些其实荒谬的观念，以至于谁提出异议就会被视为异端甚至遭受迫害。他写道：<em>“历史上的每个时期，人们都相信一些荒谬的事情，而且深信不疑，以至于你要是说反对意见就有被排斥甚至伤害的危险。如果我们所处的时代有任何不同，那才真不寻常。”</em>这警醒我们：<strong>当下主流观点未必就是正确的</strong>，只不过很多人身在其中看不清。他鼓励读者去思考当前哪些观点可能将来被证明可笑，鼓励我们有勇气挑战所谓政治正确。他给出的一个策略是：<em>“Live in the future”</em>，想象从未来回看现在，哪些观点如同过去相信炼金术一样荒诞。比如在当时，他提到对同性恋、对大麻的禁忌可能就是这样的领域（事实证明十多年后社会态度确实转变了）。这篇文章本身就体现了他所倡导的批判精神，也给很多读者以启发，让人们辨识“思想禁区”并探索真相。</p>
+</li>
+<li><p><strong>《异端的诞生》</strong>（The Origins of Wokeness）：Paul Graham在2020年发表了对“wokeness”（觉醒文化，指高度敏感的进步主义思潮）来源的探讨。他从历史宗教运动类比，分析当今的政治正确潮流如何有类似清教运动的特征。这篇文章尽管题目有争议，但内容相对冷静学术，追溯了这一社会文化现象背后的心理和群体动力。他没有明确站队反对或支持某种政治立场，而是提醒人们意识到<strong>公众舆论中的从众和道德姿态因素</strong>。类似地，<strong>《正统的特权》</strong>（Orthodox Privilege）探讨的是在某些圈子里盲从主流观点所获得的优待，呼吁对“进步阵营内的护城河”保持警惕。通过这些文章，Paul Graham试图剖析<strong>群体思潮</strong>对个人思考的影响，希望读者不被表面的正确性压倒，能看清逻辑与证据。</p>
+</li>
+<li><p><strong>《异端和新意》</strong>（Novelty and Heresy）：这篇文章探讨<strong>创新观点往往兼具离经叛道（heresy）和新颖独特（novelty）</strong>。Paul Graham指出，一个观点若被大多数人视为异端，可能意味着它很有新意，但同时也更可能是错的（因为大多数新想法都是错的）。他建议要<strong>在创新和理性之间取得平衡</strong>：既不要压抑自己的奇思妙想，也要用科学方法检验它们。这反映了他本人在鼓励大家挑战共识的同时，也强调用证据和逻辑说话，而非为了叛逆而叛逆。</p>
+</li>
+<li><p><strong>《如何反对》（How to Disagree）</strong>：发表在2008年，这篇文章提出了著名的**“反驳金字塔”<strong>理论。Paul Graham将争论时的回应方式从低到高分为7个层次：最差的是人身攻击和谩骂，然后是对对方语气措辞挑刺，再是反驳对方论点的方式，最高级的是直接反驳论点的核心并用证据证明对方错。这篇文章直观地教会读者分辨网争中的各类回应手段，</strong>倡导人们在讨论中提升格调，针对实质内容进行理性辩论<strong>。尽管互联网充斥着情绪化对抗，但他的这套分级被广泛引用，用来改进在线讨论的质量。例如很多论坛和社交媒体引用该文来引导用户理性发言。Paul Graham的本意正是</strong>希望营造更理性的公共讨论氛围**，避免争论沦为简单的谩骂与立场对立。</p>
+</li>
+<li><p><strong>《喷子》和《巨魔》</strong>（Haters &amp; Trolls）：这些文章名称俗气，却讨论了网络时代很现实的问题。Paul Graham分析了为什么互联网上充满恶意批评者（haters）和故意捣乱的人（trolls）。他认为匿名性和传播快捷导致了**“长尾的刻薄”<strong>，即原本被隐藏的刻薄言论现在无处不在。但他也观察到</strong>真正成功的人群中，刻薄的人反而极少**（这在前文《Mean People Fail》中有提及）。这些文章一方面告诫内容创作者和公众人物，不要被网络喷子的言论左右；另一方面也呼吁整个社区培养更健康的讨论环境。他建议对那些纯粹为了激怒他人的“巨魔”最好的处理方式是不理会（“Don’t feed the trolls”），因为他们以引发反应为乐。他在《巨魔》文中也提醒产品设计者注意减少产生巨魔的土壤，例如改进评论系统等。这体现了他身为Hacker News社区管理者的经验总结。</p>
+</li>
+</ul>
+</li>
+<li><p><strong>生活方式与人生哲理</strong>：在社会文化观察中，也包括Paul Graham对<strong>现代生活节奏、注意力和幸福</strong>等话题的看法。</p>
+<ul>
+<li><strong>《上瘾性的加速》</strong>（The Acceleration of Addictiveness）：这篇文章讨论现代社会各种令人上瘾的事物越来越多（游戏、社交媒体等），<strong>人类的意志力正受到前所未有的挑战</strong>。他提醒读者有意识地与分散注意力、损耗时间的诱惑作斗争，就像戒毒一样对待那些让人上瘾的无益消遣。<strong>《摆脱干扰》</strong>（Disconnecting Distraction）也有类似主题，强调在信息过载时代保持专注和深度思考的重要性。</li>
+<li><strong>《待办事项清单顶端》</strong>（The Top of My Todo List）：这是篇发人深省的短文。Paul Graham提到自己清单上的第一项其实是与亲人谈一谈（因为想到朋友突然过世，很多话没有说）。由此他感叹我们经常把真正重要的事情搁置一旁，忙于琐事。<strong>生命无常，应把重要的事优先做</strong>，比如表达爱、追求梦想等，不要等“有空了”却发现来不及。这给读者一种提醒：别让琐碎淹没了你的人生。</li>
+<li><strong>《生命短暂》</strong>（Life is Short）：这篇文章深入展开了人生短暂的话题。他指出，人人都口头知道“生命短暂”，却往往在日常中遗忘这一点，直到老来回首才惊觉光阴飞逝。他说*“日子看似漫长，但十年却一晃而过”*，呼吁大家<strong>时刻保持对时间有限的警醒</strong>。这不是让人焦虑，而是为了更珍惜时间。他建议多尝试新事物，因为新的经历会让时间感觉更充实；勇敢做自己真正关心的事情，因为蹉跎岁月是最大的后悔。Paul Graham对人生意义的思考，在这篇感悟型随笔中体现得淋漓。由于他在创业圈的地位，这些“鸡汤”式的话语也特别引人深思：连一个曾经如此忙碌创业投资的人都强调生命短促和要专注真爱之事，更何况常人呢？这篇文章激励了许多人重新审视自己的生活安排。</li>
+</ul>
+</li>
+<li><p><strong>价值观与“人生算法”</strong>：Paul Graham在一些文章中给出了<strong>生活和决策的原则</strong>，可视作他的人生观提炼：</p>
+<ul>
+<li><strong>《如何做你爱做的事》</strong>（How to Do What You Love）：他批判了社会关于“好工作”的传统观念（如收入高、体面），认为真正幸福的人生应以从事自己热爱的事业为目标。而现实问题在于，学校和父母往往并不告诉年轻人如何寻找热情所在，反而推着他们走“安全”的道路。Paul Graham建议<strong>追随内心热情</strong>，即使绕路或者暂时收入低也没关系，因为热爱的事最终更可能取得出色成就和满足感。他自身就是典型例子：热爱计算机和写作，最终将二者融为职业。</li>
+<li><strong>《好与坏的拖延》</strong>（Good and Bad Procrastination）：这篇有趣的文章分析了拖延症。Paul Graham承认自己也是拖延的人，但他区分了**“好拖延”<strong>和</strong>“坏拖延”**。坏拖延是为了逃避真正重要的工作而去做琐事，例如为了不写论文去整理书桌；而好拖延则是为了投入一个更大更有价值的项目，暂时拖延小任务。例如一个科学家可能拖延回复邮件，因为他把全部精力投入研究。这在外人看来也是拖延，但却是高效的。<strong>关键在于选择性拖延：永远把时间花在最重要的事上，哪怕其他小事被延误</strong>。他甚至说，与其按时完成琐事，不如大胆拖延它们，去啃更硬的骨头。这一思路对很多习惯拖延的人给予了安慰和方向——利用你的拖延倾向为你服务，而不是一味自责。</li>
+<li><strong>《把身份降到最低》</strong>（Keep Your Identity Small）：这篇短文提出一个独特见解：<strong>避免将自己的身份认同绑定到某个庞大群体或标签上</strong>，因为那会妨碍你理性思考。比如有些人把自己定位为某党派、某宗教或某运动的坚定支持者，那么在涉及这些话题时，他们就很难客观看待事实，而倾向于护短。Paul Graham建议尽量让自己的身份简单，比如“一个热爱编程的人”之类，可避免在讨论其他议题时因身份立场导致思维僵化。<strong>身份越小越灵活</strong>，思想越开放。这个观点对现代社会里的部落化倾向是一剂清醒药。</li>
+<li><strong>《天才的公交票理论》</strong>（The Bus Ticket Theory of Genius）：这是他2019年的一篇新作，探讨创造力和深度专注。他提出一个有趣隐喻：<em>“一些伟大的发现不是因为超人的智商，而是由于像收集公交票这种乏味爱好般的执着”</em>。他发现很多杰出人物在某一冷门领域投入了惊人时间，正如一个狂热收藏爱好者一般。由此他认为<strong>无限的好奇心和勤奋，比纯粹高智商更关键</strong>。这理论鼓励人们发展自己的“公交票”爱好——也就是找到那个你愿意投入极多时间钻研的领域，哪怕别人看来无聊，这或许就是产生杰作的土壤。这其实和他一直倡导的“追随内心热情”异曲同工，只是角度更新颖。</li>
+<li><strong>《工作与生活的融合》</strong>：Paul Graham不喜欢把“工作”和“生活”完全对立分开。在PG101的总结中提到他的观点：<em>“视工作和生活截然分开是错误的，真正热爱的工作会成为生活的一部分”</em>。因此<strong>与其强求平衡，不如寻找让你乐此不疲的事业，把工作融入丰富的人生</strong>。当然，这种理念比较符合创业者或创意工作者，对于普通上班族可能不具普适性，但仍提供了一个思路：也许我们可以努力让自己的工作更有趣味和意义，而不是仅视为养家糊口的苦役。</li>
+</ul>
+</li>
+</ul>
+<p>总体来说，Paul Graham在社会文化和人生思考方面的文章展现了他<strong>既理性又富有人文关怀</strong>的一面。他运用逻辑分析社会现象，但也常流露出对青少年、对后辈的关心（如担忧教育体制的问题），对自由思考和开放社会的期望（如倡导独立思想、良好讨论氛围）。他思维的演变也在这些文章中可见：年轻时他或许更多聚焦个人兴趣（编程、创业），随着人生阅历增长，他开始反思自己成长环境、儿时受到的观念，以及更广泛的社会议题。这些文章有些带有半自传色彩（如《为什么书呆子不受欢迎》里有他自身经历），有些则是观察到的社会现象论述（如《喷子》《政治正确》之类）。随着身份从黑客转变为人父、人师，他对儿童教育、家庭的关注增加，如《Having Kids》（为人父后的感悟）一文分享了他发现<strong>养育孩子既让人牺牲时间也给予人生新的意义</strong>，这反映出他个人生活的改变也融入了写作主题。可以说，他的社会文化随笔构成了对现代生活的一系列切面观察，从学校到网络，从工作到家庭，其中贯穿的是他推崇的<strong>善良、真实与理性</strong>的价值观。这些价值观和他在创业技术领域提倡的其实一脉相承——鼓励人们诚实地面对现实（无论是市场还是社会）、用独立思考突破陈规、以建设的态度改善环境。正因为有这种一致性，尽管题材不同，我们仍能一眼看出这些文章出自Paul Graham之手，其逻辑清晰的风格和深刻的问题意识，使之在华语世界亦赢得不少拥趸，许多文章被翻译传播，在中国互联网社区也引发讨论，证明了其思想的穿透力。</p>
+<h2 id="结语：思想演变与整体评价"><a href="#结语：思想演变与整体评价" class="headerlink" title="结语：思想演变与整体评价"></a>结语：思想演变与整体评价</h2><p>综上所述，Paul Graham在过去二十多年里通过随笔记录并传播了丰富的思想。从编程技术、创业经验，到财富观念、写作艺术，再到社会文化和人生哲理，他的文章主题广泛却各有深度。在不同主题的背后，我们可以看到一些一以贯之的核心理念：</p>
+<ul>
+<li><p><strong>独立思考，挑战常规</strong>：无论是用冷门语言编程、创办新型创业公司，还是质疑主流观念、打破思想禁区，Paul Graham始终倡导打破墨守成规的勇气。这源自他本人的黑客精神，也贯穿在他写给年轻人的忠告中。他相信创新源于独立思考，伟大来自于敢于不同。</p>
+</li>
+<li><p><strong>专注热爱，追求卓越</strong>：从技术到工作再到生活，他反复强调要<strong>找到真正热爱的事情投入其中</strong>。只有发自内心的热情，才能支撑起高强度的努力并产生非凡成果。这一点在他的创业指导、人生建议里都多次出现。同时，专注热爱也意味着不被噪音干扰，拒绝平庸的诱惑（如不陷入办公室政治、不为流行而忽视内心兴趣）。</p>
+</li>
+<li><p><strong>务实理性，重视效率</strong>：作为程序员出身，Paul Graham看问题常带有工程师的理性。他推崇精简高效，无论是代码、文章还是企业运营，都讲求<strong>去除冗余、注重实效</strong>。他的写作风格、创业管理建议以及对社会现象的分析，都体现出用数据和逻辑说话的理性态度。同时，他乐于总结方法论，如写作技巧和反驳层级，为读者提供实用工具。这种务实理性也让他的思想体系富有可操作性，而非空泛理想。</p>
+</li>
+<li><p><strong>善意与提升</strong>：尽管强调理性竞争，他对人性善的一面也很看重，例如提倡创业者要善良正直，鼓励社会对创新者宽容，对孩子耐心启发。这显示出一种<strong>建设性</strong>的底色：不是为了反对而反对，而是为了让事物变得更好。他笔下的挑战和批评，多半指向消除障碍、提高效率或解放个人潜能，而非摧毁某些东西。因此整体来说，他的作品给人积极进取的激励。</p>
+</li>
+</ul>
+<p>在时间维度上，Paul Graham的思维也在演进拓展。<strong>2000年前后</strong>，他关注编程语言、垃圾邮件过滤等具体技术问题，那时他刚从学术界和创业初体验中出来，文章内容较技术向，例如《A Plan for Spam》（提出贝叶斯反垃圾邮件的方法）被广为引用。<strong>2005年创立Y Combinator之后</strong>，创业经验日积月累，他在<strong>2005-2010年</strong>写下了许多创业指导经典，奠定了他作为创业导师的地位。这一时期他的文章很多都直接帮助了创业者社区，比如《Hackers and Painters》出版、创业谈系列演讲等，为互联网创业浪潮提供了精神燃料。<strong>2010年代</strong>，随着YC影响力扩大，他接触到了更多社会议题，也亲历了硅谷和美国社会的变化。这段时期他的写作领域明显拓展，除了继续输出创业思想（如2012年《Startup = Growth》等）外，开始在财富不平等、网络文化、教育家庭等方面发声，一些文章引起全社会范围的讨论而不仅限于技术圈。这说明他从专注行业内部，逐渐走向了对宏观社会的问题进行思考。这种演变也常见于很多行业领袖：当自身影响力和阅历达到一定程度后，会更关心广泛的人类议题。</p>
+<p>值得一提的是，Paul Graham虽然已经在2014年从YC管理岗位退休，但他并没有停止写作的脚步。到2020年代，他依然保持着每年至少几篇文章的输出，主题包括<strong>NFT、科幻式的创想、疫情下的信任问题</strong>等等。例如他在2020年的《Coronavirus and Credibility》里分析了公众何以对专家意见产生信任危机，这又是结合时事的新思考。他还涉足新领域，比如讨论**NFT（非同质化代币）**在公益上的创新用途（《An NFT That Saves Lives》）。这表明他的好奇心和分析欲依旧旺盛，不断应用他的思维框架去理解最新出现的事物。</p>
+<p>Paul Graham曾自谦说，他的文章只是**“思考过程的副产品”**。正是抱着这种持续思考、乐于分享的态度，他的200多篇随笔为我们提供了一个观察问题、解决问题的范例。对于中文读者来说，阅读Paul Graham的文章不仅能获取创业和技术的经验之谈，更能领略一种独特的思维方式：既天马行空又脚踏实地，既敏锐洞察又平实易懂。这些文章背后的思想系统性和连贯性，也在本文的主题分类梳理中有所呈现——他并非信笔由缰地漫谈，而是逐步搭建起自己对世界的认知结构，读者可以看到其中脉络，如同看到一位智者如何将不同领域的经验融会贯通。</p>
+<p>最后，用Paul Graham自己的一个比喻作结：<strong>“让我们像画家一样去创造，像黑客一样去探索”</strong>。他的文字和思想，正激励着一代又一代读者去创造属于自己的精彩人生，同时保持对世界的好奇和清醒的思考。在瞬息万变的21世纪，这或许是他留给我们最宝贵的财富。通过对他各个时期文章核心思想的梳理，我们既了解了Paul Graham思维的演变历程，也领悟到其中不变的精神内核——<strong>独立思考、勇于创新、提升自我并改善世界</strong>。这正是这些文章跨越语言与年代仍然引人共鸣的原因所在。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BA%BA%E7%89%A9%E3%80%81%E5%88%9B%E4%B8%9A%E3%80%81%E6%9E%B6%E6%9E%84/" rel="tag"># 人物、创业、架构</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/06/05/prometheus-architectural-design/" rel="prev" title="Prometheus架构设计">
+      <i class="fa fa-chevron-left"></i> Prometheus架构设计
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/06/08/LangGraph-LlamaIndex-Agent/" rel="next" title="LangGraph与LlamaIndex Agent实现对比">
+      LangGraph与LlamaIndex Agent实现对比 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E4%B8%9A%E4%B8%8E%E5%88%9D%E5%88%9B%E5%85%AC%E5%8F%B8"><span class="nav-number">1.</span> <span class="nav-text">创业与初创公司</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E4%B8%8E%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80"><span class="nav-number">2.</span> <span class="nav-text">技术与编程语言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%99%E4%BD%9C%E4%B8%8E%E6%95%A3%E6%96%87%E5%88%9B%E4%BD%9C"><span class="nav-number">3.</span> <span class="nav-text">写作与散文创作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B4%A2%E5%AF%8C%E3%80%81%E6%94%B6%E5%85%A5%E4%B8%8D%E5%B9%B3%E7%AD%89%E4%B8%8E%E7%BB%8F%E6%B5%8E%E8%A7%82%E7%82%B9"><span class="nav-number">4.</span> <span class="nav-text">财富、收入不平等与经济观点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A4%BE%E4%BC%9A%E4%B8%8E%E6%96%87%E5%8C%96%E8%A7%82%E5%AF%9F"><span class="nav-number">5.</span> <span class="nav-text">社会与文化观察</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD%EF%BC%9A%E6%80%9D%E6%83%B3%E6%BC%94%E5%8F%98%E4%B8%8E%E6%95%B4%E4%BD%93%E8%AF%84%E4%BB%B7"><span class="nav-number">6.</span> <span class="nav-text">结语：思想演变与整体评价</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

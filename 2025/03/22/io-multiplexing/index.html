@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="IO多路复用原理与技术实现详解">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IO 多路复用原理与技术实现详解">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/03/22/io-multiplexing/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="IO多路复用原理与技术实现详解">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-03-22T05:10:24.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.357Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta property="article:tag" content="AI">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/03/22/io-multiplexing/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>IO 多路复用原理与技术实现详解 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/03/22/io-multiplexing/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          IO 多路复用原理与技术实现详解
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-03-22 13:10:24" itemprop="dateCreated datePublished" datetime="2025-03-22T13:10:24+08:00">2025-03-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A0%94%E7%A9%B6%E6%8A%A5%E5%91%8A/" itemprop="url" rel="index"><span itemprop="name">研究报告</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>IO多路复用原理与技术实现详解</p>
+<span id="more"></span>
+
+
+
+<h2 id="1-IO-多路复用的定义、作用、历史演进和应用背景"><a href="#1-IO-多路复用的定义、作用、历史演进和应用背景" class="headerlink" title="1. IO 多路复用的定义、作用、历史演进和应用背景"></a>1. IO 多路复用的定义、作用、历史演进和应用背景</h2><h3 id="定义与作用"><a href="#定义与作用" class="headerlink" title="定义与作用"></a>定义与作用</h3><p><strong>IO 多路复用</strong>（I/O Multiplexing）是一种允许单个线程同时监视多个输入/输出描述符（如套接字或文件描述符）状态的技术。当任何一个描述符就绪（例如有数据可读或可写）时，程序便能获知并进行相应的读写操作，而在其他描述符未就绪时线程可以阻塞等待而不消耗CPU。简单来说，IO多路复用通过一个线程在“一个点上等待”，同时管理多个IO通道的事件，从而避免了为每个IO通道创建独立线程或进程的开销。其作用是在高并发场景下有效地调度众多IO事件，提升系统在大量并发连接下的资源利用率和响应能力 。</p>
+<p>IO 多路复用广泛应用于需要同时处理很多客户端连接的网络服务器等场景。例如一个高并发的Web服务器可能需要同时与成千上万个客户端保持连接。如果为每个连接都创建一个线程阻塞等待IO，不仅线程上下文切换开销巨大，内存消耗也会非常高。而通过IO多路复用，服务器可以使用少量线程就监视成百上千个连接的IO事件。当任何连接有数据可读写时，IO多路复用机制会通知应用，从而高效地处理众多并发请求。这种模式下，一个线程就能同时处理数以千计的并发连接，这正是著名的“C10K问题”（同时处理一万个客户端连接）提出的背景 。IO多路复用是解决C10K问题的关键技术之一，它通过事件驱动方式调度大量并发连接，避免了传统阻塞IO在高并发下的伸缩瓶颈 。</p>
+<h3 id="历史演进"><a href="#历史演进" class="headerlink" title="历史演进"></a>历史演进</h3><p>早期的操作系统只提供阻塞式的IO操作模式，一个线程在执行如<code>read()</code>或<code>recv()</code>时如果没有数据可读就会阻塞睡眠，无法同时处理其他IO 。为了解决一个线程同时等待多个IO事件的问题，<strong>IO多路复用系统调用</strong>被引入。最早出现的通用IO多路复用接口是BSD Unix在1983年推出的<code>select()</code>系统调用 。随后AT&amp;T的System V在1987年引入了功能类似但接口不同的<code>poll()</code>调用 。这两种调用后来都被纳入POSIX标准，成为早期Unix系統中<strong>跨平台</strong>监视多描述符事件的手段。</p>
+<p>随着互联网的发展和并发连接数的爆炸式增长，<code>select</code>/<code>poll</code>的线性扫描方式在高并发场景下暴露出严重的性能问题 。上世纪90年代末，社区提出了“C10K问题”，即如何让单台服务器有效处理一万个以上的并发连接 。为解决此问题，各大操作系统相继发展出更高效的IO多路复用机制：<strong>FreeBSD</strong>在2000年引入了<code>kqueue</code>作为可扩展的事件通知接口 ；<strong>Linux</strong>则在2002年由开发者Davide Libenzi引入了<code>epoll</code>机制（首次出现在Linux内核2.5.45版）；<strong>Windows</strong>则选择了不同思路，早在1994年就在Windows NT中加入了完成端口（I/O Completion Ports，IOCP）机制，用于高效处理异步IO完成通知 。这些新一代接口相较传统<code>select/poll</code>在设计上更注重性能扩展性，例如避免每次调用都线性遍历整个描述符集合，能够更好地适应成千上万并发连接的需求。</p>
+<p>IO多路复用技术伴随高并发网络的发展不断演进：从最初的<code>select/poll</code>到后来的<code>epoll</code>、<code>kqueue</code>等，操作系统内核不断优化事件通知的机制以减小随并发数增长的开销。比如Linux的<code>epoll</code>通过内核维护事件集合并采用近似O(1)的就绪事件获取，使服务器在应对上万连接时仍能保持高效 。得益于这些改进，到2010年代初，单台普通服务器就已经能稳定支持数百万级别的并发长连接：如WhatsApp曾在FreeBSD上利用<code>kqueue</code>和Erlang实现了单机200多万长连接的处理 ；又如MigratoryData项目在Linux上利用Java NIO（底层使用<code>epoll</code>）实现了单机千万级（1,000万）连接。这些里程碑式的案例体现了IO多路复用技术在高并发时代的核心地位。</p>
+<h3 id="应用背景"><a href="#应用背景" class="headerlink" title="应用背景"></a>应用背景</h3><p>在现代计算中，IO多路复用广泛应用于<strong>网络服务器、代理、中间件、数据库</strong>等需要同时处理大量网络连接或文件描述符的系统中。例如：Web服务器和反向代理（如Nginx、Apache）、即时通讯服务器、游戏服务器、分布式消息队列、负载均衡器等，都大量使用IO多路复用来管理成百上千的并发连接，实现高吞吐和高并发。对于这些应用，IO多路复用可以显著减少线程数量和上下文切换开销，在相同硬件上支撑数量级更多的客户端。</p>
+<p>不仅网络套接字，IO多路复用也可用于监视其他类型的描述符或事件源，如管道、FIFO、设备文件、IPC通信等。比如在Linux/Unix上，<code>select/poll/epoll</code>除了网络socket外也可监视本地管道、终端等的可读写事件；<code>kqueue</code>更是设计为通用事件通知机制，连文件系统变化、信号通知、定时器等都可统一通过kqueue事件获取。这种统一的事件处理模型方便构建<strong>事件驱动架构</strong>的程序，把各种来源的异步事件都归一化处理。</p>
+<p>总的来说，IO多路复用的出现是操作系统为应对高并发IO需求所做的关键改进。它通过在内核中高效等待和分发IO就绪事件，大幅提高了单线程管理多连接的能力，使得“单机万并发”成为可能。这一技术和<strong>事件驱动编程</strong>范式相辅相成，成为高性能服务器编程的基础。在接下来的内容中，我们将深入探讨各主流IO多路复用机制的原理和实现，以及它们在不同场景下的性能和应用差异。</p>
+<h2 id="2-主流-IO-多路复用技术的机制与适用场景"><a href="#2-主流-IO-多路复用技术的机制与适用场景" class="headerlink" title="2. 主流 IO 多路复用技术的机制与适用场景"></a>2. 主流 IO 多路复用技术的机制与适用场景</h2><p>本节将介绍几种主流的IO多路复用机制，包括经典的<code>select</code>、<code>poll</code>，以及现代的Linux <code>epoll</code>和BSD/macOS <code>kqueue</code>等。它们在实现机制上各有特点，适用的场景也有所不同。此外，不同操作系统还有一些其它变种机制（如Solaris的<code>/dev/poll</code>、<code>event ports</code>，Windows的IOCP等），也会简要提及。</p>
+<h3 id="2-1-select"><a href="#2-1-select" class="headerlink" title="2.1 select"></a>2.1 select</h3><p><strong>select</strong>是历史最悠久的IO多路复用系统调用之一，最初在1983年的BSD Unix 4.2中引入。其接口原型通常为<code>int select(int maxfd, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout)</code>。调用者需传入三个位掩码（<code>fd_set</code>）来指明要监视的文件描述符集合（可读、可写、异常），以及一个超时时间。调用<code>select()</code>后，进程会阻塞在内核，直到以下情况之一发生：所监视的描述符中有至少一个变为就绪状态（例如变得可读或可写），或超时时间到达，或者被信号中断。</p>
+<p><strong>实现机制</strong>：内核在处理<code>select</code>调用时，会遍历用户传入的描述符集合，对每个描述符检查其当前状态是否满足就绪条件 ([Async IO on 。如果调用指定了非阻塞检查（超时设为0）则立即返回就绪状态；否则在超时时间范围内，如果所有描述符都不满足条件，内核会将当前进程挂起等待。当底层驱动检测到某文件描述符状态改变时（例如socket收到数据变得可读），内核会唤醒在<code>select</code>上等待的进程并返回。返回后，内核会在传入的<code>fd_set</code>中标记出哪些描述符已就绪，同时修改传入的超时结构以反映实际等待时间（在某些实现中）。</p>
+<p><strong>优点</strong>：由于历史悠久，<code>select</code>具有<strong>极佳的可移植性</strong>。几乎所有类Unix系统（包括Linux、BSD、macOS等）以及Windows都支持<code>select</code>调用，这使得<code>select</code>成为早期网络程序员编写可移植高并发服务器的首选接口。即使在Windows上，没有<code>poll</code>或<code>epoll</code>时，也能通过<code>select</code>实现基本的IO复用功能（Windows的<code>select</code>在Winsock中实现，与BSD接口类似）。此外，<code>select</code>的超时参数可以精确到微秒级，这在需要亚毫秒级定时精度的场景下可能有用（尽管实际精度受限于系统调度）。</p>
+<p><strong>局限</strong>：<code>select</code>的主要问题在于<strong>性能和容量限制</strong>。首先，<code>select</code>采用<strong>线性扫描</strong>来检查描述符，每次调用都需要遍历整个描述符集合，这使其时间复杂度为O(n)，当监视的描述符数量很大时效率会线性下降 。例如监视1000个socket，其中只有1个有数据就绪，<code>select</code>仍需每次检查完这1000个fd才能返回就绪的那个，浪费大量CPU时间。当并发连接数增加到数千甚至数万时，这种线性开销将成为严重瓶颈 。事实上，有经验表明当监视的fd数量超过几百个后，使用<code>select</code>/<code>poll</code>轮询本身的开销就会显著影响性能。</p>
+<p>其次，<code>select</code>对监视的描述符数量存在<strong>硬性上限</strong>。它使用<code>fd_set</code>位数组来表示fd集合，通常默认大小只能容纳1024个文件描述符（由常量<code>FD_SETSIZE</code>定义）。如果应用需要监视超过这个数量的fd，就需要修改<code>FD_SETSIZE</code>并重新编译应用或库，在不同系统上可移植性不佳。有些系统允许调整此大小，但Linux上<code>FD_SETSIZE</code>在编译内核时固定，应用层无法动态扩容。因此，使用<code>select</code>天然限制了单个线程可监视的并发连接数上限（默认为1024，在Linux上即使增加宏定义编译应用也无法突破内核限制）。</p>
+<p>此外，<code>select</code>的使用还有一些繁琐之处：例如调用返回后，传入的<code>fd_set</code>会被内核修改，只保留就绪的fd标记且清除未就绪的，这意味着如果想在下一次调用中重用原始fd集合，就必须每次在调用前重新填充这些集合或保留备份副本 。这增加了编程负担和出错可能。另一个细节是，一些实现会在<code>select</code>返回时修改传入的超时结构以告知剩余时间，因此应用在每次循环调用<code>select</code>前都需要重新设置超时值 。</p>
+<p><strong>适用场景</strong>：鉴于上述限制，传统的<code>select</code>适用于<strong>中小规模并发</strong>且对性能极端要求不高的场景，或者作为一种<strong>通用的回退方案</strong>。比如在需要最大可移植性的应用中（跑在各种Unix和Windows平台），<code>select</code>依然是保证兼容性的选择。对于文件描述符数量有限（几百以内）的情况，<code>select</code>的性能尚可接受。一些简单的网络工具或教学示例也常使用<code>select</code>来演示IO多路复用原理。不过，在高并发服务器开发中，如果目标平台支持更高效的机制（如<code>epoll</code>或<code>kqueue</code>），<code>select</code>往往不是最佳选择，因为当并发连接上千以后它的性能问题会变得突出。</p>
+<h3 id="2-2-poll"><a href="#2-2-poll" class="headerlink" title="2.2 poll"></a>2.2 poll</h3><p><strong>poll</strong>接口是在1987年随System V Release 3引入的（在Linux内核中则于1997年的2.1版加入。它提供了与<code>select</code>类似的功能，即同时监视多个文件描述符的IO事件，但API设计上有所不同。<code>poll</code>使用一个结构数组（<code>struct pollfd</code>数组）来传递需监视的fd及感兴趣的事件，并通过返回该数组中就绪fd的事件类型来通知应用。调用形式通常为<code>int poll(struct pollfd *fds, nfds_t nfds, int timeout)</code>，其中<code>fds</code>是包含多个<code>&#123;fd, events, revents&#125;</code>结构的数组，<code>nfds</code>是数组大小，<code>timeout</code>为超时毫秒数。</p>
+<p><strong>实现机制</strong>：和<code>select</code>一样，<code>poll</code>在内核中也是通过遍历传入的描述符列表逐个检查其状态来实现等待的。不同的是，<code>poll</code>直接使用数组保存fd及事件，不受限于位数组大小，因此可以监视任意数量（理论上以内存为限）的文件描述符。调用<code>poll</code>时，内核将应用传入的pollfd数组拷贝到内核空间，然后阻塞当前线程等待事件或超时。内核检测各fd状态就绪时会设置对应的<code>revents</code>标志并唤醒线程返回。返回后，应用通过遍历传入的数组并检查<code>revents</code>字段来得知哪些fd就绪以及对应的事件类型。</p>
+<p><strong>优点</strong>：相较<code>select</code>，<code>poll</code>的主要优点之一是<strong>打破了1024个fd的上限</strong>，能够方便地处理大于1024的并发连接数。它使用动态数组，可以根据需要监视成千上万个socket而无需更改系统常量或重新编译内核。其次，<code>poll</code>不像<code>select</code>那样会修改用户传入的描述符集合结构——内核通过单独的<code>revents</code>字段返回结果，不会破坏原始的<code>events</code>设置 。这意味着我们可以重复使用同一个pollfd数组而不必每次重建，大大简化了代码逻辑。另外，<code>poll</code>支持的事件类型比<code>select</code>略丰富，例如可以区分读关闭（挂断）和错误等状态；尽管对于网络socket来说这些额外的事件标志不是绝对必要，但在某些情形下提供了更多信息。</p>
+<p><strong>性能考虑</strong>：在本质上，<code>poll</code>和<code>select</code>的内核实现复杂度是同级别的——每次调用都需要O(n)地线性检查所有fd，因此当监视fd数量很大时，二者都存在<strong>随连接数线性增长的CPU开销</strong> 。因此纯粹从速度上看，<code>poll</code>并不比<code>select</code>更快。不过，由于<code>poll</code>避免了一些<code>select</code>的额外开销（如每次需扫描位图最高fd索引），在某些场景下<code>poll</code>略有优势。例如，如果监视的fd集合分布稀疏且最大fd值远大于总数，<code>select</code>会浪费时间扫描无效的高位fd位图，而<code>poll</code>直接迭代有效数组元素，可减少无谓检查。另一方面，每个<code>pollfd</code>结构比位图中的1位要占更多内存（通常包含一个短整数的事件标志），调用<code>poll</code>需要在用户态和内核态之间拷贝比<code>select</code>更多的数据 （每个fd大约拷贝8字节信息，而<code>select</code>每个fd仅1位）。因此当fd数量不大时，<code>select</code>的内存拷贝开销更低，反而可能略快。这些差异总体来说影响不大，实际测试表明<code>select</code>和<code>poll</code>在相同数量fd下性能基本相当，都属于“<strong>慢</strong>”的类别 。</p>
+<p><strong>局限</strong>：<code>poll</code>继承了<code>select</code>的大部分缺点，其中最主要的是<strong>线性扫描导致的可扩展性瓶颈</strong>。对于上千甚至上万数量级的fd，<code>poll</code>每次调用都需要检查整个数组，效率会随着fd数线性下降，CPU消耗显著 。因此在非常高并发（比如上万连接）的场景下，<code>poll</code>和<code>select</code>一样显得力不从心。此外，<code>poll</code>在早期一些系统上的实现并不完善：例如旧版的macOS（如10.4及更早）中<code>poll</code>存在Bug，甚至某些老系统直接用<code>select</code>来实现<code>poll</code>。不过现代主流操作系统对<code>poll</code>的支持都已成熟。<code>poll</code>也无法避免多线程同时调用时可能遇到的“惊群”问题（后文讨论），这在<code>select</code>中同样存在。</p>
+<p><strong>适用场景</strong>：<code>poll</code>同样适合中等并发规模的网络服务，并在需要监视fd数量超过1024时优于<code>select</code>（因为避免了描述符数量限制和繁琐的FD_SET管理）。很多早期的高并发服务器在Linux上会优先采用<code>poll</code>而非<code>select</code>，以支持更大量的连接。实际上，在Linux的POSIX实现中，<code>poll</code>逐渐替代<code>select</code>成为默认的多路复用方案，因为它接口更灵活且无硬编码限制。但在非常高并发的要求下（成千上万连接），开发者往往还是需要更高级的机制（如<code>epoll</code>）。总的来说，如果目标平台没有更好的多路复用调用（比如Windows在Windows Vista之前没有<code>poll</code>，只能用<code>select</code>），<code>poll</code>是<code>select</code>的合理升级；但如果更先进的机制可用，<code>poll</code>通常也不是最终的解决方案。</p>
+<h3 id="2-3-epoll（Linux）"><a href="#2-3-epoll（Linux）" class="headerlink" title="2.3 epoll（Linux）"></a>2.3 epoll（Linux）</h3><p><strong>epoll</strong>是Linux特有的高性能IO多路复用机制。它在Linux 2.5开发版内核中被引入（2.5.45版，2002年)并在2.6稳定版中正式提供，其设计初衷就是替代旧有的<code>select</code>/<code>poll</code>接口以在大量文件描述符场景下提供更好的性能。顾名思义，epoll代表“事件轮询”（event poll），它通过一组函数调用（一般包括<code>epoll_create</code>/<code>epoll_ctl</code>/<code>epoll_wait</code>）让内核帮应用程序跟踪一组文件描述符的就绪状态。与<code>select/poll</code>的最大区别在于：<strong>epoll采用内核维护状态、增量通知的模式，避免了每次调用时对所有fd的重复扫描</strong>。</p>
+<p><strong>使用接口</strong>：典型的使用步骤如下 ：</p>
+<ol>
+<li>调用<code>epoll_create</code>或<code>epoll_create1</code>创建一个epoll实例，内核会返回一个epoll专用的文件描述符，用于标识内核中维护的事件集合。</li>
+<li>对每个需要监视的socket（或其他fd），调用<code>epoll_ctl</code>将其添加到epoll实例中，指定要监视的事件（可读、可写等）以及触发模式等。可以动态地添加、移除或修改监视的fd。epoll支持监视多种类型的fd（管道、FIFO、socket、设备等），但不支持普通文件 （因为对磁盘文件的IO几乎总是立即就绪，不适合事件触发模型）。</li>
+<li>在事件循环中，调用<code>epoll_wait</code>挂起等待监视集合中有事件发生。<code>epoll_wait</code>返回一个已就绪事件列表（包含发生事件的fd及事件类型）。应用遍历该列表，对每个就绪fd进行相应的读写处理。 </li>
+<li>重复调用<code>epoll_wait</code>持续获取事件。期间也可以随时使用<code>epoll_ctl</code>增删监视的fd或更改关注的事件类型。</li>
+</ol>
+<p>通过上述机制，epoll把监视fd集合的管理从每次调用内核搬到了<strong>持久的内核数据结构</strong>中。一旦将fd注册到epoll实例，内核就会“记住”这些fd，无需应用在每次等待时重复传入整张列表 。内核为epoll维护了一个数据结构（在实现上，Linux内核使用红黑树保存监视的fd集合，以及一个链表记录已就绪的事件）。当任何一个注册的fd发生了注册关注的事件（如socket变为可读），内核便将该事件加入到epoll的就绪队列。当应用调用<code>epoll_wait</code>时，如果有就绪事件内核会直接返回它们；如果没有则可以阻塞挂起等待。由于内核提前知道谁有事件且维护了就绪队列，<code>epoll_wait</code>无需像<code>select/poll</code>那样扫描所有fd，只需睡眠等待并获取已准备好的事件列表即可。这使得epoll在理论上对每个事件通知的处理复杂度接近O(1)（与就绪事件数成正比），而不像<code>select/poll</code>那样与总fd数线性相关 。</p>
+<p><strong>触发模式：</strong>epoll支持两种事件通知模式：**水平触发（Level-Triggered, LT）**和**边沿触发（Edge-Triggered, ET）**。默认是水平触发，即行为类似传统<code>select</code>：只要fd仍处于就绪状态，每次调用<code>epoll_wait</code>都会返回它（比如套接字缓冲有未读数据，在未读完前，每次都会通知可读）。边沿触发则更加高效但也更复杂：它只在fd从“不就绪”变为“就绪”的瞬间通知一次。如果应用不把数据读完，后续除非该fd再次出现新的数据（触发新的“边沿”）否则不会再次通知。这要求应用在收到ET模式通知后，必须尽可能地把该fd上的数据读空或写尽（通常用非阻塞IO循环读写直到返回EAGAIN），否则可能错过后续事件。ET模式减少了重复通知次数，适合高速IO场景，但编码难度较LT模式高一些。LT模式下则相对稳妥，哪怕一次没处理完数据，下次仍会通知。开发者可根据需求选择，在注册<code>epoll_ctl</code>事件时通过<code>EPOLLET</code>标志开启ET模式。</p>
+<p><strong>性能优势</strong>：epoll相对于<code>select/poll</code>的性能提升在大并发场景下非常显著。当监视fd数量为成千上万且其中活跃（就绪）的fd只是少数时，<code>select/poll</code>每次浪费大量时间检查不活跃的fd，而epoll仅返回实际发生事件的fd列表，避免了无效遍历 。这意味着随着并发连接数N增长，而每轮实际有事件的fd数k≪N时，epoll的开销近似与k线性相关，而<code>select/poll</code>则与N线性相关。举例来说，在典型的<strong>C10K</strong>（1万连接）服务器中，如果每轮仅有几十个连接有数据，epoll每轮处理几十个就绪事件即可，而<code>select</code>则每轮都检查完这1万个fd，这对CPU消耗的差异是巨大的。正因如此，epoll被认为能更好地解决高并发连接下的可扩展性问题 。</p>
+<p>除了降低事件检测开销，epoll还支持<strong>内核高效唤醒</strong>。例如，当fd变为就绪时，内核会将等待在<code>epoll_wait</code>上的进程唤醒并将事件加入就绪队列。如果多个事件同时到来，可以批量返回给应用，从而减少用户态/内核态切换次数。相比之下，使用<code>select/poll</code>在高并发下可能出现<strong>“惊群效应”</strong>（thundering herd）：如果有多个线程或进程同时在等待同一个fd集合上的事件，一旦事件发生，内核可能唤醒所有等待实体，造成无谓的调度开销。epoll通过使用专用的epoll实例和最近内核引入的<code>EPOLLEXCLUSIVE</code>等标志，在多线程场景下缓解了惊群效应，每个事件尽可能只唤醒一个等待线程 。</p>
+<p>当然，epoll也并非没有成本。在将fd注册到epoll时需要执行一次<code>epoll_ctl</code>系统调用，内核在内部要将该fd加入红黑树结构中，这个添加操作的复杂度是O(log N)。不过这属于初始化成本，频繁连接建立和关闭的场景下，这部分开销也需要考虑。此外，epoll的就绪事件通过一个固定大小的数组返回，如果瞬间有非常多事件，就需要多次调用<code>epoll_wait</code>取完或增大返回数组大小，但这些都属于可调节的次要因素。</p>
+<p><strong>适用场景</strong>：epoll几乎成为Linux上高并发网络服务的默认选择。凡是在Linux环境下追求高性能、高伸缩性的网络服务器或事件驱动程序，都会优先考虑使用epoll接口。例如著名的Nginx、Redis等服务器软件在Linux平台都是用epoll实现事件循环；Java的NIO在Linux上底层也是用epoll实现（后文详述）。对于需要处理数以千计乃至更多并发连接的场景，epoll能够更从容地胜任。在并发连接规模较小时，epoll相对于<code>poll</code>的优势不明显，但由于其接口也不复杂，许多应用直接使用epoll来统一代码。需要注意epoll是Linux特有的，不具备跨平台移植性，因此在编写可移植程序时通常通过封装库来调用不同平台的对应机制（如libevent等会在Linux下选用epoll，在BSD下选kqueue，在Windows下选IOCP等。</p>
+<h3 id="2-4-kqueue（BSD-macOS）"><a href="#2-4-kqueue（BSD-macOS）" class="headerlink" title="2.4 kqueue（BSD / macOS）"></a>2.4 kqueue（BSD / macOS）</h3><p><strong>kqueue</strong>是BSD系统（包括FreeBSD、NetBSD、OpenBSD，后来也被macOS采用）上提供的高效事件通知机制。它首先在FreeBSD 4.1（2000年7月）中推出，由Jonathan Lemon开发。kqueue在理念上与epoll类似，都是通过内核维护事件列表并支持高并发下高效事件传递的模型，但kqueue更进一步，提供了<strong>更通用和多样化</strong>的事件源支持。</p>
+<p><strong>使用接口</strong>：应用程序通过<code>kqueue()</code>系统调用创建一个kqueue实例（内核维护的事件队列），然后使用<code>kevent()</code>调用来注册事件、注销事件以及获取事件。<code>kevent</code>调用既可用来修改所监视的事件列表，也可用于等待事件发生并获取就绪事件列表。其调用接口相对复杂一些，但高度灵活：调用者传入希望注册/删除的事件列表，以及希望从内核获取的事件结果缓冲区和数量，内核执行相应的注册/注销操作后，可以阻塞等待指定数量的事件发生再返回（或立即返回已就绪的事件，或超时返回）。</p>
+<p><strong>事件源</strong>：kqueue最强大的地方在于其事件源（过滤器）的丰富和可扩展。除了网络socket的读写就绪事件外，kqueue还内置支持例如：文件描述符可读/可写、文件系统变化（VNODE事件，如文件被修改、删除等）、进程状态改变（如子进程退出）、信号递达、定时器超时、AIO完成等多种事件类型 () ()。通过kqueue，应用可以用统一机制监视<strong>多种不同类型</strong>事件，而不需要分别使用select监视IO、signal机制监视信号、定时器管理超时等——这一切都能由一个kqueue实例完成。这种统一的事件管理极大方便了复杂事件驱动程序的编写和扩展 () ()。比如，一个聊天服务器既需要处理socket消息，又需要处理定时心跳超时，还可能需要处理文件更新（如配置热加载）等，使用kqueue可以将这些不同来源的事件统一交给一个线程循环处理。</p>
+<p><strong>实现与性能</strong>：kqueue在内核中维护一个类似epoll的事件列表，但实现结构不同（FreeBSD内核中使用了一套称为“knote”的数据结构来跟踪事件）。当应用通过<code>kevent()</code>注册某个事件时，如果是监视某fd的可读，则内核在该fd的驱动中建立相应的记录（knote），以后该fd一有数据可读会将此knote标记激活并加入kqueue的就绪队列。当应用调用<code>kevent()</code>阻塞等待时，内核会查看队列里有哪些已就绪的事件并返回给应用。由于内核保存了状态，像epoll一样，kqueue无需每次遍历所有监视项——如果没有事件，调用可以睡眠等待，有事件则内核直接通知。因此kqueue也能实现近似O(1)的事件就绪通知性能，在大量fd情况下具有良好伸缩性。</p>
+<p>从性能对比来看，kqueue和epoll都能高效处理大量并发连接，就网络IO就绪通知这项任务而言，两者属于同一量级，没有本质上的性能差异，都远优于<code>select/poll</code>的线性开销 。一些基准测试表明，在监视一万个fd的情况下，如果每轮只有很少事件发生，kqueue和epoll的CPU消耗都很低且相近；如果每轮大部分fd都有事件，二者的开销也都会随事件数线性增加。但kqueue的优势在于，如果同时监视其他类型的事件（如文件变化、信号），它可以避免额外使用其他系统调用轮询那些事件，从而减少整体系统调用次数，提高整体效率 () ()。例如，用kqueue监视文件变化比通过定时去stat文件修改时间要高效许多 ()。另外，kqueue的设计考虑了减少系统调用次数，比如注册和等待可以合成一次调用完成，这也有助于性能。</p>
+<p>kqueue也有一些需要注意的地方：它最初是在单线程模型下设计的，与多线程配合使用时需要做好同步（macOS和部分BSD后来也支持了kqueue在多线程下的安全使用）。由于kqueue的事件种类繁多，正确使用各类filter需要仔细阅读文档，但对于常见的网络IO模式，它的用法和epoll类似。macOS在10.3开始引入了kqueue，因此macOS上的许多事件库也都会利用kqueue实现。</p>
+<p><strong>适用场景</strong>：kqueue适用于BSD家族系统及macOS上的高性能事件驱动编程。如果你的服务需要在这些平台上管理大量并发连接或者多种事件源，kqueue是非常理想的选择。许多跨平台网络库都会针对BSD/macOS使用kqueue以获得最佳性能（比如libevent在BSD上会选用kqueue后端）。具体应用场景如大型代理服务器、聊天服务器、游戏后端等在FreeBSD下通常都会用kqueue实现事件循环。kqueue的广泛事件支持也使其适合编写一些系统监控或后台服务程序（比如同时监视文件变化和网络请求的程序）。需要注意的是，kqueue是BSD特有接口，在Linux上不可用（Linux需使用epoll），因此跨平台开发一般需要抽象封装。</p>
+<h3 id="2-5-其他平台与机制补充"><a href="#2-5-其他平台与机制补充" class="headerlink" title="2.5 其他平台与机制补充"></a>2.5 其他平台与机制补充</h3><p>除了上述主要机制，不同操作系统还存在其他IO多路复用或事件通知接口：</p>
+<ul>
+<li><strong>/dev/poll</strong>：这是Solaris操作系统在90年代引入的一种机制。它通过一个伪设备文件<code>/dev/poll</code>提供类似epoll的功能：应用将文件描述符列表写入<code>/dev/poll</code>，然后可以读取就绪事件。<code>/dev/poll</code>避免了每次poll调用复制整个列表的开销，被认为是<code>poll</code>的改进版。Solaris 10之后又引入了更通用的<strong>Event Ports</strong>（<code>port_create</code>等接口），可视为Solaris版的kqueue 。</li>
+<li><strong>Windows IOCP（I/O Completion Port）</strong>：Windows采用完全不同的模型处理高并发IO，即完成端口机制。IOCP本质上是<strong>Proactor模式</strong>（后述）的一个实现，它不是等待“准备好可以读写”的事件，而是直接等待“IO操作完成”的通知。Windows应用通常先发起异步读写请求，然后使用IOCP等待操作完成并获取结果。IOCP能够在线程池间高效分配完成事件，性能非常出色，是Windows高性能服务器编程的基础。由于IOCP与<code>select/poll</code>模型差异较大，Java NIO在Windows上无法利用IOCP，只能退化用<code>select</code>模拟，导致Windows上Java NIO性能不如Linux（除非使用新的NIO2异步通道）。libuv等跨平台库在Windows内部也是用IOCP实现事件循环。</li>
+<li><strong>其他</strong>：AIX系统有自己的<code>pollset</code>接口 ，Linux早期还曾支持过POSIX AIO（异步IO接口）但因局限性未广泛应用。Linux 5.x引入的新接口io_uring（后面章节详述）则是最新的高性能IO机制。另外，还有一些用户态库封装甚至用户态实现的模拟，如在Windows上有开源的wepoll库，它在用户态封装IOCP使其看起来像epoll，以方便直接移植Linux代码在Windows运行。</li>
+</ul>
+<p>总之，各平台的发展趋势都是提供更高效的IO并发处理能力。对开发者而言，通常会借助抽象库来屏蔽不同平台细节。例如libevent、libuv等可以根据运行环境自动选择使用<code>select</code>、<code>poll</code>、<code>epoll</code>、<code>kqueue</code>或IOCP等最佳机制。因此理解不同机制的原理和差异，有助于在特定场景下做出优化选择或调优。</p>
+<h2 id="3-性能对比与典型场景分析"><a href="#3-性能对比与典型场景分析" class="headerlink" title="3. 性能对比与典型场景分析"></a>3. 性能对比与典型场景分析</h2><p>不同IO多路复用机制在性能上差异显著，尤其当并发连接数量和负载模式变化时，各机制的优劣会表现得更明显。本节我们分析<code>select</code>、<code>poll</code>与<code>epoll</code>、<code>kqueue</code>在不同场景下的性能特征，并结合典型使用场景讨论它们的优劣。</p>
+<h3 id="3-1-随并发连接数扩展的性能"><a href="#3-1-随并发连接数扩展的性能" class="headerlink" title="3.1 随并发连接数扩展的性能"></a>3.1 随并发连接数扩展的性能</h3><p><strong>线性扫描开销的问题</strong>：<code>select</code>和<code>poll</code>由于都采用线性遍历fd集合的实现方式，其等待开销基本与监视的描述符总数呈线性关系 。当连接数较少时（例如几十或一两百），这一开销是很小的，往往可以忽略不计。但当连接数上升到几百甚至几千后，线性扫描的成本开始变得不可忽视。经验表明，大约在几百个fd规模时，就可以观察到<code>select/poll</code>在等待IO事件上的CPU占用开始明显增长。如果继续增加fd数量到上千以上，那么每轮等待都会耗费相当的CPU时间在遍历检查上，成为服务器吞吐的瓶颈 。例如，一台服务器1万个连接中平均每次只有100个有数据，那么使用<code>select</code>/<code>poll</code>每次仍要检查10000个fd，而epoll/kqueue只需处理100个事件，其性能差距是数量级的。</p>
+<p><strong>O(n) vs O(1)<strong>：相对的，<code>epoll</code>和<code>kqueue</code>在设计上将每次等待的检查开销与总fd数解耦，转而与“活跃事件数”相关。这意味着在大部分连接空闲、少部分连接活跃的典型负载下，epoll/kqueue能显著减少每轮检查的fd数量。在极端情况下，如果所有监视的fd都没有任何事件，epoll/kqueue在等待时甚至不会遍历fd，而是睡眠等待硬件中断通知，一旦有事件直接定位相关fd返回。而<code>select/poll</code>即使无事可做也必须傻瓜式地每次扫完全集才能确认“无事件”。这种差异让epoll/kqueue在</strong>高并发、低吞吐</strong>（即大量连接维持但很少有事件）的场景下优势巨大。例如长连接保持的聊天服务器，用户空闲时连接很久才有一次消息，用<code>select</code>管理上万空闲连接会白白浪费大量CPU在无效遍历上，而epoll则几乎不消耗CPU就绪等待  。</p>
+<p>需要注意“O(1)”是相对概念：epoll/kqueue每次返回就绪事件本身还是要遍历那些就绪fd的（比如返回k个事件就要处理k个），因此更准确地说，epoll/kqueue的开销与<strong>发生事件的fd数</strong>成线性关系，而与<strong>总监视fd数</strong>无关 。在最坏情况下，如果每个轮次所有fd都发生事件（k接近N），那么epoll/kqueue也退化为O(N)需要处理每个fd的事件。但这种情况下一般应用本身的处理开销也已经是O(N)，多路复用机制的差异已不明显。而在常见的稀疏事件模型下，epoll/kqueue显著减少了不必要的检查工作。</p>
+<p>实际测量表明，当fd数量较多时（例如上千），<strong>事件驱动型</strong>（epoll/kqueue）的方案在性能上会早早胜出<code>select/poll</code> 。libev作者曾对不同机制做过benchmark，对比libev (epoll)和libevent (select)在不同连接数下的性能，结果显示大约几百个fd时事件驱动方案就已明显更快，且随着连接数增加优势继续扩大 。因此，对于追求可扩展性的系统设计者来说，一旦面对百级以上并发，就应考虑使用epoll/kqueue等<strong>“真正的事件驱动”</strong>方案 。</p>
+<h3 id="3-2-不同负载模式下的表现"><a href="#3-2-不同负载模式下的表现" class="headerlink" title="3.2 不同负载模式下的表现"></a>3.2 不同负载模式下的表现</h3><p>除了连接数量，总体负载模式（即活跃连接的比例和I/O频繁程度）也影响各机制的相对表现：</p>
+<ul>
+<li><strong>多数连接长期空闲，少数有流量</strong>：这是很多服务器的常见情况（比如长连接闲置等待，偶尔有请求）。在这种情况下，<code>select/poll</code>每次都白白扫描大量空闲fd。epoll/kqueue的优势被最大化：空闲连接不产生任何事件，不增加开销，而<code>select/poll</code>却因空闲连接数量庞大而浪费大量CPU时间。因此这种“<strong>多连接低活跃</strong>”场景下，epoll/kqueue相比select/poll往往能处理数量级倍增的连接而保持CPU占用率较低。</li>
+<li><strong>大部分连接都经常活跃</strong>：如果负载模式是几乎所有连接都有源源不断的数据（例如广播式应用，所有连接都同时收到消息），那么epoll/kqueue每轮也需要返回大量事件列表，<code>select/poll</code>每轮检查也几乎都会发现多数fd就绪。此时两类机制在每轮上的工作总量可能接近（都要处理N个活跃fd）。然而，即便如此，<code>select/poll</code>还承担着重复传输和重置fd集合的开销，而epoll/kqueue在内核中维护状态可能仍略胜一筹。此外，当所有fd频繁就绪时，传统<code>select</code>可能每次返回一个大批就绪fd，需要用户态再遍历处理，而epoll可以灵活控制每次获取事件的上限以分批处理大列表，避免长时间关锁在内核。总体来说，在<strong>“多连接高活跃”</strong>场景下，各方案都吃满负载，但epoll/kqueue不会比select/poll差，而且通常更<strong>灵活</strong>：例如可以结合多线程更好地分担负载（利用epoll的EPOLLEXCLUSIVE等特性避免惊群 ，而select在多线程下基本无法缩减惊群问题。</li>
+<li><strong>短连接、大量快速建立关闭</strong>：有些应用场景连接生命周期很短（如每个请求新建连接，处理完立即关闭）。这种情况下，epoll/kqueue的每个fd可能只注册监视一次就注销，持续的<code>epoll_ctl/kevent</code>操作带来的开销需要考虑。如果每秒成千上万个连接不断创建和销毁，epoll在内核插入和移除fd的操作（每次O(log N)的管理成本）累积起来也可能不小。而<code>poll</code>/<code>select</code>没有维护状态，每次处理当前有效fd即可，某种程度上避免了注册注销管理的开销。因此在<strong>极端高频率短连接</strong>模式下，当并发总量不高时，select/poll未必明显劣于epoll。不过这种模式下一般更好的解决方案是使用<strong>连接池</strong>或长连接以减少反复建立成本。另外，如果短连接并发总数依然很大，epoll仍会比poll有效很多（毕竟同时存在的fd数量大时，epoll的静态监视优势依然在）。所以仅在“中等并发+连接极短暂”情况下，也许poll的简单粗暴反而显得开销低一点点，但这不是主流场景。</li>
+<li><strong>内存与资源占用</strong>：select和poll在每次调用时都需要分配或拷贝一些数据结构：比如select要将用户空间的fd_set拷贝到内核，又将结果拷回；poll要拷贝传入的pollfd数组。epoll/kqueue因为持久维护状态，每次wait调用需要传递的数据非常小（比如只传一个epoll fd和一个用于接收结果的用户空间数组指针）。因此在每次系统调用的<strong>内存复制开销</strong>方面，epoll/kqueue也更有利，尤其当fd数很多时，select/poll拷贝的内存量会明显大于epoll的固定开销。另外select有描述符位图大小限制，会占用固定大小内存，而poll的内存占用随fd数线性。epoll/kqueue的内核结构占用也随监视fd数线性增加，但由于在内核，用空间换时间，也是设计取舍。</li>
+</ul>
+<p>综上，epoll/kqueue在绝大多数常见负载情况下都表现出比select/poll更好的伸缩性和效率。当连接数和事件频率都较小时，各方案差别不显著；但当二者之一提高时，传统select/poll往往首先达到瓶颈。除非一些特定情况（如中等并发下超高频短连接，或者需要最大兼容性且并发有限），否则选择事件驱动的epoll/kqueue通常能提供更高的性能裕度。</p>
+<h3 id="3-3-典型场景下的机制优劣"><a href="#3-3-典型场景下的机制优劣" class="headerlink" title="3.3 典型场景下的机制优劣"></a>3.3 典型场景下的机制优劣</h3><p>结合实际应用场景，可以更直观地理解选择哪种IO复用机制：</p>
+<ul>
+<li><strong>高并发长连接</strong>（如IM长连接服务器、游戏推送服务器）：这类场景下同时在线的连接数非常多，但每条连接的数据交互相对低频。epoll/kqueue无疑是首选，因为它们能轻松监控成千上万空闲连接而几乎不耗费CPU ([Async IO on Linux: select, poll, and epoll](<a target="_blank" rel="noopener" href="https://jvns.ca/blog/2017/06/03/async-io-on-linux--select--poll--and-epoll/#:~:text=,stuff">https://jvns.ca/blog/2017/06/03/async-io-on-linux--select--poll--and-epoll/#:~:text=,stuff</a> they have to do))。相反，用select/poll会浪费大量CPU空转检查空闲连接。实际案例中，如Nginx在Linux上利用epoll实现高并发的长连接保持，能够以单线程管理数万空闲长连接并在有请求时迅速响应，而不会像传统select模型那样撑满CPU。</li>
+<li><strong>高吞吐少连接</strong>（如少数几个连接需要极限吞吐的大数据传输）：如果只有很少几个连接但每个都需要传输极高的数据量（比如流媒体服务器同时给少数客户端传输），并发数不高的情况下select/poll也完全能胜任，性能上差别不大，因为fd数很少。不过此时多路复用的意义本身就不大，一般直接阻塞IO配合多线程即可。当然若还是使用多路复用模型，epoll/kqueue依然可以用，不会有什么坏处，只是优势不明显。</li>
+<li><strong>多路复用的跨平台开发</strong>：如果软件需要在Linux、Windows等多个平台运行，可能会倾向使用select作为最通用的实现，然后借助第三方库或条件编译在特定平台启用更好的机制。例如一些网络库默认用select以保证基本运行，然后检测到Linux时自动切换用epoll，提高性能。这样折中方案在并发不是特别高时可行，但如果目标就是最高性能，往往还是需要针对不同平台分别优化（比如Windows用IOCP模型，Linux用epoll）。</li>
+<li><strong>系统资源限制</strong>：在一些老系统或嵌入式系统上，可用内存和内核资源有限。select的实现相对简单，不需要在内核保存大量结构，所有fd集合都在用户栈上给出，可能反而开销小。而epoll/kqueue需要内核分配数据结构保存fd状态，占用内核内存（不过这点开销相对连接本身还是很小的）。总体说来，这不是主要矛盾，但在资源极端紧张时也许会考虑用更简单机制并发低一些。</li>
+<li><strong>代码复杂度</strong>：select/poll的代码逻辑相对直接：在一个循环中调用select/poll获取就绪fd列表然后处理，再重复。而epoll/kqueue增加了注册管理，需要处理注册和反注册操作，以及边沿触发等高级用法，代码相对复杂。但这些复杂性通常是为了换取更高性能和灵活性。对于要求简单可靠高于性能的场合，可能会倾向用稍简单的模型，比如poll。而对性能敏感的场合，则愿意付出代码复杂度成本来使用epoll/kqueue。后续的Reactor模型和实际框架部分会看到，为了方便使用epoll/kqueue，很多库对其进行了封装，降低了使用难度。</li>
+</ul>
+<p>总而言之，在现代服务器开发中，<code>select</code>/<code>poll</code>更多作为基本理论和备份手段存在，而在高性能实现中，Linux上的<code>epoll</code>、BSD上的<code>kqueue</code>已经成为主流选择 。它们表现出在高并发高负载下的明显性能优势，使单机承载的并发连接数突破过去的限制级别（从几千提升到几十万甚至更多）。实际应用中，开发者往往不会亲自在每个平台写一套事件循环，而是使用抽象框架（如Netty、libevent等）来统一调用，这些框架内部会根据平台选用最佳机制，从而同时兼顾性能和可移植性。下一节将介绍其中常用的事件驱动模型Reactor，它与IO多路复用密切相关，是高性能网络编程的重要设计模式。</p>
+<h2 id="4-Reactor-模型的工作原理与事件驱动设计"><a href="#4-Reactor-模型的工作原理与事件驱动设计" class="headerlink" title="4. Reactor 模型的工作原理与事件驱动设计"></a>4. Reactor 模型的工作原理与事件驱动设计</h2><p>高性能网络服务器通常采用<strong>事件驱动</strong>的设计模式来配合IO多路复用，其中最典型的就是<strong>Reactor模型</strong>。Reactor是一种软件设计模式，它将<strong>事件的等待与分发</strong>机制与<strong>具体的业务处理</strong>解耦，以高效地响应并发服务请求。通过Reactor模型，服务器可以在单线程或少线程的情况下同时处理大量并发连接上的IO事件，充分利用IO多路复用提供的能力，实现高并发下的高伸缩性。</p>
+<h3 id="Reactor模式概述"><a href="#Reactor模式概述" class="headerlink" title="Reactor模式概述"></a>Reactor模式概述</h3><p>Reactor模式的核心组成包括：</p>
+<ul>
+<li>一个或多个<strong>事件循环（Event Loop）/ 多路复用器</strong>：不断等待底层IO事件的发生（通常通过IO多路复用调用如epoll_wait、kevent等实现）。可以把它理解为整个系统的“心脏”，泵血般地驱动事件流动。</li>
+<li><strong>事件分离器/分发器（Demultiplexer/Dispatcher）</strong>：当事件循环检测到一个或多个IO事件就绪后，Reactor会将这些事件分离、分类，并分发给对应的<strong>事件处理器（Event Handler）</strong>。每个事件处理器一般和一个特定资源或连接关联，用于处理该资源上的特定事件。</li>
+<li><strong>事件处理器（Handler）/ 回调函数</strong>：封装了应用对某类事件的具体响应逻辑。例如Readable事件的处理器负责读取数据并按协议解析，Writable事件的处理器负责发送数据，Accept事件的处理器负责接受新连接，等等。Reactor在检测到相应事件后调用对应的处理器来执行业务逻辑。</li>
+</ul>
+<p>Reactor模式工作过程简要描述如下：</p>
+<ol>
+<li>主线程（或进程）初始化IO多路复用器（如创建epoll实例或kqueue）并注册感兴趣的事件（如“新连接可接受”事件，已有socket的可读可写事件等）。</li>
+<li>主线程进入事件循环，调用多路复用器等待事件。此时进程阻塞，不消耗CPU，直到有IO事件发生。</li>
+<li>一旦底层IO有事件（例如某监听socket上来了新连接，某连接socket收到数据），多路复用器返回相应就绪事件列表。Reactor获取该列表，遍历每个事件：<ul>
+<li>根据事件类型和对应的socket，将事件分配给预先绑定的事件处理器。例如监听socket的可读就绪意味着有新连接请求，交给Accept处理器；客户端socket可读就绪交给Read处理器；可写就绪交给Write处理器，等等。</li>
+<li>Reactor调用相应处理器的接口（通常是回调函数或对象方法），让处理器执行业务逻辑。如Accept处理器会调用<code>accept()</code>获取新连接fd并把这个新fd注册到多路复用器上监听其读写事件；Read处理器会调用<code>recv()</code>读取数据并封装成消息、高层协议解析，然后可能生成响应；Write处理器会将待发送数据写出等等。</li>
+</ul>
+</li>
+<li>处理器可能会产生后续动作，比如向多路复用器注册更多事件或修改事件关注（例如某连接暂时没有待发送数据了，可以取消监视可写事件，避免不必要的通知）。这些操作由Reactor或处理器协作完成。</li>
+<li>处理完这批事件后，Reactor再次进入下一轮事件等待。如此循环往复，持续地响应各个IO源的事件。</li>
+</ol>
+<p>通过Reactor，应用程序始终在事件驱动的节奏下运行：等待-&gt;获取事件-&gt;分发-&gt;处理-&gt;再等待…。由于IO等待由多路复用机制在内核高效实现，Reactor无需为每个连接占用一个线程等待IO，而是用<strong>少量线程</strong>即可管理大量并发连接。这正是高并发服务器能以低线程开销处理众多连接的根本原因。</p>
+<h3 id="单Reactor与多Reactor"><a href="#单Reactor与多Reactor" class="headerlink" title="单Reactor与多Reactor"></a>单Reactor与多Reactor</h3><p>最简单的Reactor模型是单线程单Reactor：即一个线程既充当事件循环，又直接调用各事件处理器处理业务。当每个事件处理都非常迅速（如只是收发少量数据）时，单线程方式可以最大程度减少同步锁开销和线程切换。但如果某些事件处理过程可能阻塞或耗时长，单线程Reactor就会挂起整个事件循环，阻塞其他连接的处理。这种情况下常见的改进是<strong>多Reactor线程</strong>模型。例如：</p>
+<ul>
+<li><strong>主从Reactor</strong>：一个主Reactor线程专门监听接受新连接事件，新连接一旦accept，就将新socket分派给某个从Reactor线程。从Reactor线程各自独立运行各自的事件循环，负责管理一部分已建立连接的读写事件处理。这样接受连接和处理IO分离，多线程并行，提高性能。典型的如Java NIO的实现就是一个Accept线程 + 若干IO工作线程的模型。</li>
+<li><strong>线程池处理</strong>：保持单Reactor线程只做事件分发，而把实际较复杂或耗时的业务逻辑交给线程池执行。即Reactor读取完数据后，不直接处理，而是投递一个任务到工作线程池处理（比如业务计算、数据库访问等），处理完成后可能再通过异步方式将结果发送。这种模式结合了事件驱动和多线程并发，既保持网络IO部分的单线程高效，又利用多线程处理CPU密集型任务。不过其复杂度增加，需要考虑线程间通信和同步。</li>
+</ul>
+<p>多Reactor模型可以视为对基本Reactor的扩展，核心思想仍是围绕IO多路复用进行事件分发，但使用多个线程/事件循环实例来扩展处理能力 。在设计上要注意避免多个线程竞争处理同一IO事件引发的问题（例如epoll实例尽量不被多个线程并发wait，除非使用了EPOLLEXCLUSIVE等确保每事件只到一个线程。</p>
+<h3 id="Reactor与Proactor的区别"><a href="#Reactor与Proactor的区别" class="headerlink" title="Reactor与Proactor的区别"></a>Reactor与Proactor的区别</h3><p>在讨论Reactor时，常会与另一种设计模式<strong>Proactor</strong>对比。两者主要区别在于事件通知的语义不同：</p>
+<ul>
+<li>Reactor模式下，内核通知的是“某描述符<strong>就绪可以执行某操作</strong>”事件，由应用来执行该操作并处理结果。比如通知套接字可读，然后应用调用recv读取数据。</li>
+<li>Proactor模式下，应用预先请求一个异步操作，由内核后台执行IO。当IO实际完成后（数据已读好或写完），再通知应用“操作已完成”，应用直接拿到结果使用即可。比如应用发起一个异步读请求，立即返回。当数据到达并读入缓冲后，内核通知应用“读操作完成，已读了N字节数据”，应用直接处理数据。</li>
+</ul>
+<p>Reactor偏重<strong>就绪通知</strong>（readiness），Proactor偏重<strong>完成通知</strong>（completion）。前者应用需要自己驱动IO操作，后者IO由内核完成。大多数Unix系的多路复用（select/poll/epoll/kqueue）都是Reactor型的，需要应用发起读写。而Windows的IOCP则是典型Proactor：应用Post一个读，OS完成后投递完成事件给IOCP队列。</p>
+<p>在实践中，Reactor模型较通用，尤其在没有原生异步IO支持的系统上是唯一选择。但其缺点是应用逻辑比较复杂，要反复响应事件、自己管理状态机。Proactor模型编程更接近同步思维，因为一个读请求发出后一觉睡到读完，再处理结果就好。随着Linux引入io_uring等接口，Proactor在Linux上也开始成为可能（后面趋势部分会讨论）。</p>
+<h3 id="Reactor模型的优缺点"><a href="#Reactor模型的优缺点" class="headerlink" title="Reactor模型的优缺点"></a>Reactor模型的优缺点</h3><p><strong>优点</strong>：</p>
+<ul>
+<li><strong>高并发处理</strong>：Reactor结合IO多路复用，可以轻松让单线程处理成千上万并发连接的IO，多线程扩展后更能充分利用多核，具有极高的并发伸缩性。</li>
+<li><strong>线程资源节约</strong>：相比线程/进程池模型，一个Reactor线程可管理众多连接，避免了创建海量线程的内存和调度开销。事件驱动本身也减少了上下文切换。</li>
+<li><strong>响应迅速</strong>：由于采用非阻塞IO，任何一个连接有数据准备好即可被及时发现和处理，不会因为别的连接阻塞而延迟（只要处理器及时处理事件）。在请求数量多但每个很短时，Reactor可以非常快速地轮询处理，提高总体吞吐。</li>
+<li><strong>扩展灵活</strong>：通过事件分发机制，新增一种事件处理只需添加新的Handler并注册即可，具有一定的可扩展性。同时通过主从Reactor、线程池等可以灵活调整并发模型。</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li><strong>编码复杂</strong>：事件驱动需要维护状态机，处理器往往是非阻塞的逻辑，需要仔细处理半包、粘包、异步流程控制等问题，代码相较同步直线模型复杂得多 。调试起来也更困难，逻辑不易跟踪。</li>
+<li><strong>单线程瓶颈</strong>：如果采用单Reactor线程模式，处理能力受限于单线程CPU，如果单个事件处理耗时长会阻塞整个循环。因此必须将耗时任务分离，否则影响整体性能。这增加了架构复杂度。</li>
+<li><strong>并发编程挑战</strong>：使用多Reactor或线程池后，虽然解决了长耗时任务的问题，但引入了多线程并发，涉及线程安全、锁竞争等问题。如果处理不好，可能出现微妙的并发Bug或性能下降（比如锁争用）。</li>
+<li><strong>延迟抖动</strong>：在高负载下，如果事件积压，同一线程顺序处理会导致某些连接事件得不到及时处理，出现处理延迟抖动。一般通过负载均衡分配、增加线程等缓解。</li>
+</ul>
+<p>整体而言，Reactor模式非常适合<strong>IO密集型</strong>并发场景（多数网络服务器就是如此），其缺点主要在于编程难度和对开发者要求高。不过成熟的框架（如Netty、libevent等）已经为我们实现了通用的Reactor模式，使我们能专注于业务逻辑。下一节会看到，Java NIO的Selector就是对Reactor模式的一种实现，Netty等框架进一步对Reactor进行了封装和抽象。</p>
+<h2 id="5-Java-NIO-的设计与实现细节"><a href="#5-Java-NIO-的设计与实现细节" class="headerlink" title="5. Java NIO 的设计与实现细节"></a>5. Java NIO 的设计与实现细节</h2><p>Java在1.4版（2002年）引入了新的IO库，即NIO（New I/O），为Java程序提供了非阻塞IO能力和IO多路复用机制。这使得Java也能方便地构建高性能的事件驱动网络应用。Java NIO的核心包括<strong>Channel（通道）</strong>、<strong>Buffer（缓冲区）</strong>和<strong>Selector（选择器）</strong>等组件。其中Selector正是实现IO多路复用的关键，它提供了类似操作系统<code>select/epoll</code>的功能，让单个线程可以监控多个Channel的IO事件。下面我们详述Java NIO的机制、Selector的原理以及NIO与传统阻塞IO的区别。</p>
+<h3 id="5-1-Selector-与多路复用原理"><a href="#5-1-Selector-与多路复用原理" class="headerlink" title="5.1 Selector 与多路复用原理"></a>5.1 Selector 与多路复用原理</h3><p><strong>Selector是什么</strong>：在Java NIO中，<code>java.nio.channels.Selector</code>类代表了多路复用选择器。一个Selector可以注册多个通道（Channel），并在某个通道有感兴趣的IO事件发生时通知程序。Java中的Channel类似于套接字描述符，它有SocketChannel、ServerSocketChannel等实现，支持非阻塞模式。因此Selector+Channel组合正是Reactor模式的Java实现：Selector负责监测事件，Channel封装IO端点，程序通过对Selector的查询来得知哪些Channel发生了事件，然后进行处理。</p>
+<p><strong>使用方式</strong>：典型的Java NIO服务端使用如下步骤：</p>
+<ol>
+<li>打开一个Selector实例：<code>Selector selector = Selector.open();</code></li>
+<li>将服务器Socket通道设为非阻塞模式，并注册到Selector上，关注OP_ACCEPT事件：<code>serverChannel.register(selector, SelectionKey.OP_ACCEPT);</code></li>
+<li>主线程进入循环：调用<code>selector.select(timeout)</code>等待事件发生。该调用会阻塞知道至少有一个注册的通道发生了我们关注的事件（或者超时/被中断返回）。</li>
+<li>一旦select返回，调用<code>selector.selectedKeys()</code>获取已就绪的SelectionKey集合。每个SelectionKey代表一个已注册通道的就绪事件，包括哪个通道、什么事件。</li>
+<li>遍历这些SelectionKey，根据事件类型分别处理：如果是OP_ACCEPT，就接受新连接并把新SocketChannel注册到Selector上关注读事件；如果是OP_READ，就从对应的SocketChannel读取数据；如果是OP_WRITE，就向对应通道写数据，等等。处理完成后需将该Key从selected集合移除，并可能根据需要重新注册关注的事件（比如读完数据后仍然关注读事件）。</li>
+<li>重复第3步，不断循环等待新的事件。</li>
+</ol>
+<p>可以看到，这几乎就是Reactor模式的直接体现：Java将底层细节封装了，开发者通过Selector提供的方法就可以执行事件等待和分发，而不必直接调用操作系统的select/epoll。非阻塞模式是必须的，因为只有通道为非阻塞，Selector才能在读写操作无法立即完成时不阻塞线程，从而实现单线程管理多通道。</p>
+<p><strong>底层实现</strong>：Java的Selector本质上是对操作系统本地多路复用机制的封装和抽象 。当我们调用Selector.open()时，JVM会根据当前操作系统选择相应的SelectorProvider实现。例如：</p>
+<ul>
+<li>在Linux上，SelectorProvider会创建基于epoll的Selector实现（在早期JDK1.4/1.5中采用<code>poll</code>, 从JDK1.6开始改为使用epoll，实现类为<code>EPollSelectorImpl</code>）。因此Linux下Java NIO用的实际上是epoll。</li>
+<li>在Windows上，由于没有poll或epoll，Sun的JDK使用了Windows自身的select函数（Winsock2的select）实现Selector。这种实现受限于Windows select的低效和FD_SET大小限制（默认64，可调），性能较差。而Windows提供的高级IOCP未被Java NIO的Selector直接采用，因为IOCP是Proactor模型，与Selector的就绪模型不一致 。</li>
+<li>在macOS/BSD上，OpenJDK的Selector会使用kqueue机制来实现（<code>KQueueSelectorImpl</code>）。因此macOS上的Java NIO性能也相当于kqueue的性能。</li>
+<li>其他系统如Solaris可能采用/dev/poll或poll实现。</li>
+</ul>
+<p>换言之，Java的Selector是一个<strong>可移植的抽象</strong>，屏蔽了平台差异，但<strong>内部尽可能利用平台最高效的IO多路复用机制</strong> 。这意味着在大多数系统上，Java NIO的效率接近本地epoll/kqueue调用效率，不会比用C直接调用慢多少，只是多了一层Java方法调用和对象开销。而在Windows上，由于只能用select模拟，其扩展性相比Linux epoll要差很多，这也是为何Netty等框架在Windows上性能不及Linux的原因之一 。</p>
+<p>Selector内部使用一些操作系统特定的系统调用，例如Linux下打开<code>/dev/epoll</code>，每个Selector.open()实际上创建了一个epoll fd；调用select()方法时，会触发JNI调用进入内核等待epoll_events；SelectionKey和Selector的关联在JDK里通过一些数据结构（如EPollArrayWrapper）管理。另外，为了唤醒阻塞在select()上的线程，Java NIO使用了一个内部的管道实现：每个Selector配一个“wakeup pipe”，当其他线程调用<code>selector.wakeup()</code>时，会向管道写数据，这会使正在阻塞的select返回（因为管道fd变为可读）。这一机制也是通过epoll注册了管道fd实现的。这些细节确保了Java NIO能安全地在一个线程里select，在别的线程里wakeup它。</p>
+<p><strong>Selector键集</strong>：值得一提的是SelectionKey，即前述每个注册的通道对应一个SelectionKey对象，包含通道、感兴趣事件集、实际就绪事件集等信息。SelectionKey用位标志表示事件种类（OP_READ等）。当事件发生后Selector将相应位设置到就绪集，供应用查询。SelectionKey还可以附带一个附件对象，方便用户存储与通道关联的上下文数据（例如Session对象），这样在拿到SelectionKey处理事件时可以快速获取应用状态。</p>
+<p><strong>问题与bug</strong>：Java NIO早期实现中曾出现过一些与Selector相关的问题。例如著名的“空轮询”bug：某些情况下Selector在有就绪事件时可能返回0导致进入空轮询从而CPU占满，这是JDK的一个缺陷（后来通过修改epoll等待方式修复）。另一个是epoll实现一度存在文件描述符泄漏或高负载下抛异常的问题，这些在现代JDK版本中大多已解决。总的来说，Java的epoll封装经历了从poll到epoll的改进，如今在Linux上Selector已经非常高效和可靠。</p>
+<h3 id="5-2-NIO-与传统阻塞IO的区别与优势"><a href="#5-2-NIO-与传统阻塞IO的区别与优势" class="headerlink" title="5.2 NIO 与传统阻塞IO的区别与优势"></a>5.2 NIO 与传统阻塞IO的区别与优势</h3><p><strong>阻塞IO模型</strong>：在引入NIO前，Java的网络编程主要依赖传统的阻塞式IO，即<code>java.net</code>包中的<code>ServerSocket</code>、<code>Socket</code>配合<code>InputStream/OutputStream</code>来读写。一条线程阻塞在<code>read()</code>调用上等待数据，一旦数据抵达即返回处理。阻塞IO的编程模型直观，一个线程处理一个连接，逻辑清晰顺序。但是在线程数量较多时扩展性不好，因为Java线程属于映射OS原生线程，成千上万线程会带来巨大的调度开销和内存占用（每线程栈内存+线程对象开销）。对于C10K这样的并发量，用阻塞IO意味着需要1万线程，这是难以承受的。</p>
+<p><strong>NIO非阻塞模型</strong>：Java NIO采用非阻塞IO + 单线程多路复用的模式，使得<strong>一个线程即可同时管理多个连接</strong>。Channel可以设置成非阻塞模式（<code>socketChannel.configureBlocking(false)</code>），之后对其调用read/write方法如果没有数据/无法写入会立即返回而不阻塞线程 。配合Selector，线程在Selector.select()处阻塞等待“哪些通道可以进行IO” 。一旦返回就可以针对这些通道执行非阻塞的读写操作。因为单线程循环处理事件，没有线程切换，因此对于大量并发且每次IO数据不大的场景，NIO模型可以大大减轻线程上下文切换和内存开销，提高整体吞吐。</p>
+<p><strong>资源利用优势</strong>：NIO让Java服务器在应对高并发时具有<strong>更好的资源利用率和伸缩性</strong>。例如，在传统阻塞模型下，1万个连接可能需要1万个线程，即使每线程很闲也至少要消耗1万个线程的基础资源。而NIO模型下，可能只用少数几个线程（甚至1个）就管理了这1万连接，让系统内存、调度压力都小得多。从经验数据看，采用NIO的Java服务器相比旧的阻塞模型，可以在相同硬件下支撑数倍到数十倍的并发连接数。</p>
+<p><strong>延迟和吞吐</strong>：NIO的优势主要体现在高并发吞吐场景，对<strong>单个连接的延迟</strong>来说，NIO不一定比阻塞IO更低。在空闲时，两者延迟相当；在高负载下，因为单线程要处理许多连接，一个连接的事件可能会因为前面队列里的其他事件而稍稍延迟处理，这就是NIO可能出现的“Head-of-line blocking”问题。但通过增加Reactor线程数（如Netty默认一核一个NioEventLoop线程）可以部分缓解这个问题，把连接分散到多个线程处理。阻塞IO模型下，如果每连接一个线程，那么理论上每个连接的IO一准备好就能被自己的线程处理，延迟可能更低一些。然而由于线程数太多，调度可能不及时，反而平均延迟会上升。所以一般来说，在适度并发下阻塞IO延迟低但线程成本高，在超高并发下阻塞IO基本不可行，而NIO在高并发下仍能保持可接受的延迟和较高吞吐。因此NIO更适合高并发IO绑定场景，而阻塞IO有时在低并发或IO很重而并发有限的场景下也未尝不可。</p>
+<p><strong>编程复杂度</strong>：NIO的缺点在于编程复杂度增加。开发者需要面对通道、缓冲区、选择键、状态等底层概念，不如使用阻塞Socket和流那样直观。比如用NIO读取半包数据需要自己缓存拼接，用阻塞流则Read调用直到读满缓冲或连接关闭。这也是为什么后来在更高层次Java引入了诸如<strong>Netty</strong>这样的框架来简化NIO编程。相较而言，阻塞IO的代码更容易编写和维护，但无法满足高并发需求。</p>
+<p><strong>典型应用区别</strong>：举一个简单例子：假设需要同时与1000个客户端保持连接并接受消息。阻塞IO做法可能是创建线程池（大小1000）让每线程阻塞在Socket.read()上，每来一个消息线程醒来处理。NIO做法是创建1~4个线程的事件循环，将1000个SocketChannel注册上去，由Selector通知哪个socket有数据，再按需处理。显然后者线程数少得多。实际上在Java生态中，传统阻塞IO用于例如早期的Tomcat BIO连接器（每连接一线程），而现代高性能服务器（如Netty、Grizzly、最新的Tomcat NIO连接器）都使用NIO模式，通过少量IO线程加业务工作池的模型支撑高并发。</p>
+<p><strong>NIO的优势总结</strong>：</p>
+<ul>
+<li><strong>可扩展性</strong>：以较少线程应对高并发连接，突破了每线程一连接模型的限制 。</li>
+<li><strong>性能</strong>：减少线程切换和调度开销，在大量空闲连接情况下尤其节省CPU。</li>
+<li><strong>灵活性</strong>：非阻塞模式下，一个线程可同时发起多路读写操作，提高链路利用率。</li>
+<li><strong>集成度</strong>：Java NIO不仅用于网络，也可用于文件IO、管道等，统一的Buffer/Channel模型让处理大文件、内存映射文件等更高效。</li>
+</ul>
+<p>因此，Java NIO自推出以来迅速成为构建高并发网络程序的基础。在Java NIO之上也出现了许多优秀的框架（Netty、Mina等）来封装底层细节。需要强调的是，NIO并非始终优于BIO（阻塞IO）——在连接数很少或编程简单性要求高的场合，BIO仍有用武之地。但随着并发要求的提升，NIO几乎是必然选择。现在主流的Java应用服务器（Tomcat、Jetty等）默认都采用NIO连接器；一些分布式中间件（如ZooKeeper早期用阻塞IO，后来也提供了NIO版本）也在向NIO演进。这充分说明了NIO在Java网络编程中的重要地位。</p>
+<h2 id="6-基于-IO-多路复用的主流高性能网络框架"><a href="#6-基于-IO-多路复用的主流高性能网络框架" class="headerlink" title="6. 基于 IO 多路复用的主流高性能网络框架"></a>6. 基于 IO 多路复用的主流高性能网络框架</h2><p>IO多路复用是许多高性能网络框架和库的核心基础。为了方便开发者使用并充分发挥多路复用的威力，业界涌现出一批优秀的网络框架，它们在内部封装了epoll、kqueue等机制，实现了健壮的Reactor模式，使开发者无需直接操作底层API就能构建高并发服务器。本节介绍几种主流框架：<strong>Netty</strong>（Java）、<strong>libevent</strong>（C）和<strong>libuv</strong>（C），看看它们如何基于IO多路复用构建高性能网络通信模块。</p>
+<h3 id="6-1-Netty-（Java框架）"><a href="#6-1-Netty-（Java框架）" class="headerlink" title="6.1 Netty （Java框架）"></a>6.1 Netty （Java框架）</h3><p><strong>简介</strong>：Netty是Java领域最知名的异步事件驱动网络应用框架。它提供了易用且高性能的API来构建各种协议服务器和客户端，比如常见的HTTP服务器、RPC框架底层通信等都广泛使用Netty。Netty的核心正是基于Java NIO实现的。它封装了Selector的使用细节，提供了事件循环组、ChannelPipeline等抽象，大大简化了编写Reactor模式服务器的难度。</p>
+<p><strong>基于多路复用的架构</strong>：Netty内部采用主从Reactor线程模型。一般有一个<code>boss</code>线程池用于处理Accept事件，多个<code>worker</code>线程池用于处理读写IO事件。每个worker线程对应一个NIO事件循环（基于一个Selector），称为<code>NioEventLoop</code>。当有新连接accept时，boss线程接受后创建Channel并注册到某个worker的Selector上。随后该连接的所有读写全由这个worker线程的事件循环处理。</p>
+<p>Netty对Java NIO Selector进行了良好封装，开发者几乎感觉不到Selector的存在，而是使用更高级的抽象。如Netty有<code>Channel</code>概念（类似SocketChannel的包装）和<code>ChannelHandler</code>链（Pipeline）概念。事件循环检测到某Channel有事件后，会触发相应的Handler回调。例如收到数据后，触发用户自定义的ChannelInboundHandler的<code>channelRead</code>方法。在实现上，这其实是Netty内部读取了SocketChannel的数据放入ByteBuf，然后调用handler，但对于开发者来说，就像框架帮你做好了一切准备，只需要处理业务数据。</p>
+<p><strong>多路复用的选择</strong>：Netty为了发挥各平台最大性能，提供了多种传输实现：默认使用Java标准的NIO（Selector），但在Linux上Netty可以使用JNI调用直接利用epoll，实现所谓“native epoll transport”，性能更佳。在MacOS上也有对应的kqueue native transport。Netty自动检测并默认使用这些本地传输（需要添加对应native库）。据Netty文档，这些JNI传输相比纯Java NIO有更低的垃圾回收和系统调用开销，在Linux上能利用一些epoll的额外特性 。例如Netty的epoll传输利用了<code>epoll_edge</code>边沿触发和<code>EPOLLEXCLUSIVE</code>避免惊群等高级选项，提高了效率。对于Windows，由于Java NIO无法使用IOCP，目前Netty暂时没有原生IOCP传输，因此Windows上Netty仍基于Java NIO Selector运行。</p>
+<p><strong>性能和特点</strong>：Netty通过精心的设计，实现了<strong>高吞吐、低延迟</strong>和<strong>低内存开销</strong>。得益于IO多路复用，Netty能用很少的IO线程处理大量连接。它内部采用<strong>批量读取</strong>、<strong>串联写入</strong>等优化降低了每次IO操作的系统调用次数。再加上内置的内存池管理（ByteBuf池化）等，使得Netty能胜任苛刻的高并发环境。例如，在Linux上Netty的epoll模式下，一台普通服务器可以用几线程处理几十万长连接的数据收发，这是传统同步BIO无法达到的。Netty提供的灵活Pipeline也方便插入各种协议编解码Handler，提高开发效率。</p>
+<p>典型应用如分布式通信框架gRPC底层就可选用Netty作为传输层；分布式缓存服务Memcached的Java客户端也用Netty；各类游戏服务器、聊天服务器中Netty也很常见。Netty成为事实上的Java网络编程标准，离不开IO多路复用提供的强大支撑。</p>
+<h3 id="6-2-libevent-（C语言库）"><a href="#6-2-libevent-（C语言库）" class="headerlink" title="6.2 libevent （C语言库）"></a>6.2 libevent （C语言库）</h3><p><strong>简介</strong>：libevent是C语言中广泛使用的事件通知库，由Niels Provos等开发（最初发布于2000年代中期）。它的定位是“<strong>取代事件驱动服务器中自行实现的事件循环</strong>”，为应用提供统一的API来注册事件和回调，并在多种操作系统上自动选择最高效的多路复用机制 。libevent支持多路复用后端包括：<code>select</code>、<code>poll</code>、<code>epoll</code>、<code>kqueue</code>、Solaris <code>evports</code>等等。使用libevent编写网络程序，往往不直接感知到底层用了哪种IO机制，这由libevent在初始化时检测决定。</p>
+<p><strong>事件循环封装</strong>：libevent的核心抽象是<code>event_base</code>（事件处理器上下文）和<code>event</code>（事件）。开发者创建一个event_base（相当于一个Reactor实例），然后将文件描述符及其感兴趣事件和回调函数注册为一个个event。之后调用<code>event_base_dispatch()</code>进入循环。libevent内部会根据平台选择例如epoll_wait或kevent等实现阻塞等待。当某个注册fd上发生了事件，libevent就调用对应的回调函数。libevent不仅支持IO事件，还支持<strong>定时事件</strong>和<strong>信号事件</strong>的回调，将这些不同来源的事件统一在一个event_base循环中处理。这类似于kqueue的多类型事件，只不过libevent自身做了抽象，在不支持的后端（如epoll不支持信号）时会采用其他方式模拟，从而对上层提供统一接口。</p>
+<p><strong>多线程</strong>：libevent在2.x版本后增加了对多线程的支持。可以选择让不同线程各自运行一个独立的event_base处理不同的一组事件（典型用法是一个监听线程+多个工作线程，各持一个event_base），或者也可以让多个线程共同处理一个event_base但需要加锁（一般采用前一种隔离法性能更好）。通过多线程，libevent也能构建类似主从Reactor的模型。</p>
+<p><strong>内部后端选择</strong>：libevent启动时或编译时会选择后端机制，例如在Linux优先使用epoll，在BSD上用kqueue，在Solaris上用evport，在Windows则用select（Windows只有select可用）。开发者也可以强制指定用某后端（比如有时为了调试强制用select等）。libevent会对不同后端的差异进行封装，例如epoll是水平触发的、kqueue有一些持久标志不同，libevent做了统一处理，确保回调行为一致。这种抽象极大方便了跨平台开发，同时保证了尽可能高的性能，因为每个平台上libevent都用到了最优的通知机制 。</p>
+<p><strong>应用与性能</strong>：libevent广泛用于各种C/C++项目，例如著名的memcached缓存服务器就使用libevent处理网络IO；Web服务器lighttpd也使用了libevent；很多研究性项目、竞赛作品等也乐于采用libevent快速构建网络模型。libevent经过长期打磨，性能和稳定性都很好。在使用epoll/kqueue的场景下，其性能几乎接近直接使用这些系统调用的水平，但大大降低了开发难度。值得一提的是，libevent还提供了更高级的封装如<strong>bufferevent</strong>（带缓冲的事件），可自动处理读写缓冲和水位控制，对于构建协议解析很有帮助。另外libevent还有对HTTP、DNS等常用协议的内置支持。这些都构建在它高效的事件循环之上。</p>
+<p>总的来说，libevent体现了一种典型模式：利用IO多路复用实现高效事件驱动，然后在其上封装易用接口。它的成功也启发了后来很多语言的事件库。libevent的缺点可能是接口偏底层（基于C语言函数回调），相对于C++的面向对象框架来说不那么友好。但这无碍它成为后端服务器开发的利器之一。</p>
+<h3 id="6-3-libuv-（跨平台异步IO库）"><a href="#6-3-libuv-（跨平台异步IO库）" class="headerlink" title="6.3 libuv （跨平台异步IO库）"></a>6.3 libuv （跨平台异步IO库）</h3><p><strong>简介</strong>：libuv是另一个广受关注的异步IO库，由Joyent公司为Node.js开发并开源。最初Node.js在不同平台上采用不同机制（Linux用epoll，Windows用IOCP等），为统一这些实现便诞生了libuv。如今libuv作为独立项目，被用于不仅限于Node.js的各种应用中，包括很多C/C++应用和其他语言的绑定。libuv的特点是<strong>跨平台</strong>和<strong>丰富功能</strong>：它不仅封装网络IO事件循环，也提供文件IO、DNS解析、线程池等异步功能，是一个综合的异步编程平台。</p>
+<p><strong>事件循环与后端</strong>：和libevent类似，libuv也有一个事件循环结构<code>uv_loop_t</code>，可以在其中添加各种IO句柄（<code>uv_handle_t</code>）和请求（<code>uv_req_t</code>）。当我们调用<code>uv_run(loop)</code>时，libuv进入事件循环，在内部使用合适的IO多路复用机制等待事件。libuv支持的后端包括：Linux的epoll，BSD的kqueue，Solaris的event ports，Windows的IOCP等 。可以说libuv把几乎所有主流OS的高效IO方案都封装进来了 。例如在Linux上<code>uv_run</code>实际上会触发一次<code>epoll_wait</code>等待事件；在Windows上则提交异步IO请求并通过GetQueuedCompletionStatus等待IOCP完成 。这些都在libuv内部做好，用户根本不需要关心。</p>
+<p><strong>异步编程模型</strong>：libuv除了网络socket的事件，还统一了<strong>文件IO的异步化</strong>。由于POSIX文件IO无法用epoll监视是否可读写，libuv采用线程池来执行文件读写，然后把完成事件投递回事件循环（等价于异步完成通知）。这样，libuv对外表现也是异步的：你可以调用<code>uv_fs_read</code>请求读取文件，提供回调，libuv会在线程池中执行实际阻塞读，读完后在主loop里调用你的回调。对于DNS解析、用户自定义计算任务等，libuv也使用类似线程池机制，使之融入统一的事件循环。这种模式结合了Proactor的思想，让libuv的事件循环不仅处理socket事件，也处理各种异步任务完成事件。</p>
+<p><strong>多线程</strong>：libuv本质上是<strong>单线程事件循环</strong>（就和Node.js一样），并不提供多线程并行执行多个loop的方案（可以手动创建多个loop在多线程中各跑各的，但libuv不提供内在的多线程调度）。Node.js采用的是一个loop跑在主线程，其它计算密集任务通过线程池搞定。所以libuv更像是提供一个完整的<strong>异步运行时</strong>而非专注多线程并行。不过，在C/C++应用中，开发者完全可以启动多个线程各自运行一个独立的uv_loop以利用多核。</p>
+<p><strong>应用</strong>：libuv最知名的应用就是Node.js的底层。Node的JavaScript单线程模型完全依赖libuv来处理包括网络IO、文件IO、计时器等所有异步事件。libuv的成熟直接关系到Node的性能与稳定。除此之外，很多其它语言和项目也绑定了libuv，如Julia语言的异步IO就是基于libuv，Python的uvloop库用libuv重写了asyncio提高性能。C++中也有人直接用libuv编写服务器。</p>
+<p><strong>性能</strong>：libuv在网络IO方面性能与libevent、epoll等相当，因为底层就是调用epoll_wait/kqueue等。在Windows上libuv通过IOCP实现，能充分发挥Windows性能 。Node.js的性能表现已经证明了libuv的实力：尽管JavaScript本身速度不算快，但Node能处理相当高的并发连接，瓶颈往往在于应用逻辑而非事件处理。这说明libuv对多路复用的封装并没有带来明显的开销。需要注意libuv在执行异步文件IO时因为使用线程池，所以如果大量使用磁盘IO可能受限于线程池大小和线程切换，但这属于设计权衡，不是IO多路复用部分的问题。</p>
+<p>总而言之，libuv体现了一种跨平台的抽象，把各操作系统最优的IO机制统一起来，并辅以线程池完成无法直接异步化的工作，从而提供给上层一个<strong>统一且强大的异步编程接口</strong>。这对提升开发效率和代码可移植性非常有价值。可以认为libuv是对IO多路复用在更高层次上的一次封装和补充，使之成为一套完整的异步事件处理框架。</p>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>无论是Java领域的Netty，还是C语言的libevent、libuv，它们都充分利用了IO多路复用带来的并发处理能力，并在其上构建了抽象层以简化开发。这些框架/库的成功证明了：<strong>将底层细节交给成熟的多路复用框架处理，开发者专注于业务逻辑</strong>，是构建高性能网络应用的有效途径。IO多路复用提供了基础的“同时等待多个事件”能力，而框架则决定了如何使用这一能力达到优化效果。例如Netty通过Pipeline流水线让数据处理解耦并并行，libevent通过统一事件源减少了额外系统调用，libuv通过线程池隐藏了阻塞操作。可以说，这些都是对IO多路复用技术的灵活运用和发扬光大。</p>
+<h2 id="7-IO-多路复用的问题与发展趋势"><a href="#7-IO-多路复用的问题与发展趋势" class="headerlink" title="7. IO 多路复用的问题与发展趋势"></a>7. IO 多路复用的问题与发展趋势</h2><p>尽管IO多路复用技术已经相当成熟并支撑了当前大量的高并发系统，但随着需求演变和硬件发展，仍不断有新的挑战出现，相应地也催生了新技术和新模型来改进。在本节，我们讨论当前IO多路复用所面临的一些问题以及未来的发展趋势，包括Linux中新出现的<code>io_uring</code>接口以及更高层次异步编程模型的演进。</p>
+<h3 id="7-1-现有机制的局限与问题"><a href="#7-1-现有机制的局限与问题" class="headerlink" title="7.1 现有机制的局限与问题"></a>7.1 现有机制的局限与问题</h3><p><strong>系统调用和上下文切换开销</strong>：即便使用了epoll/kqueue，事件驱动模型每次仍需进行系统调用（如<code>epoll_wait</code>)来进入内核等待，线程在事件到来时从睡眠转为运行，这涉及用户态/内核态切换和调度开销。对于非常高频的小数据包场景，这种开销占比会变明显。例如每个数据包几十字节，但每来一个包都要唤醒线程处理一次，再休眠，如此频繁上下文切换成为瓶颈。如果能批量处理或减少切换频率，则可提升效率。</p>
+<p><strong>数据拷贝与缓存命中</strong>：传统IO模型，无论阻塞或非阻塞，多路复用本身不解决内核与用户空间的数据拷贝问题。比如每次<code>read()</code>/<code>write()</code>仍要把数据在内核缓冲和用户缓冲之间复制。当流量极大时，这种内存复制成本也很高。另外，多路复用只能通知“可以读/写”，实际IO操作还是要用户进程发起，数据不得不在两层空间间搬运。</p>
+<p><strong>并发线程协调</strong>：epoll在最初设计时主要面向单线程，如前述，如果多个线程共享一个epoll fd，会遇到难以公平分发事件的问题。Linux后来添加了<code>EPOLLEXCLUSIVE</code>等flag来允许多个线程wait同一个epoll fd时避免惊群。但在多核时代，常见的模式是<strong>多实例多路复用</strong>（比如多个epoll，各处理一批连接），需要上层自行做好负载均衡（如根据连接ID哈希分配）。如何充分利用多核且保持编程简单也是个课题。理想情况下，希望能有机制像IOCP那样，一个队列里事件由多个线程消费且不重复。</p>
+<p><strong>文件IO与网络IO分裂</strong>：长久以来，Unix系的异步IO主要针对socket等“慢设备”，对本地文件IO无能为力。应用往往需要针对网络IO用epoll事件驱动，而对文件IO使用阻塞或线程池伪异步。这使得编程模型不统一，也无法通过一个机制同时高效管理磁盘和网络事件。虽然后来有AIO接口，但Linux的POSIX AIO是通过线程模拟的，性能和易用性都不理想。</p>
+<p><strong>编程复杂度与错误</strong>：事件驱动编程相较同步编程复杂，容易引入各种逻辑错误。例如忘记在处理后重新注册事件、没有处理好边沿触发下未读尽数据导致饿死、或对异常情况处理不足造成事件循环卡死等。虽然这不是IO多路复用接口本身的问题，但它影响着异步模型的应用推广。很多开发者更愿意用同步模型配合多线程，因为代码更直观。</p>
+<p><strong>低延迟场景</strong>：在一些对极低延迟抖动敏感的场合（如高频交易），Linux传统的epoll可能并非最佳方案。因为应用线程在用户态无法精确知道什么时候数据到了，只能依赖内核调度唤醒，有一个调度延迟。另外epoll_wait本身等待需要进入内核，也有一些微秒级的损耗。为此Linux提供过一些polling选项如忙轮询（busy poll）等，让应用在内核忙等一段时间以减少延迟，但那又增加了CPU占用。总之在极端低延迟需求下，如何更直接地拿到IO事件是个挑战。</p>
+<p><strong>epoll的一些设计缺陷</strong>：前文提到的epoll对于文件描述符是按底层对象而非fd号注册 。这导致fork子进程继承描述符或dup描述符时有意外行为：子进程如果不关闭描述符，会干扰父进程epoll实例（因为指向同一底层对象）。尽管这些可以通过良好编程规避（fork后关闭不必要fd等），但无疑增加了复杂性。另一个例子，epoll的<code>EPOLLONESHOT</code>模式和手动重装事件要求也让一些开发者困惑，虽然这是为了解决多线程处理同步问题提供的机制。此外，内核实现层面，epoll红黑树在大批量增删fd时可能有性能压力（虽然一般不成问题），以及epoll的事件队列如果不及时处理可能内存增加。这些都属于具体实现局限。</p>
+<h3 id="7-2-io-uring：Linux新一代IO接口"><a href="#7-2-io-uring：Linux新一代IO接口" class="headerlink" title="7.2 io_uring：Linux新一代IO接口"></a>7.2 io_uring：Linux新一代IO接口</h3><p>为了解决上述部分问题，Linux社区在2019年引入了全新的异步IO接口：<strong>io_uring</strong> 。io_uring的出现被认为是Linux IO系统的重大变革，特别是在统一文件与网络IO、减少系统调用开销等方面给出了创新方案。</p>
+<p><strong>基本原理</strong>：io_uring采用了<strong>环形缓冲区</strong>通信机制，提供了<strong>提交队列（SQ）</strong>和<strong>完成队列（CQ）</strong>共享内存区。应用进程可以直接将IO请求（如读写操作）放入提交队列并通知内核，内核执行后将结果放入完成队列，由应用读取。这一模型具有以下特点：</p>
+<ul>
+<li><strong>异步提交与完成</strong>：应用线程无需阻塞等待IO操作完成，可以继续做其他事，完成后再通过查询CQ获取结果。内核在后台执行IO，相当于Proactor模式的实现 。</li>
+<li><strong>减少系统调用</strong>：由于SQ/CQ在内核和用户间共享内存，应用提交多个IO请求可以只用一次系统调用（<code>io_uring_enter</code>或通过门限批处理）甚至零系统调用（内核支持在某些条件下自动收取SQE）。完成通知也可以批量获取。相比每个IO一次read/write系统调用，io_uring大幅减少了系统调用频次。</li>
+<li><strong>统一接口</strong>：io_uring最初主要支持文件异步IO（克服旧AIO不足），但很快扩展支持网络socket、管道、设备IO等几乎所有类型fd 。更妙的是，它不仅支持类似read/write这样的操作，也支持connect、accept这些可能阻塞的操作异步化，以及支持文件文件描述符上等待数据（相当于替代poll）。这样，io_uring几乎可以看作同时实现了非阻塞IO和阻塞IO的异步化，统一了接口。</li>
+<li><strong>性能优化</strong>：io_uring可以使用<strong>内核线程池</strong>处理一些无法直接非阻塞的操作（如文件IO），类似libuv线程池，但这是内核态完成，避免用户态切换。io_uring还提供所谓<strong>提交合并</strong>、<strong>SQ poll</strong>等高级特性，比如SQ poll模式下，内核一个内核线程会轮询提交队列，从而应用提交IO不需要系统调用通知内核，实现真正的零系统调用异步IO。当数据在内核缓冲已就绪时，io_uring甚至可直接拷贝给用户（通过<code>IORING_FEAT_FAST_POLL</code>等特性），避免传统epoll等待再read的两步。</li>
+</ul>
+<p><strong>相对于epoll的优势</strong>：io_uring与epoll定位稍有不同。epoll解决的是事件通知问题，但IO操作还是同步由用户发起；io_uring则进一步把实际IO读写也纳入异步体系 。具体优点包括：</p>
+<ul>
+<li>批量提交和完成减少了系统调用开销，特别适合大量小IO的场景（每个包需要一次系统调用的时代将过去）。</li>
+<li>提供异步文件IO能力，与网络IO统一在同一队列机制中。这对需要同时处理文件和网络的应用非常有利，不再需要两套机制。</li>
+<li>更少的用户态干预意味着更高效。例如过去epoll告诉应用“可读”-&gt;应用调用read-&gt;内核拷贝数据，这三个步骤在io_uring中可能就变成：应用发一个读请求-&gt;内核拷贝数据后放结果，应用直接拿数据用。步骤更少，延迟更低。此外，如果数据本就在内核缓存中，io_uring可以让读取不涉及上下文切换。</li>
+<li>对多线程更友好。io_uring的设计允许多线程并发提交IO请求以及并发获取完成事件，而且内核可以公平处理。同时，一个请求完成后哪个线程来处理取决于应用设计，可以将结果分发到工作线程，不局限于发出请求的线程。</li>
+<li>支持一些高级功能例如超时（直接在io_uring层设置某请求超时时间）和链式依赖（可以指定一系列请求顺序执行，前一个不成功则不执行后续），这些都在内核中完成，减少用户参与。</li>
+</ul>
+<p>自2019推出后，io_uring不断扩展，现在已经支持发送recv、普通文件IO、文件目录操作、splice/sendfile等众多操作的异步化，几乎可以当成一个通用异步IO子系统。很多benchmark显示，在某些场景下io_uring性能显著优于传统epoll+非阻塞IO。例如每请求小数据情况下，io_uring可以比epoll+read减少一半以上延迟和CPU占用。这使得很多项目开始尝试利用io_uring。</p>
+<p><strong>应用前景</strong>：io_uring目前需要较新内核（5.10+比较成熟），支持也在逐步进入各语言生态。例如：</p>
+<ul>
+<li>Netty已经有实验性的io_uring传输实现，可以替代epoll（在Linux新内核上跑，性能有提升） 。</li>
+<li>一些数据库（如KV存储）尝试用io_uring做文件IO，以提高SSD访问并发效率。</li>
+<li>高性能代理如HAProxy也在研究io_uring模式。</li>
+<li>io_uring配合Linux <code>splice</code>零拷贝，可以实现网络数据更高效转发。</li>
+</ul>
+<p>可以预见，随着io_uring成熟，其将逐步融入主流高并发服务器架构中，有望成为新的“epoll”。值得注意的是，io_uring并非完全取代epoll，因为使用模型不同；但对于新系统，直接基于io_uring实现一个Proactor模式或混合模式的事件循环是很有吸引力的。未来或许会出现封装io_uring的高层库，就像过去的libevent封装epoll一样，帮助开发者更方便地过渡到io_uring。</p>
+<h3 id="7-3-异步编程模型的新趋势"><a href="#7-3-异步编程模型的新趋势" class="headerlink" title="7.3 异步编程模型的新趋势"></a>7.3 异步编程模型的新趋势</h3><p>在IO多路复用不断演进的同时，高层的异步并发编程模型也在发展，以降低开发复杂度并提高性能。近年来的趋势包括：</p>
+<p><strong>协程和Async/Await</strong>：许多编程语言引入了<strong>协程</strong>（Coroutine）或<strong>async/await</strong>语法糖，使得编写异步代码像写同步代码一样直观，但运行时依然使用事件循环驱动。比如JavaScript的async/await、Python的asyncio、C#的async/await、C++20的协程等等。这些语言特性本质上在编译器/解释器层把异步状态机帮开发者维护了，开发者无需直接与回调或事件打交道，大大降低了事件驱动编程的心智负担。但底层实现仍然离不开IO多路复用提供的事件轮询机制。例如Python asyncio默认用select或epoll实现事件循环，JS的V8引擎通过libuv使用epoll/kqueue，C#的await会调度到IOCP事件完成端口。可以说，<strong>多路复用+事件循环仍是幕后英雄</strong>，只是前台写代码的人不感受到罢了。这种趋势表明，在未来，开发者可能更少直接使用如epoll_wait这样的低级接口，而更多依赖语言级异步构造，由语言运行时帮我们调用多路复用。但IO复用的重要性丝毫未减，只是被封装得更好了。</p>
+<p><strong>用户态线程（纤程）</strong>：另一趋势是回归<strong>同步编程模型</strong>但结合调度优化。典型例子是Go语言的goroutine模型和近期Java的Project Loom（虚拟线程）。它们的思路是提供大量轻量级线程，这些线程可以阻塞式调用IO，但底层运行时会把阻塞操作转化为异步事件等待，从而避免阻塞底层OS线程。例如Go的运行时针对网络IO，内部使用一个epoll线程持续等待所有goroutine的socket事件，某goroutine要读取socket时，如果数据未就绪，就挂起该goroutine（不阻塞OS线程），等epoll通知有数据时再唤醒对应goroutine继续执行。这实质上就是<strong>在运行时封装了Reactor/Proactor机制</strong>来支撑成千上万的同步风格协程。 ([Reactor pattern - Wikipedia](<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Reactor_pattern#:~:text=The">https://en.wikipedia.org/wiki/Reactor_pattern#:~:text=The</a> reactor software design pattern,1)) ([Reactor pattern - Wikipedia](<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Reactor_pattern#:~:text=By">https://en.wikipedia.org/wiki/Reactor_pattern#:~:text=By</a> relying on event,1))Java的虚拟线程也是类似，会在阻塞IO调用处挂起虚拟线程，用底层Selector等待后唤醒。这种用户态线程模型具有代码编写简单且并发量巨大的优点，兼顾了一定性能（虽然会有调度开销，但往往值得）。可以预见未来更多语言和框架会采用协程+多路复用的架构，因为这在人机效率和执行效率之间取得很好平衡。</p>
+<p><strong>网络协议栈与内核改进</strong>：除了编程模型的演化，底层内核和网络协议也在改进以配合高并发IO需求。例如eBPF技术让应用可以在内核中注册小型程序处理某些事件，未来或许可以让用户定制网络事件的处理逻辑部分下沉到内核，减少用户态交互。同时，硬件如NVMe的异步特性、网络卡的多队列、中断调度等也影响着IO多路复用的实现。在Linux5.x时代，io_uring已经考虑了利用内核任务调度和缓存机制来最大化性能，未来可能进一步优化内核调度以降低延迟。</p>
+<p><strong>统一异步编程范式</strong>：过去我们区分事件驱动(Reactor) vs 完成端口(Proactor)。现在的趋势是两者界限变模糊。像io_uring这样的接口，本质上提供了完成通知模型，但也支持纯事件等待（比如通知socket可读，有点Reactor味道）。现代框架可能结合两种模式：比如先用Reactor等待可读，然后用Proactor式读多个包等。在更高层，开发者不太关心是哪个模式，只要保证高效和易用。因此我们会看到未来的库淡化具体模式概念，更多是对开发者呈现异步任务队列+回调或future的形式，然后在内部灵活使用最佳机制。</p>
+<p><strong>多路复用应用范围扩展</strong>：以前多路复用主要用于网络，现在有扩展到其他领域的趋势。比如GPU计算中的流，多数据源合并等等。虽然那些不是传统IO，但概念上类似：等待多个源的完成通知。这可能催生更通用的事件机制。</p>
+<p>综上，IO多路复用作为高并发IO处理的基石，其重要性不会减弱。新出现的io_uring在Linux中为IO多路复用/异步IO树立了新的里程碑 ；而异步编程模型的发展则让我们以更友好的方式使用这些高性能工具。可以预见，将来开发者可能不再直接编写epoll_wait循环，而是使用语言自带的async/await或虚拟线程来编写并发逻辑，但底层运行时会更加智能地利用包括io_uring在内的各种IO机制。同时，对性能极致追求的场景，io_uring等提供的更高效率接口也将逐步成熟并普及。这一切指向一个方向：<strong>让高并发编程既高效又高效（效率和开发效率）</strong>。IO多路复用技术在其中扮演的角色，正从“底层内核接口”升华为“综合并发解决方案”的一部分，继续推动着计算机系统的并发处理能力前进。</p>
+<p><strong>参考资料：</strong></p>
+<p><a target="_blank" rel="noopener" href="https://daniel.haxx.se/docs/poll-vs-select.html#:~:text=History">poll vs select vs event-based</a></p>
+<p> <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Epoll#:~:text=,2">epoll - Wikipedia</a></p>
+<p>([poll vs select vs event-based](<a target="_blank" rel="noopener" href="https://daniel.haxx.se/docs/poll-vs-select.html#:~:text=They">https://daniel.haxx.se/docs/poll-vs-select.html#:~:text=They</a> both handle file descriptors,on your CPU and hardware)</p>
+<p> ([Async IO on Linux: select, poll, and epoll](<a target="_blank" rel="noopener" href="https://jvns.ca/blog/2017/06/03/async-io-on-linux--select--poll--and-epoll/#:~:text=,stuff">https://jvns.ca/blog/2017/06/03/async-io-on-linux--select--poll--and-epoll/#:~:text=,stuff</a> they have to do)</p>
+<p> ([Reactor pattern - Wikipedia](<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Reactor_pattern#:~:text=The">https://en.wikipedia.org/wiki/Reactor_pattern#:~:text=The</a> reactor software design pattern,1)</p>
+<p>([C10k problem - Wikipedia](<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/C10k_problem#:~:text=By">https://en.wikipedia.org/wiki/C10k_problem#:~:text=By</a> the early 2010s millions,8)</p>
+<p> ([kqueue - Wikipedia](<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Kqueue#:~:text=Kqueue">https://en.wikipedia.org/wiki/Kqueue#:~:text=Kqueue</a> is a scalable event,Kqueue)) </p>
+<p>(<a target="_blank" rel="noopener" href="https://idea.popcount.org/2017-02-20-epoll-is-fundamentally-broken-12/#:~:text=epoll(2"> Epoll is fundamentally broken 1/2 — Idea of the day </a> I%2FO multiplexing syscall))</p>
+<p> ([difference between netty running on Linux and Windows - Stack Overflow](<a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/61757084/difference-between-netty-running-on-linux-and-windows#:~:text=Think">https://stackoverflow.com/questions/61757084/difference-between-netty-running-on-linux-and-windows#:~:text=Think</a> of it this way%3A,does not depend on epoll))</p>
+<p> ([libevent](<a target="_blank" rel="noopener" href="https://libevent.org/#:~:text=Currently%2C">https://libevent.org/#:~:text=Currently%2C</a> libevent supports %2Fdev%2Fpoll%2C kqueue,threaded))</p>
+<p> ([Understanding Libuv: The Backbone of Node.js Asynchronous …](<a target="_blank" rel="noopener" href="https://medium.com/@rishabhshkl820/understanding-libuv-the-backbone-of-node-js-asynchronous-operations-53ca9218161d#:~:text=Understanding">https://medium.com/@rishabhshkl820/understanding-libuv-the-backbone-of-node-js-asynchronous-operations-53ca9218161d#:~:text=Understanding</a> Libuv%3A The Backbone of,Windows))</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+              <a href="/tags/AI/" rel="tag"># AI</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/03/21/value-of-architecture/" rel="prev" title="为什么架构的价值在于创造">
+      <i class="fa fa-chevron-left"></i> 为什么架构的价值在于创造
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/03/22/requirement-book/" rel="next" title="真需求笔记">
+      真需求笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-IO-%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E7%9A%84%E5%AE%9A%E4%B9%89%E3%80%81%E4%BD%9C%E7%94%A8%E3%80%81%E5%8E%86%E5%8F%B2%E6%BC%94%E8%BF%9B%E5%92%8C%E5%BA%94%E7%94%A8%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">1. IO 多路复用的定义、作用、历史演进和应用背景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E4%B8%8E%E4%BD%9C%E7%94%A8"><span class="nav-number">1.1.</span> <span class="nav-text">定义与作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%86%E5%8F%B2%E6%BC%94%E8%BF%9B"><span class="nav-number">1.2.</span> <span class="nav-text">历史演进</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E8%83%8C%E6%99%AF"><span class="nav-number">1.3.</span> <span class="nav-text">应用背景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E4%B8%BB%E6%B5%81-IO-%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E6%8A%80%E6%9C%AF%E7%9A%84%E6%9C%BA%E5%88%B6%E4%B8%8E%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">2.</span> <span class="nav-text">2. 主流 IO 多路复用技术的机制与适用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-select"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 select</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-poll"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 poll</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-epoll%EF%BC%88Linux%EF%BC%89"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 epoll（Linux）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-kqueue%EF%BC%88BSD-macOS%EF%BC%89"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 kqueue（BSD &#x2F; macOS）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-%E5%85%B6%E4%BB%96%E5%B9%B3%E5%8F%B0%E4%B8%8E%E6%9C%BA%E5%88%B6%E8%A1%A5%E5%85%85"><span class="nav-number">2.5.</span> <span class="nav-text">2.5 其他平台与机制补充</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E6%80%A7%E8%83%BD%E5%AF%B9%E6%AF%94%E4%B8%8E%E5%85%B8%E5%9E%8B%E5%9C%BA%E6%99%AF%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">3. 性能对比与典型场景分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-%E9%9A%8F%E5%B9%B6%E5%8F%91%E8%BF%9E%E6%8E%A5%E6%95%B0%E6%89%A9%E5%B1%95%E7%9A%84%E6%80%A7%E8%83%BD"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 随并发连接数扩展的性能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-%E4%B8%8D%E5%90%8C%E8%B4%9F%E8%BD%BD%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%9A%84%E8%A1%A8%E7%8E%B0"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 不同负载模式下的表现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-%E5%85%B8%E5%9E%8B%E5%9C%BA%E6%99%AF%E4%B8%8B%E7%9A%84%E6%9C%BA%E5%88%B6%E4%BC%98%E5%8A%A3"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 典型场景下的机制优劣</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-Reactor-%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%8E%E4%BA%8B%E4%BB%B6%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1"><span class="nav-number">4.</span> <span class="nav-text">4. Reactor 模型的工作原理与事件驱动设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Reactor%E6%A8%A1%E5%BC%8F%E6%A6%82%E8%BF%B0"><span class="nav-number">4.1.</span> <span class="nav-text">Reactor模式概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95Reactor%E4%B8%8E%E5%A4%9AReactor"><span class="nav-number">4.2.</span> <span class="nav-text">单Reactor与多Reactor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reactor%E4%B8%8EProactor%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">4.3.</span> <span class="nav-text">Reactor与Proactor的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reactor%E6%A8%A1%E5%9E%8B%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">4.4.</span> <span class="nav-text">Reactor模型的优缺点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-Java-NIO-%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82"><span class="nav-number">5.</span> <span class="nav-text">5. Java NIO 的设计与实现细节</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-Selector-%E4%B8%8E%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E5%8E%9F%E7%90%86"><span class="nav-number">5.1.</span> <span class="nav-text">5.1 Selector 与多路复用原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-NIO-%E4%B8%8E%E4%BC%A0%E7%BB%9F%E9%98%BB%E5%A1%9EIO%E7%9A%84%E5%8C%BA%E5%88%AB%E4%B8%8E%E4%BC%98%E5%8A%BF"><span class="nav-number">5.2.</span> <span class="nav-text">5.2 NIO 与传统阻塞IO的区别与优势</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E5%9F%BA%E4%BA%8E-IO-%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E7%9A%84%E4%B8%BB%E6%B5%81%E9%AB%98%E6%80%A7%E8%83%BD%E7%BD%91%E7%BB%9C%E6%A1%86%E6%9E%B6"><span class="nav-number">6.</span> <span class="nav-text">6. 基于 IO 多路复用的主流高性能网络框架</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-Netty-%EF%BC%88Java%E6%A1%86%E6%9E%B6%EF%BC%89"><span class="nav-number">6.1.</span> <span class="nav-text">6.1 Netty （Java框架）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2-libevent-%EF%BC%88C%E8%AF%AD%E8%A8%80%E5%BA%93%EF%BC%89"><span class="nav-number">6.2.</span> <span class="nav-text">6.2 libevent （C语言库）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-3-libuv-%EF%BC%88%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%82%E6%AD%A5IO%E5%BA%93%EF%BC%89"><span class="nav-number">6.3.</span> <span class="nav-text">6.3 libuv （跨平台异步IO库）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">6.4.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-IO-%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E7%9A%84%E9%97%AE%E9%A2%98%E4%B8%8E%E5%8F%91%E5%B1%95%E8%B6%8B%E5%8A%BF"><span class="nav-number">7.</span> <span class="nav-text">7. IO 多路复用的问题与发展趋势</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#7-1-%E7%8E%B0%E6%9C%89%E6%9C%BA%E5%88%B6%E7%9A%84%E5%B1%80%E9%99%90%E4%B8%8E%E9%97%AE%E9%A2%98"><span class="nav-number">7.1.</span> <span class="nav-text">7.1 现有机制的局限与问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-io-uring%EF%BC%9ALinux%E6%96%B0%E4%B8%80%E4%BB%A3IO%E6%8E%A5%E5%8F%A3"><span class="nav-number">7.2.</span> <span class="nav-text">7.2 io_uring：Linux新一代IO接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-3-%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%96%B0%E8%B6%8B%E5%8A%BF"><span class="nav-number">7.3.</span> <span class="nav-text">7.3 异步编程模型的新趋势</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

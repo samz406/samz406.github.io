@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在一个技术驱动的公司中，“总架构师”与“CTO”是技术管理的两座高峰。他们分别代表了技术决策的深度与广度，是从“技术执行”走向“战略引领”的关键角色。很多技术人渴望进入这一层级，但往往在成长路径中遭遇迷茫与瓶颈——不是能力不足，而是不清楚能力应该如何“跃迁”。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="架构师与CTO的能力进化与成长突围">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/08/15/how-to-become-cto/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="在一个技术驱动的公司中，“总架构师”与“CTO”是技术管理的两座高峰。他们分别代表了技术决策的深度与广度，是从“技术执行”走向“战略引领”的关键角色。很多技术人渴望进入这一层级，但往往在成长路径中遭遇迷茫与瓶颈——不是能力不足，而是不清楚能力应该如何“跃迁”。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-08-15T12:00:47.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.356Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="创业">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/08/15/how-to-become-cto/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>架构师与CTO的能力进化与成长突围 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/08/15/how-to-become-cto/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          架构师与CTO的能力进化与成长突围
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-08-15 20:00:47" itemprop="dateCreated datePublished" datetime="2025-08-15T20:00:47+08:00">2025-08-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%88%9B%E4%B8%9A/" itemprop="url" rel="index"><span itemprop="name">创业</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在一个技术驱动的公司中，“总架构师”与“CTO”是技术管理的两座高峰。他们分别代表了技术决策的深度与广度，是从“技术执行”走向“战略引领”的关键角色。很多技术人渴望进入这一层级，但往往在成长路径中遭遇迷茫与瓶颈——不是能力不足，而是不清楚能力应该如何“跃迁”。</p>
+<span id="more"></span>
+
+<h2 id="一、总架构师与CTO：技术领导的双重维度"><a href="#一、总架构师与CTO：技术领导的双重维度" class="headerlink" title="一、总架构师与CTO：技术领导的双重维度"></a>一、总架构师与CTO：技术领导的双重维度</h2><h3 id="1-1-总架构师：做正确的技术决策"><a href="#1-1-总架构师：做正确的技术决策" class="headerlink" title="1.1 总架构师：做正确的技术决策"></a>1.1 总架构师：做正确的技术决策</h3><ul>
+<li>核心职责：负责公司软件架构的正确性，技术架构的整体性与冲突解决</li>
+<li>特点：深耕系统、平台与技术细节，对技术趋势有前瞻洞察力</li>
+<li>关键输出：技术中长期演进路线、核心技术平台与规范制定、跨团队技术协同</li>
+</ul>
+<h3 id="1-2-CTO：技术视角的CEO"><a href="#1-2-CTO：技术视角的CEO" class="headerlink" title="1.2 CTO：技术视角的CEO"></a>1.2 CTO：技术视角的CEO</h3><ul>
+<li>核心职责：技术战略、团队建设、技术驱动业务</li>
+<li>特点：面向市场与公司经营，承担公司技术资产的最大化利用</li>
+<li>关键输出：技术愿景、业务增长模型中的技术杠杆、技术资源配置</li>
+</ul>
+<hr>
+<h2 id="二、核心能力：深度与广度的双重修炼"><a href="#二、核心能力：深度与广度的双重修炼" class="headerlink" title="二、核心能力：深度与广度的双重修炼"></a>二、核心能力：深度与广度的双重修炼</h2><h3 id="2-1-总架构师的三项核心能力"><a href="#2-1-总架构师的三项核心能力" class="headerlink" title="2.1 总架构师的三项核心能力"></a>2.1 总架构师的三项核心能力</h3><ol>
+<li><strong>技术判断力</strong>：做正确的技术决策，而非流行的决策</li>
+<li><strong>架构治理力</strong>：解决技术架构整体和局部的冲突，维护系统完整性</li>
+<li><strong>不确定性穿越力</strong>：在多种解法中快速迭代，识别技术噪声与机会</li>
+</ol>
+<h3 id="2-2-CTO的四项核心能力"><a href="#2-2-CTO的四项核心能力" class="headerlink" title="2.2 CTO的四项核心能力"></a>2.2 CTO的四项核心能力</h3><ol>
+<li><strong>战略理解力</strong>：与CEO思考同一问题，将技术转化为业务优势</li>
+<li><strong>资源配置力</strong>：在市场、财务、人力等维度上，推动技术资源有效运作</li>
+<li><strong>团队构建力</strong>：构建技术文化与梯队，实现可持续的技术成长</li>
+<li><strong>外部协同力</strong>：应对外部竞争、对手技术演进，及时调整战略</li>
+</ol>
+<hr>
+<h2 id="三、关注点差异：从“技术视角”到“经营视角”"><a href="#三、关注点差异：从“技术视角”到“经营视角”" class="headerlink" title="三、关注点差异：从“技术视角”到“经营视角”"></a>三、关注点差异：从“技术视角”到“经营视角”</h2><table>
+<thead>
+<tr>
+<th>角色</th>
+<th>主要关注点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>总架构师</td>
+<td>技术的正确性、架构的完整性、技术演进路径</td>
+</tr>
+<tr>
+<td>CTO</td>
+<td>市场走向、竞争对手增长、公司经营状况、人力成本</td>
+</tr>
+</tbody></table>
+<p><strong>延伸思考：</strong> 总架构师关注系统之内，CTO关注系统之外，两者形成“内外协同”的决策体系。</p>
+<hr>
+<h2 id="四、成长障碍：技术人的战略盲区"><a href="#四、成长障碍：技术人的战略盲区" class="headerlink" title="四、成长障碍：技术人的战略盲区"></a>四、成长障碍：技术人的战略盲区</h2><h3 id="4-1-总架构师的成长障碍"><a href="#4-1-总架构师的成长障碍" class="headerlink" title="4.1 总架构师的成长障碍"></a>4.1 总架构师的成长障碍</h3><ul>
+<li>跨越不确定性不足，缺乏“容错”思维</li>
+<li>技术嗅觉不强，对新技术过于保守或盲从</li>
+<li>决策视角停留在中低风险，缺乏战略性探索</li>
+</ul>
+<h3 id="4-2-CTO的成长障碍"><a href="#4-2-CTO的成长障碍" class="headerlink" title="4.2 CTO的成长障碍"></a>4.2 CTO的成长障碍</h3><ul>
+<li>技术不是第一优先级，缺乏放弃技术的勇气</li>
+<li>商业视角缺失，看不懂财报、用户、市场</li>
+<li>缺少“技术之外”的解决思维，不能跨域</li>
+</ul>
+<hr>
+<h2 id="五、突围策略：构建“技术战略家”的认知模型"><a href="#五、突围策略：构建“技术战略家”的认知模型" class="headerlink" title="五、突围策略：构建“技术战略家”的认知模型"></a>五、突围策略：构建“技术战略家”的认知模型</h2><ol>
+<li><p><strong>知识结构跃迁</strong>：</p>
+<ul>
+<li>从“技术栈”升级到“技术系统”</li>
+<li>从“功能设计”升级到“价值建模”</li>
+</ul>
+</li>
+<li><p><strong>角色认知跃迁</strong>：</p>
+<ul>
+<li>从“做事”升级到“做决策”</li>
+<li>从“解决问题”升级到“制造机会”</li>
+</ul>
+</li>
+<li><p><strong>战略思维跃迁</strong>：</p>
+<ul>
+<li>问“技术该如何支持业务”而非“业务如何适应技术”</li>
+<li>学会用商业语言与CEO沟通：ROI、增长、竞争优势</li>
+</ul>
+</li>
+</ol>
+<h2 id="六、结语：你是技术专家，还是技术战略家？"><a href="#六、结语：你是技术专家，还是技术战略家？" class="headerlink" title="六、结语：你是技术专家，还是技术战略家？"></a>六、结语：你是技术专家，还是技术战略家？</h2><p>未来，企业需要的不是“万能程序员”，而是能够用技术驾驭不确定性的“技术战略家”。无论你是总架构师还是CTO，想要真正成为引领者，你需要的不只是技术的深度，更是对商业的理解，对人的认知，对风险的管理能力。成长的边界，不在代码里，而在视角之外。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%88%9B%E4%B8%9A/" rel="tag"># 创业</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/08/15/from-code-to-technology/" rel="prev" title="技术人的创业突围——从代码到公司，从技术到价值">
+      <i class="fa fa-chevron-left"></i> 技术人的创业突围——从代码到公司，从技术到价值
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%80%BB%E6%9E%B6%E6%9E%84%E5%B8%88%E4%B8%8ECTO%EF%BC%9A%E6%8A%80%E6%9C%AF%E9%A2%86%E5%AF%BC%E7%9A%84%E5%8F%8C%E9%87%8D%E7%BB%B4%E5%BA%A6"><span class="nav-number">1.</span> <span class="nav-text">一、总架构师与CTO：技术领导的双重维度</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-%E6%80%BB%E6%9E%B6%E6%9E%84%E5%B8%88%EF%BC%9A%E5%81%9A%E6%AD%A3%E7%A1%AE%E7%9A%84%E6%8A%80%E6%9C%AF%E5%86%B3%E7%AD%96"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 总架构师：做正确的技术决策</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-CTO%EF%BC%9A%E6%8A%80%E6%9C%AF%E8%A7%86%E8%A7%92%E7%9A%84CEO"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 CTO：技术视角的CEO</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B%EF%BC%9A%E6%B7%B1%E5%BA%A6%E4%B8%8E%E5%B9%BF%E5%BA%A6%E7%9A%84%E5%8F%8C%E9%87%8D%E4%BF%AE%E7%82%BC"><span class="nav-number">2.</span> <span class="nav-text">二、核心能力：深度与广度的双重修炼</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E6%80%BB%E6%9E%B6%E6%9E%84%E5%B8%88%E7%9A%84%E4%B8%89%E9%A1%B9%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 总架构师的三项核心能力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-CTO%E7%9A%84%E5%9B%9B%E9%A1%B9%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 CTO的四项核心能力</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%85%B3%E6%B3%A8%E7%82%B9%E5%B7%AE%E5%BC%82%EF%BC%9A%E4%BB%8E%E2%80%9C%E6%8A%80%E6%9C%AF%E8%A7%86%E8%A7%92%E2%80%9D%E5%88%B0%E2%80%9C%E7%BB%8F%E8%90%A5%E8%A7%86%E8%A7%92%E2%80%9D"><span class="nav-number">3.</span> <span class="nav-text">三、关注点差异：从“技术视角”到“经营视角”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E6%88%90%E9%95%BF%E9%9A%9C%E7%A2%8D%EF%BC%9A%E6%8A%80%E6%9C%AF%E4%BA%BA%E7%9A%84%E6%88%98%E7%95%A5%E7%9B%B2%E5%8C%BA"><span class="nav-number">4.</span> <span class="nav-text">四、成长障碍：技术人的战略盲区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-%E6%80%BB%E6%9E%B6%E6%9E%84%E5%B8%88%E7%9A%84%E6%88%90%E9%95%BF%E9%9A%9C%E7%A2%8D"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 总架构师的成长障碍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-CTO%E7%9A%84%E6%88%90%E9%95%BF%E9%9A%9C%E7%A2%8D"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 CTO的成长障碍</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E7%AA%81%E5%9B%B4%E7%AD%96%E7%95%A5%EF%BC%9A%E6%9E%84%E5%BB%BA%E2%80%9C%E6%8A%80%E6%9C%AF%E6%88%98%E7%95%A5%E5%AE%B6%E2%80%9D%E7%9A%84%E8%AE%A4%E7%9F%A5%E6%A8%A1%E5%9E%8B"><span class="nav-number">5.</span> <span class="nav-text">五、突围策略：构建“技术战略家”的认知模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E7%BB%93%E8%AF%AD%EF%BC%9A%E4%BD%A0%E6%98%AF%E6%8A%80%E6%9C%AF%E4%B8%93%E5%AE%B6%EF%BC%8C%E8%BF%98%E6%98%AF%E6%8A%80%E6%9C%AF%E6%88%98%E7%95%A5%E5%AE%B6%EF%BC%9F"><span class="nav-number">6.</span> <span class="nav-text">六、结语：你是技术专家，还是技术战略家？</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

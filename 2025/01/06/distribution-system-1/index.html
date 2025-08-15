@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="分布式系统简介">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第一章 布式系统简介">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/01/06/distribution-system-1/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="分布式系统简介">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-01-06T01:00:01.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.352Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/01/06/distribution-system-1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>第一章 布式系统简介 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/01/06/distribution-system-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          第一章 布式系统简介
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-01-06 09:00:01" itemprop="dateCreated datePublished" datetime="2025-01-06T09:00:01+08:00">2025-01-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/DDD/" itemprop="url" rel="index"><span itemprop="name">DDD</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>分布式系统简介</p>
+<span id="more"></span>
+
+<h2 id="1-1-分布式系统的概念与特征"><a href="#1-1-分布式系统的概念与特征" class="headerlink" title="1.1 分布式系统的概念与特征"></a>1.1 分布式系统的概念与特征</h2><p>什么是分布式系统<br> 分布式系统（Distributed System）是指通过网络将多个相互独立、具有自主处理能力的计算机（或节点）连接起来，使其在系统层面对外表现为一个整体。换言之，对于使用者而言，分布式系统提供了一种“单一系统”的视图，但在内部却由多个节点协同合作、共同完成某项工作。</p>
+<p>分布式系统与传统的集中式系统相比，最显著的区别在于系统的“地理分散性”与“多节点协同”。每个节点既可独立运行，又能通过网络与其他节点共享数据或协同计算，因此能够承载更高的负载、具备更强的弹性与可扩展性。</p>
+<h3 id="1-1-1-分布式系统的主要特征"><a href="#1-1-1-分布式系统的主要特征" class="headerlink" title="1.1.1 分布式系统的主要特征"></a>1.1.1 分布式系统的主要特征</h3><ol>
+<li><strong>地理分散性（Geographical Distribution）</strong><br> 分布式系统的节点可以分布在本地网络或广域网络的不同位置上。正是因为地理上的分散，节点间的网络连接可能并不可靠，甚至存在时延较长的情况。</li>
+<li><strong>资源共享（Resource Sharing）</strong><br> 不同节点可以共享硬件资源（CPU、存储、网络带宽等）或软件资源（数据、服务等），共同完成大规模数据处理或高并发请求。资源共享的特性使得分布式系统具有较高的利用率和伸缩性。</li>
+<li><strong>并发性（Concurrency）</strong><br> 分布式系统具有先天的并发能力。在面对大量并发请求时，不同节点可以并行处理，从而提高系统整体吞吐量并降低响应延迟。</li>
+<li><strong>可扩展性（Scalability）</strong><br> 在需求增长或负载增大时，可以在系统中添加更多节点或升级已有节点的硬件，从而提升系统的处理能力。横向扩展（scale out）与纵向扩容（scale up）是常见手段。</li>
+<li><strong>容错性（Fault Tolerance）</strong><br> 由于系统的规模大、节点多，任何一个节点都可能在任意时刻发生故障。理想的分布式系统应该具备部分节点故障时仍能提供关键功能或保持核心服务稳定的能力。</li>
+<li><strong>透明性（Transparency）</strong><br> 对最终用户而言，分布式系统应尽可能隐藏系统内部的节点数量、部署位置、数据分片等细节，让用户感觉自己面对的是一个统一的系统。</li>
+</ol>
+<p>通过上述特征可见，分布式系统能够在处理高并发、大规模数据和复杂计算任务时发挥巨大优势。然而，这些特征也带来了各种额外的技术挑战，比如网络可靠性、数据一致性、故障隔离与恢复等，需要通过精心的设计与实践来应对。</p>
+<h2 id="1-2-分布式系统的发展历程与典型应用场景"><a href="#1-2-分布式系统的发展历程与典型应用场景" class="headerlink" title="1.2 分布式系统的发展历程与典型应用场景"></a>1.2 分布式系统的发展历程与典型应用场景</h2><h3 id="1-2-1-发展历程概览"><a href="#1-2-1-发展历程概览" class="headerlink" title="1.2.1 发展历程概览"></a>1.2.1 发展历程概览</h3><p>分布式系统的发展与计算机网络、硬件成本、业务需求等多种因素息息相关。大致经历了以下几个主要阶段：</p>
+<ol>
+<li><strong>早期网络文件系统与远程访问</strong><br> 在互联网尚处于萌芽期时，人们已经开始尝试通过网络访问远程资源，典型案例如 NFS（Network File System）等。这类系统通常简单地将远端资源“映射”为本地可使用的资源，主要功能是文件共享和远程访问。</li>
+<li><strong>大规模计算与集群架构</strong><br> 随着业务需求和数据量不断增加，单台机器难以满足计算和存储要求。于是出现了基于集群（Cluster）的高性能计算（HPC）和数据处理系统，比如 Google 提出的 GFS（Google File System）和 MapReduce，开源世界里的 Hadoop 项目等。在这一阶段，分布式存储与分布式计算技术开始大放异彩。</li>
+<li><strong>大规模互联网与云计算</strong><br> 移动互联网与云计算的兴起，使得分布式系统成为互联网公司的“标配”。公司不再依赖单台物理服务器，而是通过分布式架构来支持大规模、高并发的用户访问以及弹性伸缩的资源供给。Google、Amazon、Microsoft 等科技巨头也纷纷将自家的分布式基础设施开放为云服务，促进了全行业的分布式应用普及。</li>
+<li><strong>微服务与云原生时代</strong><br> 近年来，微服务（Microservices）、容器（Docker）与 Kubernetes 等技术快速发展。分布式系统不仅要解决数据处理与计算的“分布式”，还要在服务治理、观测、运维等层面提供更加灵活且自动化的能力，“云原生”也逐渐成为主流趋势。</li>
+<li><strong>边缘计算与 Serverless</strong><br> 随着物联网（IoT）、5G/6G 技术的发展，计算能力逐渐向边缘侧延伸，以降低延迟、减少网络带宽消耗。与此同时，无服务器（Serverless）架构和函数即服务（FaaS）等新模式进一步将底层基础设施的复杂度向云提供商隐藏，开发者只需专注于应用逻辑。因此，分布式系统正逐步走向“随处可在、随处可用”的形态。</li>
+</ol>
+<h3 id="1-2-2-典型应用场景"><a href="#1-2-2-典型应用场景" class="headerlink" title="1.2.2 典型应用场景"></a>1.2.2 典型应用场景</h3><ol>
+<li><strong>大型互联网服务</strong><br> 典型如电商、社交网络、在线视频、搜索引擎等，需要处理海量用户请求与海量数据存储，保障高可用与高并发。</li>
+<li><strong>大数据与人工智能</strong><br> 数据仓库、数据湖以及各种分布式计算框架（Hadoop、Spark、Flink 等），都是为大规模数据处理与机器学习任务服务，往往需要分布式的存储和计算能力。</li>
+<li><strong>金融与交易系统</strong><br> 在线支付、银行账务处理、证券交易等场景对系统可用性与一致性要求极高，且交易频率高并发、峰值流量大，通常采用分布式数据库及多地多活的架构设计来提升韧性。</li>
+<li><strong>物联网与边缘计算</strong><br> 大量数据在“边缘侧”（例如智能摄像头、传感器、无人驾驶汽车等设备）产生，实时计算、反馈与决策均需依赖分布式系统来处理、传输与分析。</li>
+<li><strong>新零售与智慧供应链</strong><br> 数据贯穿线上线下场景，例如库存管理、物流调度、门店选址等，需要分布式系统来整合各个环节的数据并高效决策。</li>
+</ol>
+<hr>
+<h2 id="1-3-常见的挑战"><a href="#1-3-常见的挑战" class="headerlink" title="1.3 常见的挑战"></a>1.3 常见的挑战</h2><p>分布式系统拥有强大的伸缩与容错能力，却也面临着集中式系统不曾有的复杂性。以下列出几个关键挑战：</p>
+<h3 id="1-3-1-网络不可靠"><a href="#1-3-1-网络不可靠" class="headerlink" title="1.3.1 网络不可靠"></a>1.3.1 网络不可靠</h3><p>分布式系统通过网络互联，而网络本身并不稳定。网络延迟、数据包丢失、带宽抖动甚至网络分区等都是常见问题。再加上地理分布的场景下，节点间的距离还会带来不可避免的延迟。工程实践中，必须考虑到网络的不确定性，设计具备重试机制、故障检测和降级方案等。</p>
+<h3 id="1-3-2-时钟同步"><a href="#1-3-2-时钟同步" class="headerlink" title="1.3.2 时钟同步"></a>1.3.2 时钟同步</h3><p>在分布式系统中，没有一个“完美同步”的时钟源。即便采用 NTP 或 PTP 等协议进行同步，也无法做到毫秒级甚至更高精度的完全一致。系统中的事件顺序有时无法简单地依赖物理时钟来判断，这就带来了逻辑时钟（Logical Clock）、向量时钟（Vector Clock）等概念，用于解决事件排序与一致性的问题。</p>
+<h3 id="1-3-3-部分失败与故障隔离"><a href="#1-3-3-部分失败与故障隔离" class="headerlink" title="1.3.3 部分失败与故障隔离"></a>1.3.3 部分失败与故障隔离</h3><p>在集中式系统中，如果服务器宕机，系统整体就会停止服务；而在分布式系统中，“部分失败”是常态。一些节点故障并不意味着整个系统不可用，但必须在设计时明确如何识别和处理节点故障、如何进行数据冗余、副本同步或主备切换等。否则一个节点或网络的故障就可能演变为“雪崩效应”，导致全局不可用。</p>
+<h3 id="1-3-4-一致性与可用性的权衡"><a href="#1-3-4-一致性与可用性的权衡" class="headerlink" title="1.3.4 一致性与可用性的权衡"></a>1.3.4 一致性与可用性的权衡</h3><p>分布式系统通常在一致性（Consistency）、可用性（Availability）和分区容错性（Partition Tolerance）三者之间进行权衡，即著名的 “CAP 定理” 所揭示的问题。无法同时保证所有特性都最优，所以需要根据业务需求（例如强一致性还是高可用）进行策略取舍。</p>
+<h3 id="1-3-5-高并发与数据热点"><a href="#1-3-5-高并发与数据热点" class="headerlink" title="1.3.5 高并发与数据热点"></a>1.3.5 高并发与数据热点</h3><p>对于热门资源的访问可能会产生“热点”问题，使部分节点压力过大而成为性能瓶颈。常见的应对方案包括缓存、负载均衡、数据分片，以及对热点数据进行拆分处理等。</p>
+<h3 id="参考与延伸阅读"><a href="#参考与延伸阅读" class="headerlink" title="参考与延伸阅读"></a>参考与延伸阅读</h3><ul>
+<li>Andrew S. Tanenbaum, Maarten van Steen：《分布式系统：原则与范型》</li>
+<li>Martin Kleppmann：《Designing Data-Intensive Applications》</li>
+<li>Leslie Lamport：时钟、事件和进程状态（逻辑时钟提出者）</li>
+<li>Jeffrey Dean, Sanjay Ghemawat：MapReduce: Simplified Data Processing on Large Clusters（Google MapReduce 论文）</li>
+<li>ACM、USENIX 等会议上的分布式系统相关论文</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/01/05/hexo-deploye/" rel="prev" title="Hexo自动化部署">
+      <i class="fa fa-chevron-left"></i> Hexo自动化部署
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/01/07/distribution-system-7/" rel="next" title="第七章 一致性与高可用策略">
+      第七章 一致性与高可用策略 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%A6%82%E5%BF%B5%E4%B8%8E%E7%89%B9%E5%BE%81"><span class="nav-number">1.</span> <span class="nav-text">1.1 分布式系统的概念与特征</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-1-%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E7%9A%84%E4%B8%BB%E8%A6%81%E7%89%B9%E5%BE%81"><span class="nav-number">1.1.</span> <span class="nav-text">1.1.1 分布式系统的主要特征</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%8F%91%E5%B1%95%E5%8E%86%E7%A8%8B%E4%B8%8E%E5%85%B8%E5%9E%8B%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">2.</span> <span class="nav-text">1.2 分布式系统的发展历程与典型应用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-1-%E5%8F%91%E5%B1%95%E5%8E%86%E7%A8%8B%E6%A6%82%E8%A7%88"><span class="nav-number">2.1.</span> <span class="nav-text">1.2.1 发展历程概览</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-2-%E5%85%B8%E5%9E%8B%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">2.2.</span> <span class="nav-text">1.2.2 典型应用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-%E5%B8%B8%E8%A7%81%E7%9A%84%E6%8C%91%E6%88%98"><span class="nav-number">3.</span> <span class="nav-text">1.3 常见的挑战</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-1-%E7%BD%91%E7%BB%9C%E4%B8%8D%E5%8F%AF%E9%9D%A0"><span class="nav-number">3.1.</span> <span class="nav-text">1.3.1 网络不可靠</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-2-%E6%97%B6%E9%92%9F%E5%90%8C%E6%AD%A5"><span class="nav-number">3.2.</span> <span class="nav-text">1.3.2 时钟同步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-3-%E9%83%A8%E5%88%86%E5%A4%B1%E8%B4%A5%E4%B8%8E%E6%95%85%E9%9A%9C%E9%9A%94%E7%A6%BB"><span class="nav-number">3.3.</span> <span class="nav-text">1.3.3 部分失败与故障隔离</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-4-%E4%B8%80%E8%87%B4%E6%80%A7%E4%B8%8E%E5%8F%AF%E7%94%A8%E6%80%A7%E7%9A%84%E6%9D%83%E8%A1%A1"><span class="nav-number">3.4.</span> <span class="nav-text">1.3.4 一致性与可用性的权衡</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-5-%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%83%AD%E7%82%B9"><span class="nav-number">3.5.</span> <span class="nav-text">1.3.5 高并发与数据热点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E4%B8%8E%E5%BB%B6%E4%BC%B8%E9%98%85%E8%AF%BB"><span class="nav-number">3.6.</span> <span class="nav-text">参考与延伸阅读</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

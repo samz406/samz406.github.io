@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="想要在AI等前沿技术浪潮中发现真实的新需求，技术人员需要刻意训练一套”需求发现的方法论”，不仅关注”技术能做什么”，更要关注”用户真正在痛苦什么”。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="技术人员发现真实需求的方法论">
+<meta property="og:url" content="http://www.sanmuzi.com/2025/05/25/discover-real-requirement/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="想要在AI等前沿技术浪潮中发现真实的新需求，技术人员需要刻意训练一套”需求发现的方法论”，不仅关注”技术能做什么”，更要关注”用户真正在痛苦什么”。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-05-25T14:00:56.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.352Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="产品">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2025/05/25/discover-real-requirement/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>技术人员发现真实需求的方法论 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2025/05/25/discover-real-requirement/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          技术人员发现真实需求的方法论
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-05-25 22:00:56" itemprop="dateCreated datePublished" datetime="2025-05-25T22:00:56+08:00">2025-05-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%BA%A7%E5%93%81/" itemprop="url" rel="index"><span itemprop="name">产品</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>想要在AI等前沿技术浪潮中发现真实的新需求，技术人员需要刻意训练一套”需求发现的方法论”，不仅关注”技术能做什么”，更要关注”用户真正在痛苦什么”。</p>
+<span id="more"></span>
+<h2 id="从”技术出发”到”场景出发”"><a href="#从”技术出发”到”场景出发”" class="headerlink" title="从”技术出发”到”场景出发”"></a>从”技术出发”到”场景出发”</h2><p><strong>技术人员常犯的错：</strong><br>“我能做语音合成+大语言模型+图像生成 = 一个AI助理！” 但没人用，因为没有具体场景和真实痛点。</p>
+<p><strong>正确的方式：</strong><br>反过来问：某个群体、某种任务，有没有”频繁出现的重复性痛苦”是AI能缓解的？</p>
+<h2 id="5个实用的需求发现方法"><a href="#5个实用的需求发现方法" class="headerlink" title="5个实用的需求发现方法"></a>5个实用的需求发现方法</h2><h3 id="1-观察：去真实场景”偷听”问题"><a href="#1-观察：去真实场景”偷听”问题" class="headerlink" title="1. 观察：去真实场景”偷听”问题"></a>1. 观察：去真实场景”偷听”问题</h3><p>关键在于：不要问”你需要什么”，要看他们”正在忍受什么”。</p>
+<ul>
+<li>观察你身边同事、朋友在用什么工具，在哪些任务上痛苦/拖延</li>
+<li>去Reddit、知乎、微博等看真实的吐槽和抱怨</li>
+<li>例子：AI生成PPT不是因为大家需要生成，而是因为大家”天天被逼赶PPT到深夜”</li>
+</ul>
+<h3 id="2-采访：精确复盘”任务路径”"><a href="#2-采访：精确复盘”任务路径”" class="headerlink" title="2. 采访：精确复盘”任务路径”"></a>2. 采访：精确复盘”任务路径”</h3><p>问用户：”上次做这件事你是怎么完成的？遇到什么麻烦？用了哪些工具？”</p>
+<p>不要问”你觉得这个功能好不好”，而要问他们做事情的<strong>流程</strong>和<strong>中间的障碍</strong>。</p>
+<p>实用问题：</p>
+<ul>
+<li>你最近一次做[某事]是什么时候？</li>
+<li>当时你卡在哪一步？用了什么工具？有没有不顺的地方？</li>
+</ul>
+<h3 id="3-任务频率-×-痛苦程度-×-可替代性"><a href="#3-任务频率-×-痛苦程度-×-可替代性" class="headerlink" title="3. 任务频率 × 痛苦程度 × 可替代性"></a>3. 任务频率 × 痛苦程度 × 可替代性</h3><p>找”高频 + 高痛 + 无替代”的任务，最容易构成真实需求。</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>示例</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>高频</td>
+<td>每天写日报、回复客户、搜索资料</td>
+<td>有持续价值</td>
+</tr>
+<tr>
+<td>高痛</td>
+<td>加班做PPT、手工标注数据、资料翻译</td>
+<td>有情绪强度</td>
+</tr>
+<tr>
+<td>替代性低</td>
+<td>没有好工具解决，只能人肉干</td>
+<td>缺少市场解决方案</td>
+</tr>
+</tbody></table>
+<h3 id="4-模仿-变体：跟踪”非技术圈”的爆款产品"><a href="#4-模仿-变体：跟踪”非技术圈”的爆款产品" class="headerlink" title="4. 模仿+变体：跟踪”非技术圈”的爆款产品"></a>4. 模仿+变体：跟踪”非技术圈”的爆款产品</h3><p>技术人员不擅长”起点思维”，但可以从”终点逆推”。</p>
+<ul>
+<li>看哪些AI工具在Notion、Gumroad、YouTube、Discord等平台爆火，然后去想：这类用户还有哪些<strong>类似但未被满足</strong>的场景？</li>
+<li>例子：AI写作工具火了，但AI脚本生成、AI视频剪辑等仍是空白地带</li>
+</ul>
+<h3 id="5-设计”实验产品”试探真实需求"><a href="#5-设计”实验产品”试探真实需求" class="headerlink" title="5. 设计”实验产品”试探真实需求"></a>5. 设计”实验产品”试探真实需求</h3><p>做个低成本可交互的原型，比如Notion页面、小程序、提示词集合、微信小助手，观察用户是否愿意用。</p>
+<p>不要直接开发产品，而是先验证：</p>
+<ul>
+<li>是否有人愿意注册？</li>
+<li>是否会每天用？</li>
+<li>是否愿意掏钱/转发？</li>
+</ul>
+<h2 id="转化思维方式：技术视角-vs-产品视角"><a href="#转化思维方式：技术视角-vs-产品视角" class="headerlink" title="转化思维方式：技术视角 vs 产品视角"></a>转化思维方式：技术视角 vs 产品视角</h2><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>技术视角</th>
+<th>产品视角</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>我能做什么？</td>
+<td>我可以训练一个LLM模型 + 图片生成 + 音频合成</td>
+<td>有没有人想”一键生成视频课程”？</td>
+</tr>
+<tr>
+<td>这个好酷！</td>
+<td>我把ChatGPT接入语音通话</td>
+<td>谁在开会时最需要智能总结 + 动作提醒？</td>
+</tr>
+<tr>
+<td>这是突破</td>
+<td>RAG + 多模态</td>
+<td>有哪些工作场景急需”文档+图表”理解能力？</td>
+</tr>
+</tbody></table>
+<h2 id="系统性发现需求的关键要点"><a href="#系统性发现需求的关键要点" class="headerlink" title="系统性发现需求的关键要点"></a>系统性发现需求的关键要点</h2><ol>
+<li><strong>先看场景，不急着造技术</strong>（需求决定解法）</li>
+<li><strong>观察身边人怎么忍痛完成任务</strong>（问题来源于行为，不是脑补）</li>
+<li><strong>常用任务频率 × 痛点 × 替代性公式筛选刚需</strong></li>
+<li><strong>以实验心态快速测试假设</strong>（避免闭门造车）</li>
+<li><strong>记住：技术越先进，越要降低用户的”理解成本”与”行为成本”</strong></li>
+</ol>
+<p>掌握这套方法论，技术人员就能更准确地找到那些真正值得投入精力的需求点，而不是陷入”技术很酷但没人用”的困境。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BA%A7%E5%93%81/" rel="tag"># 产品</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/05/24/Product-design-principle/" rel="prev" title="产品设计法则：让 AI 在场景中“无感”助力用户">
+      <i class="fa fa-chevron-left"></i> 产品设计法则：让 AI 在场景中“无感”助力用户
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/05/27/ineffective-communication/" rel="next" title="每次沟通，怎么就变成了一次受伤">
+      每次沟通，怎么就变成了一次受伤 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E%E2%80%9D%E6%8A%80%E6%9C%AF%E5%87%BA%E5%8F%91%E2%80%9D%E5%88%B0%E2%80%9D%E5%9C%BA%E6%99%AF%E5%87%BA%E5%8F%91%E2%80%9D"><span class="nav-number">1.</span> <span class="nav-text">从”技术出发”到”场景出发”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5%E4%B8%AA%E5%AE%9E%E7%94%A8%E7%9A%84%E9%9C%80%E6%B1%82%E5%8F%91%E7%8E%B0%E6%96%B9%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">5个实用的需求发现方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%A7%82%E5%AF%9F%EF%BC%9A%E5%8E%BB%E7%9C%9F%E5%AE%9E%E5%9C%BA%E6%99%AF%E2%80%9D%E5%81%B7%E5%90%AC%E2%80%9D%E9%97%AE%E9%A2%98"><span class="nav-number">2.1.</span> <span class="nav-text">1. 观察：去真实场景”偷听”问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%87%87%E8%AE%BF%EF%BC%9A%E7%B2%BE%E7%A1%AE%E5%A4%8D%E7%9B%98%E2%80%9D%E4%BB%BB%E5%8A%A1%E8%B7%AF%E5%BE%84%E2%80%9D"><span class="nav-number">2.2.</span> <span class="nav-text">2. 采访：精确复盘”任务路径”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E4%BB%BB%E5%8A%A1%E9%A2%91%E7%8E%87-%C3%97-%E7%97%9B%E8%8B%A6%E7%A8%8B%E5%BA%A6-%C3%97-%E5%8F%AF%E6%9B%BF%E4%BB%A3%E6%80%A7"><span class="nav-number">2.3.</span> <span class="nav-text">3. 任务频率 × 痛苦程度 × 可替代性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%A8%A1%E4%BB%BF-%E5%8F%98%E4%BD%93%EF%BC%9A%E8%B7%9F%E8%B8%AA%E2%80%9D%E9%9D%9E%E6%8A%80%E6%9C%AF%E5%9C%88%E2%80%9D%E7%9A%84%E7%88%86%E6%AC%BE%E4%BA%A7%E5%93%81"><span class="nav-number">2.4.</span> <span class="nav-text">4. 模仿+变体：跟踪”非技术圈”的爆款产品</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E8%AE%BE%E8%AE%A1%E2%80%9D%E5%AE%9E%E9%AA%8C%E4%BA%A7%E5%93%81%E2%80%9D%E8%AF%95%E6%8E%A2%E7%9C%9F%E5%AE%9E%E9%9C%80%E6%B1%82"><span class="nav-number">2.5.</span> <span class="nav-text">5. 设计”实验产品”试探真实需求</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AC%E5%8C%96%E6%80%9D%E7%BB%B4%E6%96%B9%E5%BC%8F%EF%BC%9A%E6%8A%80%E6%9C%AF%E8%A7%86%E8%A7%92-vs-%E4%BA%A7%E5%93%81%E8%A7%86%E8%A7%92"><span class="nav-number">3.</span> <span class="nav-text">转化思维方式：技术视角 vs 产品视角</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%80%A7%E5%8F%91%E7%8E%B0%E9%9C%80%E6%B1%82%E7%9A%84%E5%85%B3%E9%94%AE%E8%A6%81%E7%82%B9"><span class="nav-number">4.</span> <span class="nav-text">系统性发现需求的关键要点</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sanmuzi.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="REDIS持久化机制AOF、RDB介绍">
+<meta property="og:type" content="article">
+<meta property="og:title" content="REDIS持久化机制">
+<meta property="og:url" content="http://www.sanmuzi.com/2021/09/24/REDIS-PERSISTENCE/index.html">
+<meta property="og:site_name" content="一子三木">
+<meta property="og:description" content="REDIS持久化机制AOF、RDB介绍">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-09-24T13:41:02.000Z">
+<meta property="article:modified_time" content="2025-08-15T12:01:09.339Z">
+<meta property="article:author" content="爱妙妙爱生活">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.sanmuzi.com/2021/09/24/REDIS-PERSISTENCE/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>REDIS持久化机制 | 一子三木</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一子三木</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">所看 所学 所思</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.sanmuzi.com/2021/09/24/REDIS-PERSISTENCE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="爱妙妙爱生活">
+      <meta itemprop="description" content="日拱一卒，功不唐捐">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一子三木">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          REDIS持久化机制
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-09-24 21:41:02" itemprop="dateCreated datePublished" datetime="2021-09-24T21:41:02+08:00">2021-09-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/REDIS/" itemprop="url" rel="index"><span itemprop="name">REDIS</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>REDIS持久化机制AOF、RDB介绍</p>
+<span id="more"></span>
+
+
+
+<h3 id="AOF"><a href="#AOF" class="headerlink" title="AOF"></a>AOF</h3><p>​    AOF 全称是Append Only File，Redis记录写日志顺序为，先执行命令，把数据写入内存，然后才记录日志。与数据库的redo log 不同点是日志记录的是命令，而数据库记录的是修改后的数据。</p>
+<h4 id="为什么选择先执行命令才写入日志？"><a href="#为什么选择先执行命令才写入日志？" class="headerlink" title="为什么选择先执行命令才写入日志？"></a>为什么选择先执行命令才写入日志？</h4><ul>
+<li><p>Redis 向 AOF 里面记录日志的时候，并不会先去对这些命令进行语法检查。如果先记日志再执行命令的话，日志中就有可能记录了错误的命令，Redis 在使用日志恢复数据时，就可能会出错。而写后日志就是先让系统执行命令，只有命令能执行成功，才会被记录到日志中，否则，系统就会直接向客户端报错。</p>
+</li>
+<li><p>还有一个优点是命令执行后才记录日志，就不会阻塞当前写操作。</p>
+</li>
+</ul>
+<h4 id="潜在风险"><a href="#潜在风险" class="headerlink" title="潜在风险"></a>潜在风险</h4><p>​    1）如果刚执行完一个命令，还没有来得及记日志就宕机，那这个命令和相应的数据就有丢失的风险</p>
+<p>2）AOF虽然避免了对当前命令的阻塞，但可能会影响下一个操作，因为AOF 日志也是在主线程中执行，如果在把日志文件写入磁盘时，磁盘写压力大，就会导致写盘很慢，进而导致后续的操作也无法执行。</p>
+<p>​    </p>
+<h4 id="三种写回策略"><a href="#三种写回策略" class="headerlink" title="三种写回策略"></a>三种写回策略</h4><p>AOF机制提供三个选择，也就是 AOF配置项 appendfsync 的三个可选值</p>
+<ul>
+<li><p><strong>Always</strong></p>
+<ul>
+<li>同步写回：每个写命令执行完就同步地将日志写回磁盘</li>
+<li>缺点：“同步写回”可以做到基本不丢数据，但是它在每一个写命令后都有一个慢速的落盘操作，不可避免地会影响主线程性能</li>
+</ul>
+</li>
+<li><p><strong>Everysec</strong> </p>
+<ul>
+<li>每秒写回：每个写命令执行完后先把日志写到 AOF 文件的内存缓冲区，每隔一秒把缓冲区中的内容写入磁盘</li>
+<li>缺点：由于一秒才会缓冲区数据写到回磁盘，如果在一秒内宕机对应的数据就丢失</li>
+</ul>
+</li>
+<li><p><strong>No</strong> </p>
+<ul>
+<li>操作系统控制写回：每个写命令执行完，先把日志写到 AOF 文件的内存缓冲区，由操作系统决定何时将缓冲区内容写回磁盘。</li>
+<li>缺点：由于将缓冲区数据写到磁盘不再是redis控制。那么如果服务器宕机前数据没有刷到硬盘数据就会丢失。</li>
+</ul>
+<blockquote>
+<p>想要获得高性能，就选择 No 策略；</p>
+<p>如果想要得到高可靠性保证就选择 Always 策略；</p>
+<p>如果允许数据有一点丢失，又希望性能别受太大影响的话选择 Everysec 策略</p>
+</blockquote>
+</li>
+</ul>
+<h4 id="AOF日志文件太大怎么办"><a href="#AOF日志文件太大怎么办" class="headerlink" title="AOF日志文件太大怎么办"></a>AOF日志文件太大怎么办</h4><p>AOF日志文件太大就会出现性能问题，Redis通过<strong>AOF重写</strong>机制减少写的性能。AOF重写机制是指在重写时，Redis 根据数据库的现状创建一个新的 AOF 文件，也就是在读取数据库中的所有键值对，然后对每一个键值对用一条命令记录它的写入。比如说，当读取了键值对“key”: “1”之后，重写机制会记录 set key 1 这条命令。当需要恢复时可以重新执行该命令，实现“key”: “1”的写入。</p>
+<p>​    重写机制可以把日志文件变小是因为重写机制具有“多变一”功能。就是将旧日志文件中的多条命令，在重写后的新日志中变成了一条命令。</p>
+<p>​    AOF 文件是以追加的方式，逐一记录接收到的写命令的。当一个键值对被多条写命令反复修改时，AOF 文件会记录相应的多条命令。但在重写的时，是根据这个键值对当前的最新状态，为它生成对应的写入命令。</p>
+<p>​    每次执行重写时，主线程 fork出后台 bgrewriteaof 子进程。fork会把主线程的内存拷贝一份给 bgrewriteaof 子进程，这里面就包含了数据库的最新数据。然后bgrewriteaof 子进程就可以在不影响主线程的情况下，逐一把拷贝的数据写成操作，记入重写日志。</p>
+<p> AOF重写也是有日志的。AOF重写操作会记录到也重写日志缓冲区，重写日志不会丢失最新的操作。拷贝数据的所有操作记录重写完成后，重写日志记录的这些最新操作也会写入新的 AOF 文件。以保证数据最新状态</p>
+<blockquote>
+<p>有两个配置项在控制AOF重写的触发时机：<br>1 auto-aof-rewrite-min-size: 表示运行AOF重写时文件的最小大小，默认为64MB</p>
+<ol start="2">
+<li>auto-aof-rewrite-percentage: 当前AOF文件大小和上一次重写后AOF文件大小的差值，再除以上一次重写后AOF文件大小。也就是当前AOF文件比上一次重写后AOF文件的增量大小，和上一次重写后AOF文件大小的比值。</li>
+</ol>
+<p>AOF文件大小同时超出上面这两个配置项时，会触发AOF重写。</p>
+</blockquote>
+<blockquote>
+<p>Redis采用fork子进程重写AOF文件时，潜在的阻塞风险包括：fork子进程 和 AOF重写过程中父进程产生写入的场景</p>
+<p>风险1</p>
+<p>fork子进程，fork这个瞬间一定是会阻塞主线程的（fork时并不会一次性拷贝所有内存数据给子进程），fork采用操作系统提供的写实复制(Copy On Write)机制，这样为了避免一次性拷贝大量内存数据给子进程造成的长时间阻塞问题，但fork子进程需要拷贝进程必要的数据结构，其中有一项就是拷贝内存页表（虚拟内存和物理内存的映射索引表），这个拷贝过程会消耗大量CPU资源，拷贝完成之前整个进程是会阻塞的，阻塞时间取决于整个实例的内存大小，实例越大，内存页表越大，fork阻塞时间越久。拷贝内存页表完成后，子进程与父进程指向相同的内存地址空间，也就是说此时虽然产生了子进程，但是并没有申请与父进程相同的内存大小。那什么时候父子进程才会真正内存分离呢？“写实复制”顾名思义，就是在写发生时，才真正拷贝内存真正的数据，这个过程中，父进程也可能会产生阻塞的风险。</p>
+<p>风险2</p>
+<p> fork出的子进程指向与父进程相同的内存地址空间，此时子进程就可以执行AOF重写，把内存中的所有数据写入到AOF文件中。但是此时父进程依旧是会有流量写入的，如果父进程操作的是一个已经存在的key，那么这个时候父进程就会真正拷贝这个key对应的内存数据，申请新的内存空间，这样逐渐地，父子进程内存数据开始分离，父子进程逐渐拥有各自独立的内存空间。因为内存分配是以页为单位进行分配的，默认4k，如果父进程此时操作的是一个bigkey，重新申请大块内存耗时会变长，可能会产阻塞风险。另外，如果操作系统开启了内存大页机制(Huge Page，页面大小2M)，那么父进程申请内存时阻塞的概率将会大大提高，所以在Redis机器上需要关闭Huge Page机制。Redis每次fork生成RDB或AOF重写完成后，都可以在Redis log中看到父进程重新申请了多大的内存空间。</p>
+</blockquote>
+<h3 id="RDB"><a href="#RDB" class="headerlink" title="RDB"></a>RDB</h3><p>​    由于AOF记录的是操作命令，而不是实际的数据,如果用AOF进行故障恢复，需要逐一把操作日志都执行一遍。如果操作日志非常多，Redis 就会恢复得很缓慢，影响到正常使用。这是RDB出现了。</p>
+<p>RDB 全称是Redis DataBase ，是一种内存快照，所谓内存快照，就是指内存中的数据在某一个时刻的数据。在做数据恢复时，可以直接把 RDB 文件读入内存，很快地完成恢复，</p>
+<p>Redis 提供了两个命令来生成 RDB 文件</p>
+<p><strong>save</strong>：在主线程中执行，会导致阻塞；</p>
+<p><strong>bgsave</strong>：创建一个子进程，专门用于写入 RDB 文件，避免主线程的阻塞， Redis RDB 文件生成的默认配置。</p>
+<p>如果在做bgsave时,有新数据写入，这块数据就会被复制一份，生成该数据的副本，主线程在这个数据副本上进行修改。同时bgsave 子进程可以继续把原来的数据写入 RDB 文件。</p>
+<h3 id="AOF-和RDB混搭"><a href="#AOF-和RDB混搭" class="headerlink" title="AOF 和RDB混搭"></a>AOF 和RDB混搭</h3><p>​    如果内存快照操作太频繁，就会影响磁盘写入性能。混合使用 AOF 日志和内存快照可以减少性能问题。具体为</p>
+<p>内存快照以一定的频率执行，在两次快照之间，使用AOF日志记录这期间的所有命令操作。</p>
+<p>注；</p>
+<p>以上内容为《Redis核心技术与实战》学习笔记记录</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/09/22/DDD-INIT/" rel="prev" title="DDD学习笔记">
+      <i class="fa fa-chevron-left"></i> DDD学习笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/09/25/bounded-context/" rel="next" title="DDD之限界上下文">
+      DDD之限界上下文 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF"><span class="nav-number">1.</span> <span class="nav-text">AOF</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89%E6%8B%A9%E5%85%88%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4%E6%89%8D%E5%86%99%E5%85%A5%E6%97%A5%E5%BF%97%EF%BC%9F"><span class="nav-number">1.1.</span> <span class="nav-text">为什么选择先执行命令才写入日志？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%BD%9C%E5%9C%A8%E9%A3%8E%E9%99%A9"><span class="nav-number">1.2.</span> <span class="nav-text">潜在风险</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E7%A7%8D%E5%86%99%E5%9B%9E%E7%AD%96%E7%95%A5"><span class="nav-number">1.3.</span> <span class="nav-text">三种写回策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AOF%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E5%A4%AA%E5%A4%A7%E6%80%8E%E4%B9%88%E5%8A%9E"><span class="nav-number">1.4.</span> <span class="nav-text">AOF日志文件太大怎么办</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RDB"><span class="nav-number">2.</span> <span class="nav-text">RDB</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF-%E5%92%8CRDB%E6%B7%B7%E6%90%AD"><span class="nav-number">3.</span> <span class="nav-text">AOF 和RDB混搭</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">爱妙妙爱生活</p>
+  <div class="site-description" itemprop="description">日拱一卒，功不唐捐</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samz406" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samz406" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lilin@apache.org" title="E-Mail → mailto:lilin@apache.org" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">蜀ICP备2021016919号-1 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱妙妙爱生活</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
